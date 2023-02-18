@@ -43,11 +43,8 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Update data via library."""
         try:
-            LOGGER.debug("%s", self.config_entry.options)
-            config = self.hass.data[DOMAIN][self.config_entry.entry_id]
-            return await self.client.async_get_measures_total(
-                config.options[CONF_DEVICE_ID]
-            )
+            device_id = self.config_entry.data[CONF_DEVICE_ID]
+            return await self.client.async_get_measures_total(device_id)
         except MyLightSystemsApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except MyLightSystemsApiClientError as exception:

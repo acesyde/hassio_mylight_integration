@@ -4,7 +4,7 @@ Custom integration to integrate mylight_systems with Home Assistant.
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PASSWORD, CONF_EMAIL, Platform
+from homeassistant.const import CONF_PASSWORD, CONF_EMAIL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 

@@ -6,7 +6,7 @@ import socket
 
 import aiohttp
 import async_timeout
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from .const import BASE_URL, AUTH_PATH, LOGGER, MEASURES_TOTAL_PATH
 
 
@@ -36,7 +36,7 @@ class MyLightSystemsApiClient:
         self._password = password
         self._session = session
         self._token = ""
-        self._last_token_date: date | None = None
+        self._last_token_date: datetime | None = None
 
     async def check_token(self) -> any:
         """Check login token"""
@@ -48,6 +48,10 @@ class MyLightSystemsApiClient:
         ):
             login_result = await self.async_login()
             self._token = login_result["authToken"]
+            self._last_token_date = datetime.utcnow()
+            LOGGER.debug(
+                "User logged with : %s for %s", self._token, self._last_token_date
+            )
 
     async def async_login(self) -> any:
         """Login from the MyLight Systems API"""
@@ -73,13 +77,15 @@ class MyLightSystemsApiClient:
 
         await self.check_token()
 
+        LOGGER.debug("Get measures total for device : %s", device_id)
+
         return await self._api_wrapper(
             method="get",
             url=BASE_URL + MEASURES_TOTAL_PATH,
             params={
                 "authToken": self._token,
                 "measureType": "one_phase",
-                "device_id": device_id,
+                "deviceId": device_id,
             },
         )
 
@@ -99,6 +105,9 @@ class MyLightSystemsApiClient:
                     headers=headers,
                     params=params,
                 )
+
+                LOGGER.debug("Retrieved data from API: %s", response.request_info.url)
+
                 response.raise_for_status()
                 data = await response.json()
 
