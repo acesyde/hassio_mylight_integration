@@ -10,13 +10,14 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.const import CONF_DEVICE_ID
 
 from .api import (
     MyLightSystemsApiClient,
     MyLightSystemsApiClientAuthenticationError,
     MyLightSystemsApiClientError,
 )
-from .const import DOMAIN, LOGGER
+from .const import DOMAIN, LOGGER, SCAN_INTERVAL_IN_MINUTES
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -36,13 +37,17 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             hass=hass,
             logger=LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(minutes=5),
+            update_interval=timedelta(minutes=SCAN_INTERVAL_IN_MINUTES),
         )
 
     async def _async_update_data(self):
         """Update data via library."""
         try:
-            return await self.client.async_get_data()
+            LOGGER.debug("%s", self.config_entry.options)
+            config = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            return await self.client.async_get_measures_total(
+                config.options[CONF_DEVICE_ID]
+            )
         except MyLightSystemsApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except MyLightSystemsApiClientError as exception:

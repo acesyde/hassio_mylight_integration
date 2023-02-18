@@ -5,7 +5,8 @@
                 "description": "If you need help with the configuration have a look here: https://github.com/acesyde/hassio_mylight_integration",
                 "data": {
                     "username": "Email",
-                    "password": "Password"
+                    "password": "Password",
+                    "device_id": "Device ID"
                 }
             }
         },

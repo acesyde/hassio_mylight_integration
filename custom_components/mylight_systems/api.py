@@ -6,6 +6,8 @@ import socket
 
 import aiohttp
 import async_timeout
+from datetime import date, datetime, timedelta
+from .const import BASE_URL, AUTH_PATH, LOGGER, MEASURES_TOTAL_PATH
 
 
 class MyLightSystemsApiClientError(Exception):
@@ -29,31 +31,63 @@ class MyLightSystemsApiClient:
         password: str,
         session: aiohttp.ClientSession,
     ) -> None:
-        """Sample API Client."""
+        """MyLight System API Client."""
         self._username = username
         self._password = password
         self._session = session
+        self._token = ""
+        self._last_token_date: date | None = None
 
-    async def async_get_data(self) -> any:
-        """Get data from the API."""
-        return await self._api_wrapper(
-            method="get", url="https://jsonplaceholder.typicode.com/posts/1"
+    async def check_token(self) -> any:
+        """Check login token"""
+        LOGGER.debug("Checking Token value: %s", self._token)
+        if (
+            self._token == ""
+            or self._last_token_date is None
+            or self._last_token_date < datetime.utcnow() + timedelta(hours=1)
+        ):
+            login_result = await self.async_login()
+            self._token = login_result["authToken"]
+
+    async def async_login(self) -> any:
+        """Login from the MyLight Systems API"""
+        data = await self._api_wrapper(
+            method="get",
+            url=BASE_URL + AUTH_PATH,
+            params={"email": self._username, "password": self._password},
         )
 
-    async def async_set_title(self, value: str) -> any:
-        """Get data from the API."""
+        if data["status"] == "error" and data["error"] in (
+            "invalid.credentials",
+            "not.authorized",
+        ):
+            LOGGER.warning("Unable to retrieve credentials")
+            raise MyLightSystemsApiClientAuthenticationError(
+                "Invalid credentials",
+            )
+
+        return data
+
+    async def async_get_measures_total(self, device_id: str) -> any:
+        """Get measures total from the API."""
+
+        await self.check_token()
+
         return await self._api_wrapper(
-            method="patch",
-            url="https://jsonplaceholder.typicode.com/posts/1",
-            data={"title": value},
-            headers={"Content-type": "application/json; charset=UTF-8"},
+            method="get",
+            url=BASE_URL + MEASURES_TOTAL_PATH,
+            params={
+                "authToken": self._token,
+                "measureType": "one_phase",
+                "device_id": device_id,
+            },
         )
 
     async def _api_wrapper(
         self,
         method: str,
         url: str,
-        data: dict | None = None,
+        params: dict | None = None,
         headers: dict | None = None,
     ) -> any:
         """Get information from the API."""
@@ -63,14 +97,14 @@ class MyLightSystemsApiClient:
                     method=method,
                     url=url,
                     headers=headers,
-                    json=data,
+                    params=params,
                 )
-                if response.status in (401, 403):
-                    raise MyLightSystemsApiClientAuthenticationError(
-                        "Invalid credentials",
-                    )
                 response.raise_for_status()
-                return await response.json()
+                data = await response.json()
+
+                LOGGER.debug("Retrieved data from API: %s", data)
+
+                return data
 
         except asyncio.TimeoutError as exception:
             raise MyLightSystemsApiClientCommunicationError(

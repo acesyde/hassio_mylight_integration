@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_PASSWORD, CONF_EMAIL
+from homeassistant.const import CONF_PASSWORD, CONF_EMAIL, CONF_DEVICE_ID
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
@@ -13,7 +13,7 @@ from .api import (
     MyLightSystemsApiClientCommunicationError,
     MyLightSystemsApiClientError,
 )
-from .const import DOMAIN, LOGGER
+from .const import DOMAIN, LOGGER, NAME
 
 
 class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -45,7 +45,7 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
-                    title=user_input[CONF_EMAIL],
+                    title=user_input[CONF_DEVICE_ID],
                     data=user_input,
                 )
 
@@ -66,6 +66,11 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                             type=selector.TextSelectorType.PASSWORD
                         ),
                     ),
+                    vol.Required(CONF_DEVICE_ID): selector.TextSelector(
+                        selector.TextSelectorConfig(
+                            type=selector.TextSelectorType.TEXT
+                        ),
+                    ),
                 }
             ),
             errors=_errors,
@@ -78,4 +83,4 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             password=password,
             session=async_create_clientsession(self.hass),
         )
-        await client.async_get_data()
+        await client.async_login()
