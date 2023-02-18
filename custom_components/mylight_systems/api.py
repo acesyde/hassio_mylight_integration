@@ -1,4 +1,4 @@
-"""Sample API Client."""
+"""mylight_systems API Client."""
 from __future__ import annotations
 
 import asyncio

@@ -9,3 +9,9 @@ repos:
     rev: 23.1.0
     hooks:
       - id: black
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v2.42.0
+    hooks:
+      - id: commitizen
+      - id: commitizen-branch
+        stages: [push]

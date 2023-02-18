@@ -1,12 +1,12 @@
 {
-  "domain": "integration_blueprint",
-  "name": "Integration blueprint",
+  "domain": "mylight_systems",
+  "name": "MyLight Systems",
   "codeowners": [
-    "@ludeeus"
+    "@acesyde"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/ludeeus/integration_blueprint",
+  "documentation": "https://github.com/acesyde/hassio_mylight_integration",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/ludeeus/integration_blueprint/issues",
+  "issue_tracker": "https://github.com/acesyde/hassio_mylight_integration/issues",
   "version": "0.0.0"
 }

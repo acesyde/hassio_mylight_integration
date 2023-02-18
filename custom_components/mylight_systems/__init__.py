@@ -1,19 +1,16 @@
 """
-Custom integration to integrate integration_blueprint with Home Assistant.
-
-For more details about this integration, please refer to
-https://github.com/ludeeus/integration_blueprint
+Custom integration to integrate mylight_systems with Home Assistant.
 """
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
+from homeassistant.const import CONF_PASSWORD, CONF_EMAIL, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import MyLightSystemsApiClient
 from .const import DOMAIN
-from .coordinator import BlueprintDataUpdateCoordinator
+from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
@@ -26,10 +23,12 @@ PLATFORMS: list[Platform] = [
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinator = BlueprintDataUpdateCoordinator(
+    hass.data[DOMAIN][
+        entry.entry_id
+    ] = coordinator = MyLightSystemsDataUpdateCoordinator(
         hass=hass,
         client=MyLightSystemsApiClient(
-            username=entry.data[CONF_USERNAME],
+            username=entry.data[CONF_EMAIL],
             password=entry.data[CONF_PASSWORD],
             session=async_get_clientsession(hass),
         ),

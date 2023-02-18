@@ -1,9 +1,9 @@
-"""Adds config flow for Blueprint."""
+"""Adds config flow for mylight_systems."""
 from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_PASSWORD, CONF_EMAIL
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
@@ -31,7 +31,7 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 await self._test_credentials(
-                    username=user_input[CONF_USERNAME],
+                    username=user_input[CONF_EMAIL],
                     password=user_input[CONF_PASSWORD],
                 )
             except MyLightSystemsApiClientAuthenticationError as exception:
@@ -45,7 +45,7 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
-                    title=user_input[CONF_USERNAME],
+                    title=user_input[CONF_EMAIL],
                     data=user_input,
                 )
 
@@ -54,11 +54,11 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        CONF_USERNAME,
-                        default=(user_input or {}).get(CONF_USERNAME),
+                        CONF_EMAIL,
+                        default=(user_input or {}).get(CONF_EMAIL),
                     ): selector.TextSelector(
                         selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.TEXT
+                            type=selector.TextSelectorType.EMAIL
                         ),
                     ),
                     vol.Required(CONF_PASSWORD): selector.TextSelector(
