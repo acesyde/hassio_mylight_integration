@@ -1,0 +1,18 @@
+[run]
+source = custom_components
+
+omit =
+    # omit pieces of code that rely on external API calls
+    # These should be mocked one day....
+    custom_components/mylight_systems/config_flow.py
+    custom_components/mylight_systems/__init__.py
+
+    # omit tests
+    tests/*
+
+    # omit scripts
+    scripts/*
+
+[report]
+exclude_lines =
+    if TYPE_CHECKING:
