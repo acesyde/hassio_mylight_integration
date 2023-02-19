@@ -1,7 +1,8 @@
 """Sensor platform for integration_blueprint."""
 from __future__ import annotations
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntityDescription
 
 from .const import DOMAIN
 from .coordinator import MyLightSystemsDataUpdateCoordinator

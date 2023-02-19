@@ -3,17 +3,18 @@ from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_PASSWORD, CONF_EMAIL, CONF_DEVICE_ID
+from homeassistant.const import CONF_DEVICE_ID
+from homeassistant.const import CONF_EMAIL
+from homeassistant.const import CONF_PASSWORD
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .api import (
-    MyLightSystemsApiClient,
-    MyLightSystemsApiClientAuthenticationError,
-    MyLightSystemsApiClientCommunicationError,
-    MyLightSystemsApiClientError,
-)
-from .const import DOMAIN, LOGGER, NAME
+from .api import MyLightSystemsApiClient
+from .api import MyLightSystemsApiClientAuthenticationError
+from .api import MyLightSystemsApiClientCommunicationError
+from .api import MyLightSystemsApiClientError
+from .const import DOMAIN
+from .const import LOGGER
 
 
 class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):

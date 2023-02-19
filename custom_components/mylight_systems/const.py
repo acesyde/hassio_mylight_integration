@@ -1,11 +1,12 @@
 """Constants for mylight_systems."""
-from logging import Logger, getLogger
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntityDescription,
-    SensorStateClass,
-)
-from homeassistant.const import Platform, UnitOfEnergy
+from logging import getLogger
+from logging import Logger
+
+from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.components.sensor import SensorEntityDescription
+from homeassistant.components.sensor import SensorStateClass
+from homeassistant.const import Platform
+from homeassistant.const import UnitOfEnergy
 
 LOGGER: Logger = getLogger(__package__)
 
@@ -21,6 +22,8 @@ SCAN_INTERVAL_IN_MINUTES = 15
 # API
 BASE_URL = "https://myhome.mylight-systems.com/api"
 AUTH_PATH = "/auth"
+PROFILE_PATH = "/profile"
+DEVICES_PATH = "/devices"
 MEASURES_TOTAL_PATH = "/measures/total"
 
 # SENSORS
