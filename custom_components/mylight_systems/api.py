@@ -17,6 +17,17 @@ from .const import MEASURES_TOTAL_PATH
 from .const import PROFILE_PATH
 
 
+class MyLightDevices:
+    """MyLight devices ids"""
+
+    virtual_device_id: str | None
+    virtual_battery_id: str | None
+
+    def __init__(self, virtual_device_id: str, virtual_battery_id: str):
+        self.virtual_device_id = virtual_device_id
+        self.virtual_battery_id = virtual_battery_id
+
+
 class MyLightSystemsApiClientError(Exception):
     """Exception to indicate a general API error."""
 
@@ -36,23 +47,30 @@ class MyLightSystemsApiClient:
         self,
         username: str,
         password: str,
+        virtual_device_id: str,
+        virtual_battery_id: str,
         session: aiohttp.ClientSession,
     ) -> None:
         """MyLight System API Client."""
         self._username = username
         self._password = password
+        self._virtual_device_id = virtual_device_id
+        self._virtual_battery_id = virtual_battery_id
         self._session = session
-        self._token = ""
-        self._last_token_date: datetime | None = None
+        self._token: str | None = None
+        self._token_expire_at: datetime | None = None
 
     async def _should_reauthenticate(self) -> bool:
         """Check login token"""
-        LOGGER.debug("Checking Token value: %s", self._token)
+
+        LOGGER.debug(
+            "Checking Token value: %s and date : %s", self._token, self._token_expire_at
+        )
 
         return (
-            self._token == ""
-            or self._last_token_date is None
-            or self._last_token_date < datetime.utcnow() + timedelta(hours=1)
+            self._token is None
+            or self._token_expire_at is None
+            or self._token_expire_at < datetime.utcnow()
         )
 
     async def async_login(self) -> None:
@@ -76,7 +94,11 @@ class MyLightSystemsApiClient:
             )
 
         self._token = data["authToken"]
-        self._last_token_date = datetime.utcnow()
+        self._token_expire_at = datetime.utcnow() + timedelta(hours=2)
+
+        LOGGER.debug(
+            "Authenticate with token %s for %s", self._token, self._token_expire_at
+        )
 
     async def async_get_profile(self) -> None:
         """Get user profile from the MyLight Systems API."""
@@ -85,13 +107,13 @@ class MyLightSystemsApiClient:
 
         LOGGER.debug("Get user profile")
 
-        data = await self._api_wrapper(
+        await self._api_wrapper(
             method="get",
             url=BASE_URL + PROFILE_PATH,
             params={"authToken": self._token},
         )
 
-    async def async_get_devices(self) -> None:
+    async def async_get_device_ids(self) -> MyLightDevices:
         """Get user profile from the MyLight Systems API."""
 
         await self.async_login()
@@ -104,12 +126,30 @@ class MyLightSystemsApiClient:
             params={"authToken": self._token, "adjustmentHistory": "true"},
         )
 
-    async def async_get_measures_total(self, device_id: str) -> any:
+        device_virtual_id: str | None = self._get_device_id_by_name(
+            "virtual", data["devices"]
+        )
+        device_battery_id: str | None = self._get_device_id_by_name(
+            "my_smart_battery", data["devices"]
+        )
+
+        LOGGER.debug("Virtual device id : %s", device_virtual_id)
+        LOGGER.debug("Virtual battery device id : %s", device_battery_id)
+
+        return MyLightDevices(device_virtual_id, device_battery_id)
+
+    def _get_device_id_by_name(self, name: str, devices: any) -> str | None:
+        for device in devices:
+            if device["deviceTypeId"] == name:
+                return device["id"]
+        return None
+
+    async def async_get_measures_total(self) -> any:
         """Get measures total from the MyLight Systems API."""
 
         await self.async_login()
 
-        LOGGER.debug("Get measures total for device : %s", device_id)
+        LOGGER.debug("Get measures total for device : %s", self._virtual_device_id)
 
         data = await self._api_wrapper(
             method="get",
@@ -117,9 +157,14 @@ class MyLightSystemsApiClient:
             params={
                 "authToken": self._token,
                 "measureType": "one_phase",
-                "deviceId": device_id,
+                "deviceId": self._virtual_device_id,
             },
         )
+
+        if data["status"] == "ok":
+            return data
+
+        return None
 
     async def _api_wrapper(
         self,

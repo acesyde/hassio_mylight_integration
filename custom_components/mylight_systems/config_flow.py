@@ -1,9 +1,9 @@
 """Adds config flow for mylight_systems."""
 from __future__ import annotations
 
+import aiohttp
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_DEVICE_ID
 from homeassistant.const import CONF_EMAIL
 from homeassistant.const import CONF_PASSWORD
 from homeassistant.helpers import selector
@@ -13,11 +13,13 @@ from .api import MyLightSystemsApiClient
 from .api import MyLightSystemsApiClientAuthenticationError
 from .api import MyLightSystemsApiClientCommunicationError
 from .api import MyLightSystemsApiClientError
+from .const import CONF_VIRTUAL_BATTERY_ID
+from .const import CONF_VIRTUAL_DEVICE_ID
 from .const import DOMAIN
 from .const import LOGGER
 
 
-class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Blueprint."""
 
     VERSION = 1
@@ -31,10 +33,25 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         _errors = {}
         if user_input is not None:
             try:
-                await self._test_credentials(
+                api_client = MyLightSystemsApiClient(
                     username=user_input[CONF_EMAIL],
                     password=user_input[CONF_PASSWORD],
+                    virtual_device_id=None,
+                    virtual_battery_id=None,
+                    session=async_create_clientsession(self.hass),
                 )
+
+                await api_client.async_login()
+
+                device_ids = await api_client.async_get_device_ids()
+
+                user_input[CONF_VIRTUAL_DEVICE_ID] = device_ids.virtual_device_id
+                user_input[CONF_VIRTUAL_BATTERY_ID] = device_ids.virtual_battery_id
+
+                await self.async_set_unique_id(str(user_input[CONF_VIRTUAL_DEVICE_ID]))
+
+                self._abort_if_unique_id_configured()
+
             except MyLightSystemsApiClientAuthenticationError as exception:
                 LOGGER.warning(exception)
                 _errors["base"] = "auth"
@@ -46,7 +63,7 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
-                    title=user_input[CONF_DEVICE_ID],
+                    title=user_input[CONF_VIRTUAL_DEVICE_ID],
                     data=user_input,
                 )
 
@@ -67,21 +84,7 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                             type=selector.TextSelectorType.PASSWORD
                         ),
                     ),
-                    vol.Required(CONF_DEVICE_ID): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.TEXT
-                        ),
-                    ),
                 }
             ),
             errors=_errors,
         )
-
-    async def _test_credentials(self, username: str, password: str) -> None:
-        """Validate credentials."""
-        client = MyLightSystemsApiClient(
-            username=username,
-            password=password,
-            session=async_create_clientsession(self.hass),
-        )
-        await client.async_login()

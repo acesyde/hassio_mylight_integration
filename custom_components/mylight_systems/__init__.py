@@ -10,6 +10,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import MyLightSystemsApiClient
+from .const import CONF_VIRTUAL_BATTERY_ID
+from .const import CONF_VIRTUAL_DEVICE_ID
 from .const import DOMAIN
 from .const import PLATFORMS
 from .coordinator import MyLightSystemsDataUpdateCoordinator
@@ -26,6 +28,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         client=MyLightSystemsApiClient(
             username=entry.data[CONF_EMAIL],
             password=entry.data[CONF_PASSWORD],
+            virtual_device_id=entry.data[CONF_VIRTUAL_DEVICE_ID],
+            virtual_battery_id=entry.data[CONF_VIRTUAL_BATTERY_ID],
             session=async_get_clientsession(hass),
         ),
     )

@@ -4,7 +4,6 @@ from __future__ import annotations
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_DEVICE_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -41,8 +40,27 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Update data via library."""
         try:
-            device_id = self.config_entry.data[CONF_DEVICE_ID]
-            return await self.client.async_get_measures_total(device_id)
+            result = await self.client.async_get_measures_total()
+
+            if result is None:
+                LOGGER.debug("Nothing to retrieve")
+                return
+
+            produced_energy: float | None = 0
+            grid_energy: float | None = 0
+
+            for value in result["measure"]["values"]:
+                if value["type"] == "produced_energy":
+                    produced_energy = value["value"]
+                if value["type"] == "grid_energy":
+                    grid_energy = value["value"]
+
+            LOGGER.debug("%s | %s", produced_energy, grid_energy)
+
+            return {
+                "produced_energy": round(produced_energy / 36e5, 2),
+                "grid_energy": round(grid_energy / 36e5, 2),
+            }
         except MyLightSystemsApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except MyLightSystemsApiClientError as exception:
