@@ -55,8 +55,6 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                 if value["type"] == "grid_energy":
                     grid_energy = value["value"]
 
-            LOGGER.debug("%s | %s", produced_energy, grid_energy)
-
             return {
                 "produced_energy": round(produced_energy / 36e5, 2),
                 "grid_energy": round(grid_energy / 36e5, 2),
