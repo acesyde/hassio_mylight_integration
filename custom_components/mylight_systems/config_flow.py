@@ -1,11 +1,11 @@
 """Adds config flow for mylight_systems."""
 from __future__ import annotations
 
+import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
-import voluptuous as vol
 
 from .api import (
     MyLightSystemsApiClient,
@@ -13,7 +13,12 @@ from .api import (
     MyLightSystemsApiClientCommunicationError,
     MyLightSystemsApiClientError,
 )
-from .const import CONF_VIRTUAL_BATTERY_ID, CONF_VIRTUAL_DEVICE_ID, DOMAIN, LOGGER
+from .const import (
+    CONF_VIRTUAL_BATTERY_ID,
+    CONF_VIRTUAL_DEVICE_ID,
+    DOMAIN,
+    LOGGER,
+)
 
 
 class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -42,10 +47,16 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
                 device_ids = await api_client.async_get_device_ids()
 
-                user_input[CONF_VIRTUAL_DEVICE_ID] = device_ids.virtual_device_id
-                user_input[CONF_VIRTUAL_BATTERY_ID] = device_ids.virtual_battery_id
+                user_input[
+                    CONF_VIRTUAL_DEVICE_ID
+                ] = device_ids.virtual_device_id
+                user_input[
+                    CONF_VIRTUAL_BATTERY_ID
+                ] = device_ids.virtual_battery_id
 
-                await self.async_set_unique_id(str(user_input[CONF_VIRTUAL_DEVICE_ID]))
+                await self.async_set_unique_id(
+                    str(user_input[CONF_VIRTUAL_DEVICE_ID])
+                )
 
                 self._abort_if_unique_id_configured()
 
@@ -72,10 +83,14 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_EMAIL,
                         default=(user_input or {}).get(CONF_EMAIL),
                     ): selector.TextSelector(
-                        selector.TextSelectorConfig(type=selector.TextSelectorType.EMAIL),
+                        selector.TextSelectorConfig(
+                            type=selector.TextSelectorType.EMAIL
+                        ),
                     ),
                     vol.Required(CONF_PASSWORD): selector.TextSelector(
-                        selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD),
+                        selector.TextSelectorConfig(
+                            type=selector.TextSelectorType.PASSWORD
+                        ),
                     ),
                 }
             ),

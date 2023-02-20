@@ -7,7 +7,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import MyLightSystemsApiClient
-from .const import CONF_VIRTUAL_BATTERY_ID, CONF_VIRTUAL_DEVICE_ID, DOMAIN, PLATFORMS
+from .const import (
+    CONF_VIRTUAL_BATTERY_ID,
+    CONF_VIRTUAL_DEVICE_ID,
+    DOMAIN,
+    PLATFORMS,
+)
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 
@@ -15,7 +20,9 @@ from .coordinator import MyLightSystemsDataUpdateCoordinator
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinator = MyLightSystemsDataUpdateCoordinator(
+    hass.data[DOMAIN][
+        entry.entry_id
+    ] = coordinator = MyLightSystemsDataUpdateCoordinator(
         hass=hass,
         client=MyLightSystemsApiClient(
             username=entry.data[CONF_EMAIL],
@@ -36,7 +43,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
-    if unloaded := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+    if unloaded := await hass.config_entries.async_unload_platforms(
+        entry, PLATFORMS
+    ):
         hass.data[DOMAIN].pop(entry.entry_id)
     return unloaded
 
