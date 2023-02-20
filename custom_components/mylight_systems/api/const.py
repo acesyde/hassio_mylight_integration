@@ -1,6 +1,4 @@
 """Constants for MyLight Systems library."""
-from __future__ import annotations
-
 DEFAULT_TIMEOUT_IN_SECONDS: int = 10
 
 BASE_URL: str = "https://myhome.mylight-systems.com"

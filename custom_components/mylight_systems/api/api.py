@@ -8,7 +8,7 @@ import socket
 import aiohttp
 import async_timeout
 
-from .const import (
+from custom_components.mylight_systems.api.const import (
     AUTH_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
     DEVICES_URL,
@@ -16,7 +16,7 @@ from .const import (
     PROFILE_URL,
     STATES_URL,
 )
-from .exceptions import (
+from custom_components.mylight_systems.api.exceptions import (
     CommunicationException,
     InvalidCredentialsException,
     UnauthorizedException,

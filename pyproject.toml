@@ -17,7 +17,6 @@ addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
 filterwarnings = ["ignore::DeprecationWarning"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-
 norecursedirs = [".git"]
 
 [tool.mypy]
