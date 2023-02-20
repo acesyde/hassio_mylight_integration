@@ -1,19 +1,16 @@
 [tool.black]
-line-length = 80
+line-length = 79
 target-version = ['py39']
 exclude = 'generated'
 
 [tool.flake8]
 ignore = ['E501', 'W503', 'E203', 'D202', 'W504']
-noqa-require-code = true
-doctests = true
-exclude = ".venv,.git,docs,venv,bin,lib,deps,build"
 max-complexity = 25
-max-line-length = 80
+max-line-length = 79
 
 [tool.isort]
 profile = "black"
-line_length = 80
+line_length = 79
 
 [tool.pytest.ini_options]
 addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
