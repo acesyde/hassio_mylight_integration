@@ -34,7 +34,7 @@ ENTITY_DESCRIPTIONS = (
 
 
 async def async_setup_entry(hass, entry, async_add_devices):
-    """Setup sensor platform."""
+    """Configure sensor platform."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_devices(
         MyLightSystemsSensor(
@@ -55,6 +55,7 @@ class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
         coordinator: MyLightSystemsDataUpdateCoordinator,
         entity_description: SensorEntityDescription,
     ) -> None:
+        """Init."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry_id}_{entity_description.key}"
         self.entity_description = entity_description

@@ -14,22 +14,20 @@
                 "ms-python.vscode-pylance",
                 "redhat.vscode-yaml",
                 "yzhang.markdown-all-in-one",
-                "esbenp.prettier-vscode"
+                "esbenp.prettier-vscode",
+                "ms-python.black-formatter",
+                "ms-python.flake8"
             ],
             "settings": {
                 "files.eol": "\n",
                 "editor.tabSize": 4,
                 "python.pythonPath": "/usr/bin/python3",
                 "python.analysis.autoSearchPaths": false,
-                "python.linting.pylintEnabled": true,
                 "python.linting.enabled": true,
+                "python.linting.flake8Enabled": true,
                 "python.formatting.provider": "black",
                 "python.formatting.blackPath": "/usr/local/py-utils/bin/black",
                 "python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
-                "python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
-                "python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
-                "python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
-                "python.linting.pylintPath": "/usr/loca/py-utilsl/bin/pylint",
                 "python.testing.pytestArgs": [
                     "--no-cov"
                 ],
@@ -40,6 +38,9 @@
                 "yaml.format.enable": true,
                 "[yaml]": {
                     "editor.defaultFormatter": "redhat.vscode-yaml"
+                },
+                "[python]": {
+                    "editor.defaultFormatter": "ms-python.flake8"
                 }
             }
         }

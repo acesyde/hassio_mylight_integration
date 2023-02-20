@@ -19,12 +19,13 @@ from .const import (
 
 
 class MyLightDevices:
-    """MyLight devices ids"""
+    """MyLight devices ids."""
 
     virtual_device_id: str | None
     virtual_battery_id: str | None
 
     def __init__(self, virtual_device_id: str, virtual_battery_id: str):
+        """Init."""
         self.virtual_device_id = virtual_device_id
         self.virtual_battery_id = virtual_battery_id
 
@@ -52,7 +53,7 @@ class MyLightSystemsApiClient:
         virtual_battery_id: str,
         session: aiohttp.ClientSession,
     ) -> None:
-        """MyLight System API Client."""
+        """My Light System API Client."""
         self._username = username
         self._password = password
         self._virtual_device_id = virtual_device_id
@@ -62,8 +63,7 @@ class MyLightSystemsApiClient:
         self._token_expire_at: datetime | None = None
 
     async def _should_reauthenticate(self) -> bool:
-        """Check login token"""
-
+        """Check login token."""
         LOGGER.debug("Checking Token value: %s and date : %s", self._token, self._token_expire_at)
 
         return (
@@ -74,7 +74,6 @@ class MyLightSystemsApiClient:
 
     async def async_login(self) -> None:
         """Login from the MyLight Systems API."""
-
         if await self._should_reauthenticate() is False:
             return
 

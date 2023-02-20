@@ -1,6 +1,4 @@
-"""
-Custom integration to integrate mylight_systems with Home Assistant.
-"""
+"""Custom integration to integrate mylight_systems with Home Assistant."""
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
