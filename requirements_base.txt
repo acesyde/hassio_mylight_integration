@@ -2,4 +2,8 @@ pip>=21.0,<23.1
 colorlog
 homeassistant
 pre-commit
+pycodestyle
 reorder-python-imports
+flake8
+mypy
+pylint

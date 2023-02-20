@@ -1,22 +1,19 @@
 """Adds config flow for mylight_systems."""
 from __future__ import annotations
 
-import aiohttp
-import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_EMAIL
-from homeassistant.const import CONF_PASSWORD
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+import voluptuous as vol
 
-from .api import MyLightSystemsApiClient
-from .api import MyLightSystemsApiClientAuthenticationError
-from .api import MyLightSystemsApiClientCommunicationError
-from .api import MyLightSystemsApiClientError
-from .const import CONF_VIRTUAL_BATTERY_ID
-from .const import CONF_VIRTUAL_DEVICE_ID
-from .const import DOMAIN
-from .const import LOGGER
+from .api import (
+    MyLightSystemsApiClient,
+    MyLightSystemsApiClientAuthenticationError,
+    MyLightSystemsApiClientCommunicationError,
+    MyLightSystemsApiClientError,
+)
+from .const import CONF_VIRTUAL_BATTERY_ID, CONF_VIRTUAL_DEVICE_ID, DOMAIN, LOGGER
 
 
 class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -75,14 +72,10 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_EMAIL,
                         default=(user_input or {}).get(CONF_EMAIL),
                     ): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.EMAIL
-                        ),
+                        selector.TextSelectorConfig(type=selector.TextSelectorType.EMAIL),
                     ),
                     vol.Required(CONF_PASSWORD): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.PASSWORD
-                        ),
+                        selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD),
                     ),
                 }
             ),

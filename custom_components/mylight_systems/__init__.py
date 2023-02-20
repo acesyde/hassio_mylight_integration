@@ -4,16 +4,12 @@ Custom integration to integrate mylight_systems with Home Assistant.
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_EMAIL
-from homeassistant.const import CONF_PASSWORD
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import MyLightSystemsApiClient
-from .const import CONF_VIRTUAL_BATTERY_ID
-from .const import CONF_VIRTUAL_DEVICE_ID
-from .const import DOMAIN
-from .const import PLATFORMS
+from .const import CONF_VIRTUAL_BATTERY_ID, CONF_VIRTUAL_DEVICE_ID, DOMAIN, PLATFORMS
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 
@@ -21,9 +17,7 @@ from .coordinator import MyLightSystemsDataUpdateCoordinator
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][
-        entry.entry_id
-    ] = coordinator = MyLightSystemsDataUpdateCoordinator(
+    hass.data[DOMAIN][entry.entry_id] = coordinator = MyLightSystemsDataUpdateCoordinator(
         hass=hass,
         client=MyLightSystemsApiClient(
             username=entry.data[CONF_EMAIL],

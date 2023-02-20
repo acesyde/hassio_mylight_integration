@@ -2,19 +2,20 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timedelta
 import socket
-from datetime import datetime
-from datetime import timedelta
 
 import aiohttp
 import async_timeout
 
-from .const import AUTH_PATH
-from .const import BASE_URL
-from .const import DEVICES_PATH
-from .const import LOGGER
-from .const import MEASURES_TOTAL_PATH
-from .const import PROFILE_PATH
+from .const import (
+    AUTH_PATH,
+    BASE_URL,
+    DEVICES_PATH,
+    LOGGER,
+    MEASURES_TOTAL_PATH,
+    PROFILE_PATH,
+)
 
 
 class MyLightDevices:
@@ -63,9 +64,7 @@ class MyLightSystemsApiClient:
     async def _should_reauthenticate(self) -> bool:
         """Check login token"""
 
-        LOGGER.debug(
-            "Checking Token value: %s and date : %s", self._token, self._token_expire_at
-        )
+        LOGGER.debug("Checking Token value: %s and date : %s", self._token, self._token_expire_at)
 
         return (
             self._token is None
@@ -96,9 +95,7 @@ class MyLightSystemsApiClient:
         self._token = data["authToken"]
         self._token_expire_at = datetime.utcnow() + timedelta(hours=2)
 
-        LOGGER.debug(
-            "Authenticate with token %s for %s", self._token, self._token_expire_at
-        )
+        LOGGER.debug("Authenticate with token %s for %s", self._token, self._token_expire_at)
 
     async def async_get_profile(self) -> None:
         """Get user profile from the MyLight Systems API."""
@@ -126,9 +123,7 @@ class MyLightSystemsApiClient:
             params={"authToken": self._token, "adjustmentHistory": "true"},
         )
 
-        device_virtual_id: str | None = self._get_device_id_by_name(
-            "virtual", data["devices"]
-        )
+        device_virtual_id: str | None = self._get_device_id_by_name("virtual", data["devices"])
         device_battery_id: str | None = self._get_device_id_by_name(
             "my_smart_battery", data["devices"]
         )
@@ -203,6 +198,4 @@ class MyLightSystemsApiClient:
             ) from exception
         except Exception as exception:  # pylint: disable=broad-except
             LOGGER.debug("An error occured : %s", exception, exc_info=True)
-            raise MyLightSystemsApiClientError(
-                "Something really wrong happened!"
-            ) from exception
+            raise MyLightSystemsApiClientError("Something really wrong happened!") from exception
