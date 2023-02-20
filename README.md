@@ -7,7 +7,7 @@
 [![hacs][hacsbadge]][hacs]
 ![Project Maintenance][maintenance-shield]
 
-_Integration to integrate with [mylight_systems][mylight_systems]._
+_Integration to integrate with [MyLight Systems][mylight_systems]._
 
 **This integration will set up the following platforms.**
 
@@ -37,7 +37,7 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ***
 
-[mylight_systems]: https://github.com/acesyde/hassio_mylight_integration
+[mylight_systems]: https://www.mylight-systems.com/
 [commits-shield]: https://img.shields.io/github/commit-activity/y/acesyde/hassio_mylight_integration.svg?style=for-the-badge
 [commits]: https://github.com/acesyde/hassio_mylight_integration/commits/main
 [hacs]: https://github.com/hacs/integration
