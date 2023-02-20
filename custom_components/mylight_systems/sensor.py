@@ -14,7 +14,7 @@ from .entity import IntegrationMyLightSystemsEntity
 ENTITY_DESCRIPTIONS = (
     SensorEntityDescription(
         key="solar_production",
-        name="Current Solar Power Production",
+        name="Current solar power production",
         icon="mdi:solar-panel",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,

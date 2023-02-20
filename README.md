@@ -11,11 +11,13 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 
 **This integration will set up the following platforms.**
 
-Platform | Description
--- | --
-`binary_sensor` | Show something `True` or `False`.
-`sensor` | Show info from blueprint API.
-`switch` | Switch something `True` or `False`.
+| Platform                                  | Description                                                      |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| `sensor.solar_production`                 | Current solar power production.                                  |
+| `sensor.grid_with_battery_consumption`    | Current power consumption from the grid with virtual battery.    |
+| `sensor.grid_without_battery_consumption` | Current power consumption from the grid without virtual battery. |
+| `sensor.virtual_battery_charge`           | Current virtual battery charge.                                  |
+| `sensor.virtual_battery_discharge`        | Current virtual battery discharge.                               |
 
 ## Installation
 
