@@ -75,11 +75,13 @@ class MyLightApiClient:
             params={"email": username, "password": password},
         )
 
-        if response["status"] != "ok":
-            if response["error"] == "invalid.credentials":
+        if response["status"] == "error":
+            if response["error"] in (
+                "invalid.credentials",
+                "undefined.email",
+                "undefined.password",
+            ):
                 raise InvalidCredentialsException()
-            if response["error"] == "not.authorized":
-                raise UnauthorizedException()
 
         return response["authToken"]
 
@@ -91,7 +93,7 @@ class MyLightApiClient:
             params={"authToken": auth_token},
         )
 
-        if response["status"] != "ok":
+        if response["status"] == "error":
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
@@ -113,7 +115,7 @@ class MyLightApiClient:
             params={"authToken": auth_token},
         )
 
-        if response["status"] != "ok":
+        if response["status"] == "error":
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
@@ -141,7 +143,7 @@ class MyLightApiClient:
             params={"authToken": auth_token},
         )
 
-        if response["status"] != "ok":
+        if response["status"] == "error":
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
@@ -179,7 +181,7 @@ class MyLightApiClient:
             },
         )
 
-        if response["status"] != "ok":
+        if response["status"] == "error":
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
@@ -192,12 +194,9 @@ class MyLightApiClient:
                     value["unit"],
                 }
             else:
-                result[value["type"]] = {
-                    value["value"],
-                    value["unit"],
-                }
+                result[value["type"]] = {value["value"]}
 
         return result
 
     def _convert_in_watt(number: float) -> float:
-        return round(number / 36e5, 2)
+        return round(number / 300, 2)
