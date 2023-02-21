@@ -1,0 +1,70 @@
+"""Unit tests for the get profile API."""
+import json
+
+import aiohttp
+import pytest
+from aioresponses import aioresponses
+
+from custom_components.mylight_systems.api.client import (
+    PROFILE_URL,
+    MyLightApiClient,
+    UnauthorizedException,
+)
+
+
+@pytest.mark.asyncio
+async def test_get_profile_with_invalid_token_should_throw_exception():
+    """Test with valid location data."""
+    with open(
+        "tests/api/fixtures/profile/unauthorized.json", encoding="utf-8"
+    ) as file:
+        response_fixture = json.load(file)
+
+    session = aiohttp.ClientSession()
+
+    url = PROFILE_URL + "?authToken=abcdef"
+
+    with aioresponses() as session_mock:
+        session_mock.get(
+            url,
+            status=200,
+            payload=response_fixture,
+        )
+
+        api_client = MyLightApiClient(session)
+
+        with pytest.raises(Exception) as ex:
+            await api_client.async_get_profile("abcdef")
+
+    await session.close()
+
+    assert ex.type is UnauthorizedException
+
+
+@pytest.mark.asyncio
+async def test_get_profile_with_one_phase_grid_type_should_return():
+    """Test with valid data."""
+    with open(
+        "tests/api/fixtures/profile/ok_one_phase.json", encoding="utf-8"
+    ) as file:
+        response_fixture = json.load(file)
+
+    session = aiohttp.ClientSession()
+
+    url = PROFILE_URL + "?authToken=abcdef"
+
+    with aioresponses() as session_mock:
+        session_mock.get(
+            url,
+            status=200,
+            payload=response_fixture,
+        )
+
+        api_client = MyLightApiClient(session)
+
+        response = await api_client.async_get_profile("abcdef")
+
+    await session.close()
+
+    assert response.subscription_id == "40oXYqq6nM7R9zGK"
+    assert response.grid_type == "one_phase"

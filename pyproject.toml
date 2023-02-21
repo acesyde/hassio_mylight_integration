@@ -1,0 +1,39 @@
+[tool.black]
+line-length = 79
+target-version = ['py39']
+exclude = 'generated'
+
+[tool.flake8]
+ignore = ['E501', 'W503', 'E203', 'D202', 'W504']
+max-complexity = 25
+max-line-length = 79
+
+[tool.isort]
+profile = "black"
+line_length = 79
+
+[tool.pytest.ini_options]
+addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
+filterwarnings = ["ignore::DeprecationWarning"]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+norecursedirs = [".git"]
+
+[tool.mypy]
+python_version = 3.9
+show_error_codes = true
+ignore_missing_imports = true
+warn_incomplete_stub = true
+warn_redundant_casts = true
+warn_unused_configs = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+strict_equality = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_ignores = true
