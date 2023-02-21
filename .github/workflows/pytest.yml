@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.9, "3.10", "3.11"]
+        python-version: ["3.10"]
     steps:
       - name: 📥 Checkout the repository
         uses: actions/checkout@v3.3.0
@@ -35,8 +35,7 @@ jobs:
 
       - name: 📦 Install requirements
         run: |
-          scripts/install/frontend
-          scripts/install/pip_packages --requirement requirements_test.txt
+          scripts/setup
 
       - name: 🏃 Run tests
         env:
