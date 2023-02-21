@@ -35,8 +35,7 @@ jobs:
 
       - name: 📦 Install requirements
         run: |
-          scripts/install/frontend
-          scripts/install/pip_packages --requirement requirements_test.txt
+          scripts/setup
 
       - name: 🏃 Run tests
         env:
