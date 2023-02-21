@@ -1,0 +1,77 @@
+{
+    "status": "ok",
+    "devices": [
+        {
+            "id": "4tGrXr2CViF8chJEd",
+            "name": "Master",
+            "type": "mst",
+            "serialNumber": "JZJQ57LS2UHKP",
+            "reportPeriod": 300,
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "time": "2023-02-21 00:00:00Z",
+            "deviceTypeId": "asoka_red_plug",
+            "typeOverride": "MST-G3",
+            "preProcessingEpsilon": 0,
+            "deviceTypeName": "Appareil rouge",
+            "powerColor": "#39b54a",
+            "power": 0,
+            "programs": {},
+            "room": {
+                "id": "ab150cDfefghij",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "qVGSJ45vkeqvrHy6g",
+            "name": "Virtual 1",
+            "type": "vrt",
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "deviceTypeId": "virtual",
+            "typeOverride": null,
+            "preProcessingEpsilon": 0,
+            "deviceTypeName": "Virtual device",
+            "powerColor": "#39b54a",
+            "power": 0,
+            "programs": {},
+            "room": {
+                "id": "ab150cDfefghij",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "ZEdtSVQKto8T53RWa_msb",
+            "name": "Battery 1",
+            "type": "bat",
+            "batteryCapacity": 0,
+            "batteryNumberOfBoxes": 1,
+            "msbType": "MYLIGHT",
+            "msb_SN_filled": true,
+            "msb_AC_filled": false,
+            "msb_provider_registration_ok": false,
+            "msb_enedis_ok": false,
+            "msb_ok": false,
+            "state": "offline",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "deviceTypeId": "my_smart_battery",
+            "typeOverride": "MySmartBattery",
+            "preProcessingEpsilon": 0,
+            "deviceTypeName": "My Smart Battery",
+            "powerColor": "#39b54a",
+            "power": 0,
+            "programs": {},
+            "batteryAdjustment": [],
+            "room": {
+                "id": "ab150cDfefghij",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        }
+    ]
+}

@@ -8,20 +8,24 @@ import socket
 import aiohttp
 import async_timeout
 
-from .models import UserProfile, Login
-
 from .const import (
     AUTH_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
     DEVICES_URL,
     MEASURES_TOTAL_URL,
     PROFILE_URL,
-    STATES_URL,
 )
 from .exceptions import (
     CommunicationException,
     InvalidCredentialsException,
     UnauthorizedException,
+)
+from .models import (
+    InstallationDevices,
+    Login,
+    Measure,
+    MeasuresTotal,
+    UserProfile,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -109,7 +113,7 @@ class MyLightApiClient:
 
     async def async_get_devices(
         self, auth_token: str
-    ) -> dict[str, any] | None:
+    ) -> InstallationDevices | None:
         """Get user devices (virtual and battery)."""
         response = await self._execute_request(
             "get",
@@ -121,57 +125,22 @@ class MyLightApiClient:
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
-        device_virtual_id: str | None = None
-        device_battery_id: str | None = None
+        model = InstallationDevices()
 
         for device in response["devices"]:
-            if device["deviceTypeId"] == "virtual":
-                device_virtual_id = device["id"]
-            if device["deviceTypeId"] == "my_smart_battery":
-                device_battery_id = device["id"]
+            if device["type"] == "vrt":
+                model.virtual_device_id = device["id"]
+            if device["type"] == "bat":
+                model.virtual_battery_id = device["id"]
+            if device["type"] == "mst":
+                model.master_id = device["id"]
+                model.master_report_period = device["reportPeriod"]
 
-        if device_virtual_id is None and device_battery_id is None:
-            return None
-
-        return {device_virtual_id, device_battery_id}
-
-    async def async_get_state(
-        self, auth_token: str, devices_id: list(str)
-    ) -> dict[str, dict[str, any]] | None:
-        """Get devices states."""
-        response = await self._execute_request(
-            "get",
-            STATES_URL,
-            params={"authToken": auth_token},
-        )
-
-        if response["status"] == "error":
-            if response["error"] == "not.authorized":
-                raise UnauthorizedException()
-
-        states: dict[str, dict[str, object]] = []
-
-        for device_id in devices_id:
-            for device_state in response["deviceStates"]:
-                if (
-                    device_state["deviceId"] == device_id
-                    and device_state["state"] == "on"
-                ):
-                    for sensor_state in device_state["sensorStates"]:
-                        states[device_id][sensor_state["type"]] = {
-                            "value": sensor_state["value"],
-                            "unit": sensor_state["unit"],
-                            "date": sensor_state["date"],
-                        }
-
-        if len(states) <= 0:
-            return None
-
-        return states
+        return model
 
     async def async_get_measures_total(
         self, auth_token: str, phase: str, device_id: str
-    ) -> dict[str, object] | None:
+    ) -> MeasuresTotal:
         """Get device measures total."""
         response = await self._execute_request(
             "get",
@@ -187,18 +156,11 @@ class MyLightApiClient:
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
-        result: dict[str, any] | None = None
+        measures = MeasuresTotal()
 
         for value in response["measure"]["values"]:
-            if value["unit"] == "Ws":
-                result[value["type"]] = {
-                    self._convert_in_watt(value["value"]),
-                    value["unit"],
-                }
-            else:
-                result[value["type"]] = {value["value"]}
+            measures.append(
+                Measure(value["type"], value["value"], value["unit"])
+            )
 
-        return result
-
-    def _convert_in_watt(number: float) -> float:
-        return round(number / 300, 2)
+        return measures

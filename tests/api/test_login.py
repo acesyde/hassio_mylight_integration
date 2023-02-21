@@ -104,7 +104,7 @@ async def test_login_with_invalid_credentials_should_throw_exception():
 
 @pytest.mark.asyncio
 async def test_login_should_return_auth_token():
-    """Test with valid location data."""
+    """Test with valid data."""
     with open("tests/api/fixtures/login/ok.json", encoding="utf-8") as file:
         response_fixture = json.load(file)
 

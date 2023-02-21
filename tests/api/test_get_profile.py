@@ -7,8 +7,8 @@ from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     PROFILE_URL,
-    UnauthorizedException,
     MyLightApiClient,
+    UnauthorizedException,
 )
 
 
@@ -42,8 +42,8 @@ async def test_get_profile_with_invalid_token_should_throw_exception():
 
 
 @pytest.mark.asyncio
-async def test_get_profile_withoneèphase_grid_type_should_return():
-    """Test with valid location data."""
+async def test_get_profile_with_one_phase_grid_type_should_return():
+    """Test with valid data."""
     with open(
         "tests/api/fixtures/profile/ok_one_phase.json", encoding="utf-8"
     ) as file:
