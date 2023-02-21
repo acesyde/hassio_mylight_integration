@@ -111,9 +111,7 @@ class MyLightApiClient:
 
         return UserProfile(response["id"], grid_type)
 
-    async def async_get_devices(
-        self, auth_token: str
-    ) -> InstallationDevices | None:
+    async def async_get_devices(self, auth_token: str) -> InstallationDevices:
         """Get user devices (virtual and battery)."""
         response = await self._execute_request(
             "get",

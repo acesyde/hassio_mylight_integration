@@ -66,5 +66,5 @@ async def test_get_profile_with_one_phase_grid_type_should_return():
 
     await session.close()
 
-    assert response.id == "40oXYqq6nM7R9zGK"
+    assert response.subscription_id == "40oXYqq6nM7R9zGK"
     assert response.grid_type == "one_phase"

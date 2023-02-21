@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Si vous avez besoin d'aide pour la configuration, regardez ici : https://github.com/acesyde/hassio_mylight_integration",
+                "data": {
+                    "username": "Email",
+                    "password": "Mot de passe"
+                }
+            }
+        },
+        "error": {
+            "auth": "Mauvais email ou mot de passe.",
+            "connection": "Impossible de se connecter au serveur.",
+            "unknown": "Une erreur inconnue s'est produite."
+        }
+    }
+}

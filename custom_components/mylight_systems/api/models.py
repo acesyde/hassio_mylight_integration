@@ -19,18 +19,18 @@ class Login:
 class UserProfile:
     """User profile model."""
 
-    __id: str = None
+    __subscription_id: str = None
     __grid_type: str = None
 
-    def __init__(self, id: str, grid_type: str) -> None:
+    def __init__(self, subscription_id: str, grid_type: str) -> None:
         """Initialize."""
-        self.__id = id
+        self.__subscription_id = subscription_id
         self.__grid_type = grid_type
 
     @property
-    def id(self):
+    def subscription_id(self):
         """Return subscription id."""
-        return self.__id
+        return self.__subscription_id
 
     @property
     def grid_type(self):

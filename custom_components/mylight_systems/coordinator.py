@@ -1,9 +1,10 @@
 """DataUpdateCoordinator for mylight_systems."""
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import (
@@ -11,7 +12,39 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 
-from .const import DOMAIN, LOGGER, SCAN_INTERVAL_IN_MINUTES
+from custom_components.mylight_systems.api.models import Measure
+
+from .api.client import MyLightApiClient
+from .api.exceptions import (
+    InvalidCredentialsException,
+    MyLightSystemsException,
+    UnauthorizedException,
+)
+from .const import (
+    CONF_GRID_TYPE,
+    CONF_VIRTUAL_DEVICE_ID,
+    DOMAIN,
+    LOGGER,
+    SCAN_INTERVAL_IN_MINUTES,
+)
+
+
+class MyLightSystemsCoordinatorData:
+    """Data returned by the coordinator."""
+
+    def __init__(
+        self,
+        produced_energy: Measure,
+        grid_energy: Measure,
+        grid_energy_without_battery: Measure,
+        autonomy_rate: Measure,
+        self_conso: Measure,
+    ) -> None:
+        """Initialize."""
+        self._produced_energy = produced_energy
+        self._grid_energy = grid_energy
+        self._autonomy_rate = autonomy_rate
+        self._self_conso = self_conso
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -23,7 +56,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass: HomeAssistant,
-        client: MyLightSystemsApiClient,
+        client: MyLightApiClient,
     ) -> None:
         """Initialize."""
         self.client = client
@@ -37,26 +70,39 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Update data via library."""
         try:
-            result = await self.client.async_get_measures_total()
+            email = self.self.config_entry.data[CONF_EMAIL]
+            password = self.self.config_entry.data[CONF_PASSWORD]
+            grid_type = self.self.config_entry.data[CONF_GRID_TYPE]
+            device_id = self.self.config_entry.data[CONF_VIRTUAL_DEVICE_ID]
 
-            if result is None:
-                LOGGER.debug("Nothing to retrieve")
-                return
+            await self.authenticate_user(email, password)
 
-            produced_energy: float | None = 0
-            grid_energy: float | None = 0
+            result = await self.client.async_get_measures_total(
+                self.__auth_token, grid_type, device_id
+            )
 
-            for value in result["measure"]["values"]:
-                if value["type"] == "produced_energy":
-                    produced_energy = value["value"]
-                if value["type"] == "grid_energy":
-                    grid_energy = value["value"]
-
-            return {
-                "produced_energy": round(produced_energy / 36e5, 2),
-                "grid_energy": round(grid_energy / 36e5, 2),
-            }
-        except MyLightSystemsApiClientAuthenticationError as exception:
+            return MyLightSystemsCoordinatorData(
+                result["produced_energy"],
+                result["grid_energy"],
+                result["grid_sans_msb_energy"],
+                result["autonomy_rate"],
+                result["self_conso"],
+            )
+        except (
+            UnauthorizedException,
+            InvalidCredentialsException,
+        ) as exception:
             raise ConfigEntryAuthFailed(exception) from exception
-        except MyLightSystemsApiClientError as exception:
+        except MyLightSystemsException as exception:
             raise UpdateFailed(exception) from exception
+
+    async def authenticate_user(self, email, password):
+        """Reauthenticate user if needed."""
+        if (
+            self.__auth_token is None
+            or self.__token_expiration is None
+            or self.__token_expiration < datetime.utcnow()
+        ):
+            result = await self.client.async_login(email, password)
+            self.__auth_token = result.__auth_token
+            self.__token_expiration = datetime.utcnow() + timedelta(hours=2)
