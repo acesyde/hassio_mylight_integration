@@ -4,7 +4,7 @@
             "user": {
                 "description": "Si vous avez besoin d'aide pour la configuration, regardez ici : https://github.com/acesyde/hassio_mylight_integration",
                 "data": {
-                    "username": "Email",
+                    "email": "Email",
                     "password": "Mot de passe"
                 }
             }

@@ -20,13 +20,7 @@ from .exceptions import (
     InvalidCredentialsException,
     UnauthorizedException,
 )
-from .models import (
-    InstallationDevices,
-    Login,
-    Measure,
-    MeasuresTotal,
-    UserProfile,
-)
+from .models import InstallationDevices, Login, Measure, UserProfile
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -58,7 +52,9 @@ class MyLightApiClient:
                 )
 
                 _LOGGER.debug(
-                    "Data retrieved from %s, status: %s", url, response.status
+                    "Data retrieved from %s, status: %s",
+                    response.url,
+                    response.status,
                 )
                 response.raise_for_status()
                 data = await response.json()
@@ -138,7 +134,7 @@ class MyLightApiClient:
 
     async def async_get_measures_total(
         self, auth_token: str, phase: str, device_id: str
-    ) -> MeasuresTotal:
+    ) -> list[Measure]:
         """Get device measures total."""
         response = await self._execute_request(
             "get",
@@ -154,7 +150,7 @@ class MyLightApiClient:
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
-        measures = MeasuresTotal()
+        measures: list[Measure] = []
 
         for value in response["measure"]["values"]:
             measures.append(

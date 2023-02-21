@@ -112,17 +112,3 @@ class Measure:
     def unit(self) -> str:
         """Return measure unit."""
         return self.__unit
-
-
-class MeasuresTotal(list):
-    """List of all measures."""
-
-    def __init__(
-        self,
-    ) -> None:
-        """Initialize."""
-        super().__init__()
-
-    def append(self, item: Measure):
-        """Append new measure."""
-        super().append(item)

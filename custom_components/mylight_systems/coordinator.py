@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from typing import NamedTuple
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
@@ -29,22 +30,14 @@ from .const import (
 )
 
 
-class MyLightSystemsCoordinatorData:
+class MyLightSystemsCoordinatorData(NamedTuple):
     """Data returned by the coordinator."""
 
-    def __init__(
-        self,
-        produced_energy: Measure,
-        grid_energy: Measure,
-        grid_energy_without_battery: Measure,
-        autonomy_rate: Measure,
-        self_conso: Measure,
-    ) -> None:
-        """Initialize."""
-        self._produced_energy = produced_energy
-        self._grid_energy = grid_energy
-        self._autonomy_rate = autonomy_rate
-        self._self_conso = self_conso
+    produced_energy: Measure
+    grid_energy: Measure
+    grid_energy_without_battery: Measure
+    autonomy_rate: Measure
+    self_conso: Measure
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -52,6 +45,8 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching data from the API."""
 
     config_entry: ConfigEntry
+    __auth_token: str | None = None
+    __token_expiration: datetime | None = None
 
     def __init__(
         self,
@@ -67,13 +62,13 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(minutes=SCAN_INTERVAL_IN_MINUTES),
         )
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> MyLightSystemsCoordinatorData:
         """Update data via library."""
         try:
-            email = self.self.config_entry.data[CONF_EMAIL]
-            password = self.self.config_entry.data[CONF_PASSWORD]
-            grid_type = self.self.config_entry.data[CONF_GRID_TYPE]
-            device_id = self.self.config_entry.data[CONF_VIRTUAL_DEVICE_ID]
+            email = self.config_entry.data[CONF_EMAIL]
+            password = self.config_entry.data[CONF_PASSWORD]
+            grid_type = self.config_entry.data[CONF_GRID_TYPE]
+            device_id = self.config_entry.data[CONF_VIRTUAL_DEVICE_ID]
 
             await self.authenticate_user(email, password)
 
@@ -82,11 +77,17 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             )
 
             return MyLightSystemsCoordinatorData(
-                result["produced_energy"],
-                result["grid_energy"],
-                result["grid_sans_msb_energy"],
-                result["autonomy_rate"],
-                result["self_conso"],
+                produced_energy=self.find_measure_by_type(
+                    result, "produced_energy"
+                ),
+                grid_energy=self.find_measure_by_type(result, "grid_energy"),
+                grid_energy_without_battery=self.find_measure_by_type(
+                    result, "grid_sans_msb_energy"
+                ),
+                autonomy_rate=self.find_measure_by_type(
+                    result, "autonomy_rate"
+                ),
+                self_conso=self.find_measure_by_type(result, "self_conso"),
             )
         except (
             UnauthorizedException,
@@ -104,5 +105,11 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             or self.__token_expiration < datetime.utcnow()
         ):
             result = await self.client.async_login(email, password)
-            self.__auth_token = result.__auth_token
+            self.__auth_token = result.auth_token
             self.__token_expiration = datetime.utcnow() + timedelta(hours=2)
+
+    def find_measure_by_type(
+        self, measures: list[Measure], name: str
+    ) -> Measure:
+        """Find measure by name."""
+        return next(m for m in measures if m.type == name)

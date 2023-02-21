@@ -43,14 +43,20 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     session=async_create_clientsession(self.hass),
                 )
 
-                auth_token = await api_client.async_login(
+                login_response = await api_client.async_login(
                     user_input[CONF_EMAIL], user_input[CONF_PASSWORD]
                 )
 
-                user_profile = await api_client.async_get_profile(auth_token)
-                device_ids = await api_client.async_get_devices(auth_token)
+                user_profile = await api_client.async_get_profile(
+                    login_response.auth_token
+                )
+                device_ids = await api_client.async_get_devices(
+                    login_response.auth_token
+                )
 
                 data = {
+                    CONF_EMAIL: user_input[CONF_EMAIL],
+                    CONF_PASSWORD: user_input[CONF_PASSWORD],
                     CONF_SUBSCRIPTION_ID: user_profile.subscription_id,
                     CONF_GRID_TYPE: user_profile.grid_type,
                     CONF_VIRTUAL_DEVICE_ID: device_ids.virtual_device_id,
