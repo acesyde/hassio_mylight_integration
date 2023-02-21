@@ -8,6 +8,8 @@ import socket
 import aiohttp
 import async_timeout
 
+from .models import UserProfile, Login
+
 from .const import (
     AUTH_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
@@ -67,7 +69,7 @@ class MyLightApiClient:
             _LOGGER.debug("An error occured : %s", exception, exc_info=True)
             raise CommunicationException() from exception
 
-    async def async_login(self, username: str, password: str) -> str:
+    async def async_login(self, username: str, password: str) -> Login:
         """Log user and return the authentication token."""
         response = await self._execute_request(
             "get",
@@ -83,9 +85,9 @@ class MyLightApiClient:
             ):
                 raise InvalidCredentialsException()
 
-        return response["authToken"]
+        return Login(response["authToken"])
 
-    async def async_get_profile(self, auth_token: str) -> dict[str, any]:
+    async def async_get_profile(self, auth_token: str) -> UserProfile:
         """Get user profile."""
         response = await self._execute_request(
             "get",
@@ -103,7 +105,7 @@ class MyLightApiClient:
         else:
             grid_type = "three_phases"
 
-        return {response["id"], grid_type}
+        return UserProfile(response["id"], grid_type)
 
     async def async_get_devices(
         self, auth_token: str

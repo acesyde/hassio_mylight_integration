@@ -127,4 +127,4 @@ async def test_login_should_return_auth_token():
 
     await session.close()
 
-    assert response == "abcdefgh"
+    assert response.auth_token == "abcdefgh"
