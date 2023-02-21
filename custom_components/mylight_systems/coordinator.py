@@ -11,11 +11,6 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 
-from .api import (
-    MyLightSystemsApiClient,
-    MyLightSystemsApiClientAuthenticationError,
-    MyLightSystemsApiClientError,
-)
 from .const import DOMAIN, LOGGER, SCAN_INTERVAL_IN_MINUTES
 
 

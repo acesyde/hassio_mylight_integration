@@ -8,7 +8,7 @@ import socket
 import aiohttp
 import async_timeout
 
-from custom_components.mylight_systems.api.const import (
+from .const import (
     AUTH_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
     DEVICES_URL,
@@ -16,7 +16,7 @@ from custom_components.mylight_systems.api.const import (
     PROFILE_URL,
     STATES_URL,
 )
-from custom_components.mylight_systems.api.exceptions import (
+from .exceptions import (
     CommunicationException,
     InvalidCredentialsException,
     UnauthorizedException,
@@ -51,10 +51,10 @@ class MyLightApiClient:
                     params=params,
                 )
 
-                response.raise_for_status()
                 _LOGGER.debug(
                     "Data retrieved from %s, status: %s", url, response.status
                 )
+                response.raise_for_status()
                 data = await response.json()
 
                 return data

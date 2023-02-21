@@ -3,7 +3,9 @@
   "name": "MyLight Systems",
   "documentation": "https://github.com/acesyde/hassio_mylight_integration",
   "issue_tracker": "https://github.com/acesyde/hassio_mylight_integration/issues",
-  "dependencies": [],
+  "dependencies": [
+    "requests"
+  ],
   "codeowners": [
     "@acesyde"
   ],
