@@ -11,13 +11,13 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 
 **This integration will set up the following platforms.**
 
-| Platform                                  | Description                                                      |
-| ----------------------------------------- | ---------------------------------------------------------------- |
-| `sensor.solar_production`                 | Current solar power production.                                  |
-| `sensor.grid_with_battery_consumption`    | Current power consumption from the grid with virtual battery.    |
-| `sensor.grid_without_battery_consumption` | Current power consumption from the grid without virtual battery. |
-| `sensor.virtual_battery_charge`           | Current virtual battery charge.                                  |
-| `sensor.virtual_battery_discharge`        | Current virtual battery discharge.                               |
+| Platform                                        | Description                                                      | Unit | Implemented        |
+| ----------------------------------------------- | ---------------------------------------------------------------- | ---- | ------------------ |
+| `sensor.total_solar_production`                 | Current solar power production.                                  | kw/h | :white_check_mark: |
+| `sensor.total_grid_with_battery_consumption`    | Current power consumption from the grid with virtual battery.    | kw/h | :white_check_mark: |
+| `sensor.total_grid_without_battery_consumption` | Current power consumption from the grid without virtual battery. | kw/h | :white_check_mark: |
+| `sensor.total_autonomy_rate`                    | Autonomy rate.                                                   | %    | :white_check_mark: |
+| `sensor.total_self_conso`                       | Self consumption.                                                | %    | :white_check_mark: |
 
 ## Installation
 

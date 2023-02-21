@@ -2,36 +2,25 @@
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import MyLightSystemsApiClient
-from .const import (
-    CONF_VIRTUAL_BATTERY_ID,
-    CONF_VIRTUAL_DEVICE_ID,
-    DOMAIN,
-    PLATFORMS,
-)
+from .api.client import MyLightApiClient
+from .const import DOMAIN, PLATFORMS
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 
 # https://developers.home-assistant.io/docs/config_entries_index/#setting-up-an-entry
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][
-        entry.entry_id
-    ] = coordinator = MyLightSystemsDataUpdateCoordinator(
-        hass=hass,
-        client=MyLightSystemsApiClient(
-            username=entry.data[CONF_EMAIL],
-            password=entry.data[CONF_PASSWORD],
-            virtual_device_id=entry.data[CONF_VIRTUAL_DEVICE_ID],
-            virtual_battery_id=entry.data[CONF_VIRTUAL_BATTERY_ID],
-            session=async_get_clientsession(hass),
-        ),
+    session = async_get_clientsession(hass)
+    client = MyLightApiClient(
+        session=session,
     )
+    coordinator = MyLightSystemsDataUpdateCoordinator(hass=hass, client=client)
+
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+
     # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
     await coordinator.async_config_entry_first_refresh()
 
