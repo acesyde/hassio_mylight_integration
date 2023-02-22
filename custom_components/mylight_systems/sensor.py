@@ -42,19 +42,30 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         key="total_solar_production",
         name="Total solar power production",
         icon="mdi:solar-panel",
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: round(data.produced_energy.value / 36e5, 2),
+        value_fn=lambda data: round(data.produced_energy.value / 36e2, 2),
     ),
     MyLightSensorEntityDescription(
         key="total_grid_consumption",
-        name="Total power consumption from the grid",
+        name="Total power consumption from the grid with virtual battery",
         icon="mdi:transmission-tower",
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: round(data.grid_energy.value / 36e5, 2),
+        value_fn=lambda data: round(data.grid_energy.value / 36e2, 2),
+    ),
+    MyLightSensorEntityDescription(
+        key="total_grid_without_battery_consumption",
+        name="Total power consumption from the grid without virtual battery",
+        icon="mdi:transmission-tower",
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        value_fn=lambda data: round(
+            data.grid_energy_without_battery.value / 36e2, 2
+        ),
     ),
     MyLightSensorEntityDescription(
         key="total_autonomy_rate",
@@ -62,8 +73,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         icon="mdi:percent-box",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        device_class=SensorDeviceClass.POWER_FACTOR,
-        value_fn=lambda data: data.autonomy_rate.value,
+        value_fn=lambda data: round(data.autonomy_rate.value, 2),
     ),
     MyLightSensorEntityDescription(
         key="total_self_conso",
@@ -71,8 +81,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         icon="mdi:percent-box",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        device_class=SensorDeviceClass.POWER_FACTOR,
-        value_fn=lambda data: data.self_conso.value,
+        value_fn=lambda data: round(data.self_conso.value, 2),
     ),
 )
 
