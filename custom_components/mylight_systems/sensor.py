@@ -73,8 +73,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         icon="mdi:percent-box",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        device_class=SensorDeviceClass.POWER_FACTOR,
-        value_fn=lambda data: data.autonomy_rate.value,
+        value_fn=lambda data: round(data.autonomy_rate.value, 2),
     ),
     MyLightSensorEntityDescription(
         key="total_self_conso",
@@ -82,8 +81,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         icon="mdi:percent-box",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        device_class=SensorDeviceClass.POWER_FACTOR,
-        value_fn=lambda data: data.self_conso.value,
+        value_fn=lambda data: round(data.self_conso.value, 2),
     ),
 )
 
