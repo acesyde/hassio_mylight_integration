@@ -1,14 +1,12 @@
 {
   "domain": "mylight_systems",
   "name": "MyLight Systems",
-  "documentation": "https://github.com/acesyde/hassio_mylight_integration",
-  "issue_tracker": "https://github.com/acesyde/hassio_mylight_integration/issues",
-  "dependencies": [],
   "codeowners": [
     "@acesyde"
   ],
-  "requirements": [],
-  "iot_class": "cloud_polling",
   "config_flow": true,
+  "documentation": "https://github.com/acesyde/hassio_mylight_integration",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/acesyde/hassio_mylight_integration/issues",
   "version": "0.0.1"
 }
