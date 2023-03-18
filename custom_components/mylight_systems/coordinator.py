@@ -110,6 +110,6 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
 
     def find_measure_by_type(
         self, measures: list[Measure], name: str
-    ) -> Measure:
+    ) -> Measure | None:
         """Find measure by name."""
-        return next(m for m in measures if m.type == name)
+        return next((m for m in measures if m.type == name), None)
