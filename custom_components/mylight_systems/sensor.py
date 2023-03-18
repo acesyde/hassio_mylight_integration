@@ -93,6 +93,28 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         if data.self_conso is not None
         else 0,
     ),
+    MyLightSensorEntityDescription(
+        key="total_msb_charge",
+        name="Total My Smart Battery Charge",
+        icon="mdi:solar-panel",
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        value_fn=lambda data: round(data.msb_charge.value / 36e2, 2)
+        if data.msb_charge is not None
+        else 0,
+    ),
+    MyLightSensorEntityDescription(
+        key="total_msb_discharge",
+        name="Total My Smart Battery Discharge",
+        icon="mdi:solar-panel",
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        value_fn=lambda data: round(data.msb_discharge.value / 36e2, 2)
+        if data.msb_discharge is not None
+        else 0,
+    ),
 )
 
 
