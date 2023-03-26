@@ -38,6 +38,8 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     grid_energy_without_battery: Measure
     autonomy_rate: Measure
     self_conso: Measure
+    msb_charge: Measure
+    msb_discharge: Measure
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -88,6 +90,10 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                     result, "autonomy_rate"
                 ),
                 self_conso=self.find_measure_by_type(result, "self_conso"),
+                msb_charge=self.find_measure_by_type(result, "msb_charge"),
+                msb_discharge=self.find_measure_by_type(
+                    result, "msb_discharge"
+                ),
             )
         except (
             UnauthorizedException,

@@ -18,8 +18,16 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 | `sensor.total_grid_without_battery_consumption` | Total power consumption from the grid without virtual battery. | W/h  | :white_check_mark: |
 | `sensor.total_autonomy_rate`                    | Autonomy rate.                                                 | %    | :white_check_mark: |
 | `sensor.total_self_conso`                       | Self consumption.                                              | %    | :white_check_mark: |
+| `sensor.total_msb_charge`                       | My Smart Battery Charge.                                       | W/h  | :white_check_mark: |
+| `sensor.total_msb_discharge`                    | My Smart Battery Discharge.                                    | W/h  | :white_check_mark: |
 
 ## Installation
+
+## Automatic
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=acesyde&repository=hassio_mylight_integration&category=integration)
+
+## Manual
 
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
 1. If you do not have a `custom_components` directory (folder) there, you need to create it.
