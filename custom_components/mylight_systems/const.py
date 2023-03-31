@@ -22,9 +22,5 @@ CONF_MASTER_REPORT_PERIOD = "master_report_period"
 CONF_SUBSCRIPTION_ID = "subscription_id"
 CONF_GRID_TYPE = "grid_type"
 
-# API
-BASE_URL = "https://myhome.mylight-systems.com/api"
-AUTH_PATH = "/auth"
-PROFILE_PATH = "/profile"
-DEVICES_PATH = "/devices"
-MEASURES_TOTAL_PATH = "/measures/total"
+# MyLight
+DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"

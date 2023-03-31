@@ -10,6 +10,7 @@ import async_timeout
 
 from .const import (
     AUTH_URL,
+    BASE_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
     DEVICES_URL,
     MEASURES_TOTAL_URL,
@@ -30,9 +31,12 @@ class MyLightApiClient:
 
     _session: aiohttp.ClientSession = None
 
-    def __init__(self, session: aiohttp.ClientSession) -> None:
+    def __init__(self, base_url: str, session: aiohttp.ClientSession) -> None:
         """Initialize."""
         self._session = session
+        self._base_url = (
+            base_url if base_url and not base_url.isspace() else BASE_URL
+        )
 
     async def _execute_request(
         self,
@@ -46,7 +50,7 @@ class MyLightApiClient:
             async with async_timeout.timeout(DEFAULT_TIMEOUT_IN_SECONDS):
                 response = await self._session.request(
                     method=method,
-                    url=url,
+                    url=f"{self._base_url}/{url}",
                     headers=headers,
                     params=params,
                 )
