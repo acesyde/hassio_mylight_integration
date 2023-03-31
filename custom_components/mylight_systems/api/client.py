@@ -7,6 +7,7 @@ import socket
 
 import aiohttp
 import async_timeout
+from yarl import URL
 
 from .const import (
     AUTH_URL,
@@ -41,7 +42,7 @@ class MyLightApiClient:
     async def _execute_request(
         self,
         method: str,
-        url: str,
+        path: str,
         params: dict | None = None,
         headers: dict | None = None,
     ) -> any:
@@ -50,7 +51,7 @@ class MyLightApiClient:
             async with async_timeout.timeout(DEFAULT_TIMEOUT_IN_SECONDS):
                 response = await self._session.request(
                     method=method,
-                    url=f"{self._base_url}{url}",
+                    url=URL(self._base_url).with_path(path),
                     headers=headers,
                     params=params,
                 )
