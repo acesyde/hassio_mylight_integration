@@ -11,7 +11,7 @@ from yarl import URL
 
 from .const import (
     AUTH_URL,
-    BASE_URL,
+    DEFAULT_BASE_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
     DEVICES_URL,
     MEASURES_TOTAL_URL,
@@ -36,7 +36,9 @@ class MyLightApiClient:
         """Initialize."""
         self._session = session
         self._base_url = (
-            base_url if base_url and not base_url.isspace() else BASE_URL
+            base_url
+            if base_url and not base_url.isspace()
+            else DEFAULT_BASE_URL
         )
 
     async def _execute_request(

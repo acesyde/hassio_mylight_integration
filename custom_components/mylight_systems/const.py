@@ -23,4 +23,4 @@ CONF_SUBSCRIPTION_ID = "subscription_id"
 CONF_GRID_TYPE = "grid_type"
 
 # MyLight
-DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"
+# DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"

@@ -7,7 +7,7 @@ from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .api.client import MyLightApiClient
+from .api.client import DEFAULT_BASE_URL, MyLightApiClient
 from .api.exceptions import (
     CommunicationException,
     InvalidCredentialsException,
@@ -20,7 +20,6 @@ from .const import (
     CONF_SUBSCRIPTION_ID,
     CONF_VIRTUAL_BATTERY_ID,
     CONF_VIRTUAL_DEVICE_ID,
-    DEFAULT_BASE_URL,
     DOMAIN,
     LOGGER,
 )
