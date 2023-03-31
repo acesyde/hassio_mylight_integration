@@ -8,6 +8,7 @@ from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     AUTH_URL,
+    BASE_URL,
     InvalidCredentialsException,
     MyLightApiClient,
 )
@@ -23,7 +24,7 @@ async def test_login_with_bad_email_should_throw_exception():
 
     session = aiohttp.ClientSession()
 
-    url = AUTH_URL + "?password=test"
+    url = BASE_URL + AUTH_URL + "?password=test"
 
     with aioresponses() as session_mock:
         session_mock.get(
@@ -32,7 +33,7 @@ async def test_login_with_bad_email_should_throw_exception():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(BASE_URL, session)
 
         with pytest.raises(Exception) as ex:
             await api_client.async_login(username="", password="test")
@@ -52,7 +53,7 @@ async def test_login_with_bad_password_should_throw_exception():
 
     session = aiohttp.ClientSession()
 
-    url = AUTH_URL + "?email=test%2540test.com"
+    url = BASE_URL + AUTH_URL + "?email=test%2540test.com"
 
     with aioresponses() as session_mock:
         session_mock.get(
@@ -61,7 +62,7 @@ async def test_login_with_bad_password_should_throw_exception():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(BASE_URL, session)
 
         with pytest.raises(Exception) as ex:
             await api_client.async_login(username="test@test.com", password="")
@@ -81,7 +82,7 @@ async def test_login_with_invalid_credentials_should_throw_exception():
 
     session = aiohttp.ClientSession()
 
-    url = AUTH_URL + "?email=test%2540test.com&password=test"
+    url = BASE_URL + AUTH_URL + "?email=test%2540test.com&password=test"
 
     with aioresponses() as session_mock:
         session_mock.get(
@@ -90,7 +91,7 @@ async def test_login_with_invalid_credentials_should_throw_exception():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(BASE_URL, session)
 
         with pytest.raises(Exception) as ex:
             await api_client.async_login(
@@ -110,7 +111,7 @@ async def test_login_should_return_auth_token():
 
     session = aiohttp.ClientSession()
 
-    url = AUTH_URL + "?email=test%2540test.com&password=test"
+    url = BASE_URL + AUTH_URL + "?email=test%2540test.com&password=test"
 
     with aioresponses() as session_mock:
         session_mock.get(
@@ -119,7 +120,7 @@ async def test_login_should_return_auth_token():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(BASE_URL, session)
 
         response = await api_client.async_login(
             username="test@test.com", password="test"

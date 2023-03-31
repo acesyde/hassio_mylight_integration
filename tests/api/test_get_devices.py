@@ -6,6 +6,7 @@ import pytest
 from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
+    BASE_URL,
     DEVICES_URL,
     MyLightApiClient,
     UnauthorizedException,
@@ -22,7 +23,7 @@ async def test_get_devices_with_invalid_token_should_throw_exception():
 
     session = aiohttp.ClientSession()
 
-    url = DEVICES_URL + "?authToken=abcdef"
+    url = BASE_URL + DEVICES_URL + "?authToken=abcdef"
 
     with aioresponses() as session_mock:
         session_mock.get(
@@ -31,7 +32,7 @@ async def test_get_devices_with_invalid_token_should_throw_exception():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(BASE_URL, session)
 
         with pytest.raises(Exception) as ex:
             await api_client.async_get_devices("abcdef")
@@ -49,7 +50,7 @@ async def test_get_device_should_return():
 
     session = aiohttp.ClientSession()
 
-    url = DEVICES_URL + "?authToken=abcdef"
+    url = BASE_URL + DEVICES_URL + "?authToken=abcdef"
 
     with aioresponses() as session_mock:
         session_mock.get(
@@ -58,7 +59,7 @@ async def test_get_device_should_return():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(BASE_URL, session)
 
         response = await api_client.async_get_devices("abcdef")
 

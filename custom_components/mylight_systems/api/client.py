@@ -50,7 +50,7 @@ class MyLightApiClient:
             async with async_timeout.timeout(DEFAULT_TIMEOUT_IN_SECONDS):
                 response = await self._session.request(
                     method=method,
-                    url=f"{self._base_url}/{url}",
+                    url=f"{self._base_url}{url}",
                     headers=headers,
                     params=params,
                 )
