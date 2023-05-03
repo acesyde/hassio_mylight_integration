@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .api.client import MyLightApiClient
+from .api.client import DEFAULT_BASE_URL, MyLightApiClient
 from .api.exceptions import (
     CommunicationException,
     InvalidCredentialsException,
@@ -40,6 +40,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 api_client = MyLightApiClient(
+                    base_url=user_input[CONF_URL],
                     session=async_create_clientsession(self.hass),
                 )
 
@@ -57,6 +58,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 data = {
                     CONF_EMAIL: user_input[CONF_EMAIL],
                     CONF_PASSWORD: user_input[CONF_PASSWORD],
+                    CONF_URL: user_input[CONF_URL],
                     CONF_SUBSCRIPTION_ID: user_profile.subscription_id,
                     CONF_GRID_TYPE: user_profile.grid_type,
                     CONF_VIRTUAL_DEVICE_ID: device_ids.virtual_device_id,
@@ -101,6 +103,13 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_PASSWORD): selector.TextSelector(
                         selector.TextSelectorConfig(
                             type=selector.TextSelectorType.PASSWORD
+                        ),
+                    ),
+                    vol.Optional(
+                        CONF_URL, default=DEFAULT_BASE_URL
+                    ): selector.TextSelector(
+                        selector.TextSelectorConfig(
+                            type=selector.TextSelectorType.URL,
                         ),
                     ),
                 }

@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_URL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api.client import MyLightApiClient
+from .api.client import DEFAULT_BASE_URL, MyLightApiClient
 from .const import DOMAIN, PLATFORMS
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
@@ -14,7 +15,9 @@ from .coordinator import MyLightSystemsDataUpdateCoordinator
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
     session = async_get_clientsession(hass)
+
     client = MyLightApiClient(
+        base_url=entry.data.get(CONF_URL, DEFAULT_BASE_URL),
         session=session,
     )
     coordinator = MyLightSystemsDataUpdateCoordinator(hass=hass, client=client)

@@ -7,6 +7,7 @@ import pytest
 from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
+    DEFAULT_BASE_URL,
     MEASURES_TOTAL_URL,
     MyLightApiClient,
     UnauthorizedException,
@@ -24,7 +25,8 @@ async def test_get_measures_total_with_invalid_token_should_throw_exception():
     session = aiohttp.ClientSession()
 
     url = (
-        MEASURES_TOTAL_URL
+        DEFAULT_BASE_URL
+        + MEASURES_TOTAL_URL
         + "?authToken=abcdef&measureType=one_phase&deviceId=qVGSJ45vkeqvrHy6g"
     )
 
@@ -35,7 +37,7 @@ async def test_get_measures_total_with_invalid_token_should_throw_exception():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(DEFAULT_BASE_URL, session)
 
         with pytest.raises(Exception) as ex:
             await api_client.async_get_measures_total(
@@ -58,7 +60,8 @@ async def test_get_measures_total_should_return():
     session = aiohttp.ClientSession()
 
     url = (
-        MEASURES_TOTAL_URL
+        DEFAULT_BASE_URL
+        + MEASURES_TOTAL_URL
         + "?authToken=abcdef&measureType=one_phase&deviceId=qVGSJ45vkeqvrHy6g"
     )
 
@@ -69,7 +72,7 @@ async def test_get_measures_total_should_return():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(DEFAULT_BASE_URL, session)
 
         response = await api_client.async_get_measures_total(
             "abcdef", "one_phase", "qVGSJ45vkeqvrHy6g"

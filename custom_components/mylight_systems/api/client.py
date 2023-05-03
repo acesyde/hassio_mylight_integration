@@ -7,9 +7,11 @@ import socket
 
 import aiohttp
 import async_timeout
+from yarl import URL
 
 from .const import (
     AUTH_URL,
+    DEFAULT_BASE_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
     DEVICES_URL,
     MEASURES_TOTAL_URL,
@@ -30,14 +32,19 @@ class MyLightApiClient:
 
     _session: aiohttp.ClientSession = None
 
-    def __init__(self, session: aiohttp.ClientSession) -> None:
+    def __init__(self, base_url: str, session: aiohttp.ClientSession) -> None:
         """Initialize."""
         self._session = session
+        self._base_url = (
+            base_url
+            if base_url and not base_url.isspace()
+            else DEFAULT_BASE_URL
+        )
 
     async def _execute_request(
         self,
         method: str,
-        url: str,
+        path: str,
         params: dict | None = None,
         headers: dict | None = None,
     ) -> any:
@@ -46,7 +53,7 @@ class MyLightApiClient:
             async with async_timeout.timeout(DEFAULT_TIMEOUT_IN_SECONDS):
                 response = await self._session.request(
                     method=method,
-                    url=url,
+                    url=URL(self._base_url).with_path(path),
                     headers=headers,
                     params=params,
                 )

@@ -6,6 +6,7 @@ import pytest
 from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
+    DEFAULT_BASE_URL,
     PROFILE_URL,
     MyLightApiClient,
     UnauthorizedException,
@@ -22,7 +23,7 @@ async def test_get_profile_with_invalid_token_should_throw_exception():
 
     session = aiohttp.ClientSession()
 
-    url = PROFILE_URL + "?authToken=abcdef"
+    url = DEFAULT_BASE_URL + PROFILE_URL + "?authToken=abcdef"
 
     with aioresponses() as session_mock:
         session_mock.get(
@@ -31,7 +32,7 @@ async def test_get_profile_with_invalid_token_should_throw_exception():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(DEFAULT_BASE_URL, session)
 
         with pytest.raises(Exception) as ex:
             await api_client.async_get_profile("abcdef")
@@ -51,7 +52,7 @@ async def test_get_profile_with_one_phase_grid_type_should_return():
 
     session = aiohttp.ClientSession()
 
-    url = PROFILE_URL + "?authToken=abcdef"
+    url = DEFAULT_BASE_URL + PROFILE_URL + "?authToken=abcdef"
 
     with aioresponses() as session_mock:
         session_mock.get(
@@ -60,7 +61,7 @@ async def test_get_profile_with_one_phase_grid_type_should_return():
             payload=response_fixture,
         )
 
-        api_client = MyLightApiClient(session)
+        api_client = MyLightApiClient(DEFAULT_BASE_URL, session)
 
         response = await api_client.async_get_profile("abcdef")
 
