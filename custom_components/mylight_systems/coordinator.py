@@ -40,6 +40,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     self_conso: Measure
     msb_charge: Measure
     msb_discharge: Measure
+    green_energy: Measure
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -93,6 +94,9 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                 msb_charge=self.find_measure_by_type(result, "msb_charge"),
                 msb_discharge=self.find_measure_by_type(
                     result, "msb_discharge"
+                ),
+                green_energy=self.find_measure_by_type(
+                    result, "green_energy"
                 ),
             )
         except (
