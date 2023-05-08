@@ -170,7 +170,7 @@ class MyLightApiClient:
 
     async def async_get_battery_state(
         self, auth_token: str, battery_id: str
-    ) -> Measure:
+    ) -> Measure | None:
         """Get battery state."""
         response = await self._execute_request(
             "get", STATES_URL, params={"authToken": auth_token}
