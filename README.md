@@ -20,6 +20,8 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 | `sensor.total_self_conso`                       | Self consumption.                                              | %    | :white_check_mark: |
 | `sensor.total_msb_charge`                       | My Smart Battery Charge.                                       | W/h  | :white_check_mark: |
 | `sensor.total_msb_discharge`                    | My Smart Battery Discharge.                                    | W/h  | :white_check_mark: |
+| `sensor.battery_state`                          | Current battery state.                                         | W    | :white_check_mark: |
+| `sensor.total_green_energy`                     | Total power consumned (from the production) by you home.       | W/h  | :white_check_mark: |
 
 ## Installation
 
