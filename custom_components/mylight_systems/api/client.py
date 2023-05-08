@@ -186,9 +186,11 @@ class MyLightApiClient:
             if device["deviceId"] == battery_id:
                 for state in device["sensorStates"]:
                     if state["sensorId"] == battery_id + "-soc":
-                        measure.type = state["type"]
-                        measure.unit = state["unit"]
-                        measure.value = state["value"]
+                        measure = Measure(
+                            state["measure"]["type"],
+                            state["measure"]["value"],
+                            state["measure"]["unit"],
+                        )
                         return measure
 
         return measure

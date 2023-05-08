@@ -10,7 +10,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, POWER_WATT, UnitOfEnergy
+from homeassistant.const import PERCENTAGE, POWER_KILO_WATT, UnitOfEnergy
 
 from .const import DOMAIN
 from .coordinator import (
@@ -130,9 +130,9 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         key="battery_state",
         name="Battery state",
         icon="mdi:battery",
-        native_unit_of_measurement=POWER_WATT,
+        native_unit_of_measurement=POWER_KILO_WATT,
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda data: float(data.battery_state.value / 3600)
+        value_fn=lambda data: round(data.battery_state.value / 36e2 / 1e3, 2)
         if data.battery_state is not None
         else 0,
     ),
