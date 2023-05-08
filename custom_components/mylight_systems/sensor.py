@@ -40,7 +40,7 @@ class MyLightSensorEntityDescription(
 MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_solar_production",
-        name="Total solar power production",
+        name="Solar power production",
         icon="mdi:solar-panel",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
@@ -62,7 +62,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_grid_without_battery_consumption",
-        name="Total power consumption from the grid without virtual battery",
+        name="Grid power consumption",
         icon="mdi:transmission-tower",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
@@ -95,7 +95,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_msb_charge",
-        name="Total My Smart Battery Charge",
+        name="Battery Charge",
         icon="mdi:battery-high",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
@@ -106,13 +106,24 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_msb_discharge",
-        name="Total My Smart Battery Discharge",
+        name="Battery Discharge",
         icon="mdi:battery-low",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: round(data.msb_discharge.value / 36e2, 2)
         if data.msb_discharge is not None
+        else 0,
+    ),
+    MyLightSensorEntityDescription(
+        key="total_green_energy",
+        name="Green energy",
+        icon="mdi:solar-panel",
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        value_fn=lambda data: round(data.green_energy.value / 36e2, 2)
+        if data.green_energy is not None
         else 0,
     ),
 )
