@@ -16,6 +16,7 @@ from .const import (
     DEVICES_URL,
     MEASURES_TOTAL_URL,
     PROFILE_URL,
+    STATES_URL,
 )
 from .exceptions import (
     CommunicationException,
@@ -133,6 +134,7 @@ class MyLightApiClient:
                 model.virtual_device_id = device["id"]
             if device["type"] == "bat":
                 model.virtual_battery_id = device["id"]
+                model.virtual_battery_capacity = device["batteryCapacity"]
             if device["type"] == "mst":
                 model.master_id = device["id"]
                 model.master_report_period = device["reportPeriod"]
@@ -165,3 +167,28 @@ class MyLightApiClient:
             )
 
         return measures
+
+    async def async_get_battery_state(
+        self, auth_token: str, battery_id: str
+    ) -> Measure:
+        """Get battery state."""
+        response = await self._execute_request(
+            "get", STATES_URL, params={"authToken": auth_token}
+        )
+
+        if response["status"] == "error":
+            if response["error"] == "not.authorized":
+                raise UnauthorizedException()
+
+        measure: Measure = None
+
+        for device in response["deviceStates"]:
+            if device["deviceId"] == battery_id:
+                for state in device["sensorStates"]:
+                    if state["sensorId"] == battery_id + "-soc":
+                        measure.type = state["type"]
+                        measure.unit = state["unit"]
+                        measure.value = state["value"]
+                        return measure
+
+        return measure
