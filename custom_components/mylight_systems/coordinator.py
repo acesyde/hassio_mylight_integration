@@ -23,6 +23,7 @@ from .api.exceptions import (
 )
 from .const import (
     CONF_GRID_TYPE,
+    CONF_VIRTUAL_BATTERY_ID,
     CONF_VIRTUAL_DEVICE_ID,
     DOMAIN,
     LOGGER,
@@ -41,6 +42,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     msb_charge: Measure
     msb_discharge: Measure
     green_energy: Measure
+    battery_state: Measure
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -72,11 +74,18 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             password = self.config_entry.data[CONF_PASSWORD]
             grid_type = self.config_entry.data[CONF_GRID_TYPE]
             device_id = self.config_entry.data[CONF_VIRTUAL_DEVICE_ID]
+            virtual_battery_id = self.config_entry.data[
+                CONF_VIRTUAL_BATTERY_ID
+            ]
 
             await self.authenticate_user(email, password)
 
             result = await self.client.async_get_measures_total(
                 self.__auth_token, grid_type, device_id
+            )
+
+            battery_state = await self.client.async_get_battery_state(
+                self.__auth_token, virtual_battery_id
             )
 
             return MyLightSystemsCoordinatorData(
@@ -95,9 +104,8 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                 msb_discharge=self.find_measure_by_type(
                     result, "msb_discharge"
                 ),
-                green_energy=self.find_measure_by_type(
-                    result, "green_energy"
-                ),
+                green_energy=self.find_measure_by_type(result, "green_energy"),
+                battery_state=battery_state,
             )
         except (
             UnauthorizedException,
