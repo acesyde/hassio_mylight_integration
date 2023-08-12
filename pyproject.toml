@@ -30,6 +30,11 @@ in-project = true
 
 [tool.ruff]
 line-length = 120
+target-version = 3.10
+exclude = [
+    ".venv",
+    ".github",
+]
 
 [tool.pytest.ini_options]
 addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
