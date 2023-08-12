@@ -2,14 +2,17 @@
 
   tasks:
     tests:
+      env:
+        PYTEST: true
+        PYTHONPATH: ./custom_components
       cmds:
-        - python -m  pytest tests -rxf -x -v -l --cov=./ --cov-report=xml
+        - poetry run pytest tests -rxf -x -v -l --cov=./ --cov-report=xml
 
     coverage:
       deps:
-        - test
+        - tests
       cmds:
-        - python3 -m coverage report --skip-covered
+        - poetry run coverage report --skip-covered
 
     develop:
       cmds:

@@ -37,6 +37,7 @@ jobs:
         with:
           python-version: "${{ matrix.python_version }}"
           cache: "poetry"
+          python-version-file: pyproject.toml
 
       - name: 📦 Install requirements
         run: task install
@@ -51,33 +52,3 @@ jobs:
         run: |
           task coverage
           curl -sfSL https://codecov.io/bash | bash -
-
-#  legacy:
-#    name: With pytest with Home Assistant 2022.11.0
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: 📥 Checkout the repository
-#        uses: actions/checkout@v3.3.0
-#
-#      - name: Install Task
-#        uses: arduino/setup-task@v1
-#        with:
-#          version: 3.x
-#          repo-token: ${{ secrets.GITHUB_TOKEN }}
-#
-#      - name: Install poetry
-#        run: pipx install poetry
-#
-#      - name: 🛠️ Set up Python 3.9
-#        uses: actions/setup-python@v4.7.0
-#        with:
-#          python-version: "3.9"
-#          cache: "poetry"
-#
-#      - name: 📦 Install dependencies
-#        run: task install
-#
-#      - name: 🏃 Run tests
-#        env:
-#          PYTEST: true
-#        run: task tests
