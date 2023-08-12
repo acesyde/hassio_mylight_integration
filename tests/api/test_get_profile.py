@@ -1,5 +1,6 @@
 """Unit tests for the get profile API."""
 import json
+import os
 
 import aiohttp
 import pytest
@@ -16,9 +17,9 @@ from custom_components.mylight_systems.api.client import (
 @pytest.mark.asyncio
 async def test_get_profile_with_invalid_token_should_throw_exception():
     """Test with valid location data."""
-    with open(
-        "tests/api/fixtures/profile/unauthorized.json", encoding="utf-8"
-    ) as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/profile/unauthorized.json")
+    with open(fixture_path, encoding="utf-8") as file:
         response_fixture = json.load(file)
 
     session = aiohttp.ClientSession()
@@ -45,9 +46,9 @@ async def test_get_profile_with_invalid_token_should_throw_exception():
 @pytest.mark.asyncio
 async def test_get_profile_with_one_phase_grid_type_should_return():
     """Test with valid data."""
-    with open(
-        "tests/api/fixtures/profile/ok_one_phase.json", encoding="utf-8"
-    ) as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/profile/ok_one_phase.json")
+    with open(fixture_path, encoding="utf-8") as file:
         response_fixture = json.load(file)
 
     session = aiohttp.ClientSession()

@@ -4,9 +4,8 @@
     tests:
       env:
         PYTEST: true
-        PYTHONPATH: ./custom_components
       cmds:
-        - poetry run pytest tests -rxf -x -v -l --cov=./ --cov-report=xml
+        - poetry run pytest -rxf -x -v -l --cov=./ --cov-report=xml
 
     coverage:
       deps:

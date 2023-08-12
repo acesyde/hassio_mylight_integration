@@ -1,6 +1,7 @@
 """Unit tests for the login API."""
 
 import json
+import os
 
 import aiohttp
 import pytest
@@ -17,9 +18,9 @@ from custom_components.mylight_systems.api.client import (
 @pytest.mark.asyncio
 async def test_login_with_bad_email_should_throw_exception():
     """Test with valid location data."""
-    with open(
-        "tests/api/fixtures/login/undefined_email.json", encoding="utf-8"
-    ) as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/login/undefined_email.json")
+    with open(fixture_path, encoding="utf-8") as file:
         response_fixture = json.load(file)
 
     session = aiohttp.ClientSession()
@@ -46,9 +47,9 @@ async def test_login_with_bad_email_should_throw_exception():
 @pytest.mark.asyncio
 async def test_login_with_bad_password_should_throw_exception():
     """Test with valid location data."""
-    with open(
-        "tests/api/fixtures/login/undefined_password.json", encoding="utf-8"
-    ) as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/login/undefined_password.json")
+    with open(fixture_path, encoding="utf-8") as file:
         response_fixture = json.load(file)
 
     session = aiohttp.ClientSession()
@@ -75,9 +76,9 @@ async def test_login_with_bad_password_should_throw_exception():
 @pytest.mark.asyncio
 async def test_login_with_invalid_credentials_should_throw_exception():
     """Test with valid location data."""
-    with open(
-        "tests/api/fixtures/login/invalid_credentials.json", encoding="utf-8"
-    ) as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/login/invalid_credentials.json")
+    with open(fixture_path, encoding="utf-8") as file:
         response_fixture = json.load(file)
 
     session = aiohttp.ClientSession()
@@ -108,7 +109,9 @@ async def test_login_with_invalid_credentials_should_throw_exception():
 @pytest.mark.asyncio
 async def test_login_should_return_auth_token():
     """Test with valid data."""
-    with open("tests/api/fixtures/login/ok.json", encoding="utf-8") as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/login/ok.json")
+    with open(fixture_path, encoding="utf-8") as file:
         response_fixture = json.load(file)
 
     session = aiohttp.ClientSession()

@@ -1,6 +1,7 @@
 """Unit tests for the get measures total API."""
 
 import json
+import os
 
 import aiohttp
 import pytest
@@ -17,9 +18,9 @@ from custom_components.mylight_systems.api.client import (
 @pytest.mark.asyncio
 async def test_get_measures_total_with_invalid_token_should_throw_exception():
     """Test with valid location data."""
-    with open(
-        "tests/api/fixtures/measures_total/unauthorized.json", encoding="utf-8"
-    ) as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/measures_total/unauthorized.json")
+    with open(fixture_path, encoding="utf-8") as file:
         response_fixture = json.load(file)
 
     session = aiohttp.ClientSession()
@@ -52,9 +53,9 @@ async def test_get_measures_total_with_invalid_token_should_throw_exception():
 @pytest.mark.asyncio
 async def test_get_measures_total_should_return():
     """Test with valid data."""
-    with open(
-        "tests/api/fixtures/measures_total/ok.json", encoding="utf-8"
-    ) as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/measures_total/ok.json")
+    with open(fixture_path, encoding="utf-8") as file:
         response_fixture = json.load(file)
 
     session = aiohttp.ClientSession()

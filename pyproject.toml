@@ -27,3 +27,12 @@ pre-commit = "^3.3.3"
 [virtualenvs]
 create = true
 in-project = true
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
+testpaths = [
+    "tests"
+]
