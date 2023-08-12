@@ -1,7 +1,7 @@
   version: 3
 
   tasks:
-    test:
+    tests:
       cmds:
         - python3 -m  pytest tests -rxf -x -v -l --cov=./ --cov-report=xml
 
