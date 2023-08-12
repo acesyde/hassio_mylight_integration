@@ -1,16 +1,26 @@
-[tool.black]
-line-length = 79
-target-version = ['py39']
-exclude = 'generated'
+[tool.poetry]
+name = "hassio_mylight_integration"
+version = "0.0.6"
+description = "MyLight Systems integration for Home Assistant"
+authors = ["Pierre-Emmanuel Mercier <acesyde@gmail.com>"]
+license = "MIT"
+keywords = ["homeassistant", "hassio", "mylight", "solar", "power", "energy"]
+readme = "README.md"
 
-[tool.flake8]
-ignore = ['E501', 'W503', 'E203', 'D202', 'W504']
-max-complexity = 25
-max-line-length = 79
+[tool.poetry.dependencies]
+python = "^3.9"
+colorlog = "^6.7.0"
+aiohttp = "^3.8.5"
 
-[tool.isort]
-profile = "black"
-line_length = 79
+[tool.poetry.group.dev.dependencies]
+asynctest = "^0.13.0"
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.1"
+pytest-cov = "^4.1.0"
+pytest-socket = "^0.6.0"
+aioresponses = "^0.7.4"
+ruff = "^0.0.284"
+pre-commit = "^3.3.3"
 
 [tool.pytest.ini_options]
 addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
@@ -18,22 +28,3 @@ filterwarnings = ["ignore::DeprecationWarning"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 norecursedirs = [".git"]
-
-[tool.mypy]
-python_version = 3.9
-show_error_codes = true
-ignore_missing_imports = true
-warn_incomplete_stub = true
-warn_redundant_casts = true
-warn_unused_configs = true
-check_untyped_defs = true
-disallow_incomplete_defs = true
-disallow_subclassing_any = true
-disallow_untyped_calls = true
-disallow_untyped_decorators = true
-disallow_untyped_defs = true
-no_implicit_optional = true
-strict_equality = true
-warn_return_any = true
-warn_unreachable = true
-warn_unused_ignores = true

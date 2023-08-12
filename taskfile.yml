@@ -1,0 +1,23 @@
+  version: 3
+
+  tasks:
+    test:
+      cmds:
+        - python3 -m  pytest tests -rxf -x -v -l --cov=./ --cov-report=xml
+
+    coverage:
+      deps:
+        - test
+      cmds:
+        - python3 -m coverage report --skip-covered
+
+    develop:
+      cmds:
+        - hass -c . --debug
+
+    setup:
+      cmds:
+        - poetry shell
+        - poetry install
+        - pre-commit install --install-hooks
+        - pre-commit install --hook-type commit-msg --hook-type pre-push
