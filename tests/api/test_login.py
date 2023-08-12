@@ -36,7 +36,7 @@ async def test_login_with_bad_email_should_throw_exception():
         api_client = MyLightApiClient(DEFAULT_BASE_URL, session)
 
         with pytest.raises(Exception) as ex:
-            await api_client.async_login(username="", password="test")
+            await api_client.async_login(email="", password="test")
 
     await session.close()
 
@@ -65,7 +65,7 @@ async def test_login_with_bad_password_should_throw_exception():
         api_client = MyLightApiClient(DEFAULT_BASE_URL, session)
 
         with pytest.raises(Exception) as ex:
-            await api_client.async_login(username="test@test.com", password="")
+            await api_client.async_login(email="test@test.com", password="")
 
     await session.close()
 
@@ -97,7 +97,7 @@ async def test_login_with_invalid_credentials_should_throw_exception():
 
         with pytest.raises(Exception) as ex:
             await api_client.async_login(
-                username="test@test.com", password="test"
+                email="test@test.com", password="test"
             )
 
     await session.close()
@@ -127,7 +127,7 @@ async def test_login_should_return_auth_token():
         api_client = MyLightApiClient(DEFAULT_BASE_URL, session)
 
         response = await api_client.async_login(
-            username="test@test.com", password="test"
+            email="test@test.com", password="test"
         )
 
     await session.close()

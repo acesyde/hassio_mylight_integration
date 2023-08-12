@@ -92,9 +92,9 @@ class InstallationDevices:
 class Measure:
     """Represent a measure."""
 
-    def __init__(self, type: str, value: float, unit: str) -> None:
+    def __init__(self, key: str, value: float, unit: str) -> None:
         """Initialize."""
-        self.__type = type
+        self.__type = key
         self.__value = value
         self.__unit = unit
 
@@ -104,7 +104,7 @@ class Measure:
         return self.__type
 
     @property
-    def value(self) -> str:
+    def value(self) -> float:
         """Return measure value."""
         return self.__value
 

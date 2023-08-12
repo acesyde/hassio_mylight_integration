@@ -5,13 +5,13 @@ import aiohttp
 import pytest
 from aioresponses import aioresponses
 
-
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
     DEVICES_URL,
     MyLightApiClient,
     UnauthorizedException,
 )
+
 
 @pytest.mark.asyncio
 async def test_get_devices_with_invalid_token_should_throw_exception():

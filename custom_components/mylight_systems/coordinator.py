@@ -126,8 +126,9 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             self.__auth_token = result.auth_token
             self.__token_expiration = datetime.utcnow() + timedelta(hours=2)
 
+    @staticmethod
     def find_measure_by_type(
-        self, measures: list[Measure], name: str
+        measures: list[Measure], name: str
     ) -> Measure | None:
         """Find measure by name."""
         return next((m for m in measures if m.type == name), None)
