@@ -21,3 +21,12 @@ repos:
             -   id: no-commit-to-branch
                 args:
                     - --branch=main
+    -   repo: local
+        hooks:
+            - id: test
+              name: test
+              entry: task tests
+              language: system
+              types:
+                  - python
+              pass_filenames: false
