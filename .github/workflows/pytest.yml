@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11"]
+        python_version: ["3.10", "3.11"]
     steps:
       - name: 📥 Checkout the repository
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3
 
       - name: Install Task
         uses: arduino/setup-task@v1
@@ -33,8 +33,7 @@ jobs:
         run: pipx install poetry
 
       - name: 🛠️ Set up Python
-        uses: actions/setup-python@v4.7.0
-        id: python
+        uses: actions/setup-python@v4
         with:
           python-version: "${{ matrix.python_version }}"
           cache: "poetry"
@@ -48,7 +47,7 @@ jobs:
         run: task tests
 
       - name: 📤 Upload coverage to Codecov
-        if: ${{ matrix.python-version == '3.10' }}
+        if: ${{ matrix.python_version == '3.11' }}
         run: |
           task coverage
           curl -sfSL https://codecov.io/bash | bash -
