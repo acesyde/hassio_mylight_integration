@@ -32,8 +32,7 @@ in-project = true
 line-length = 120
 target-version = "py310"
 exclude = [
-    ".venv",
-    ".github",
+    ".venv"
 ]
 
 [tool.pytest.ini_options]
