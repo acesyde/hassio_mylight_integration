@@ -136,7 +136,28 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         if data.battery_state is not None
         else 0,
     ),
+    MyLightSensorEntityDescription(
+        key="grid_returned_energy",
+        name="Grid returned energy",
+        icon="mdi:transmission-tower",
+        native_unit_of_measurement=POWER_KILO_WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda data: _calculate_grid_returned_energy(data)
+
+    ),
 )
+
+
+def _calculate_grid_returned_energy(data):
+    """Calculate grid returned energy."""
+    produced_energy = round(data.produced_energy.value / 36e2, 2) | 0
+    grid_energy = round(data.green_energy.value / 36e2, 2) | 0
+    msb_charge = round(data.msb_charge.value / 36e2, 2) | 0
+    result = produced_energy - grid_energy - msb_charge
+    if result > 0:
+        return result
+    else:
+        return 0
 
 
 async def async_setup_entry(hass, entry, async_add_devices):

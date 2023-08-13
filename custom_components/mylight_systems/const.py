@@ -21,6 +21,7 @@ CONF_MASTER_ID = "master_id"
 CONF_MASTER_REPORT_PERIOD = "master_report_period"
 CONF_SUBSCRIPTION_ID = "subscription_id"
 CONF_GRID_TYPE = "grid_type"
+CONF_MASTER_RELAY_ID = "master_relay_id"
 
 # MyLight
 # DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"

@@ -107,11 +107,13 @@ class MyLightApiClient:
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
-        grid_type: str = "one_phase"
-        if response["gridType"] == "1 phase":
-            grid_type = "one_phase"
-        else:
-            grid_type = "three_phases"
+        match response["gridType"]:
+            case "1 phase":
+                grid_type = "one_phase"
+            case "3 phases":
+                grid_type = "three_phases"
+            case _:
+                grid_type = "one_phase"
 
         return UserProfile(response["id"], grid_type)
 
@@ -138,6 +140,8 @@ class MyLightApiClient:
             if device["type"] == "mst":
                 model.master_id = device["id"]
                 model.master_report_period = device["reportPeriod"]
+            if device["type"] == "sw":
+                model.master_relay_id = device["id"]
 
         return model
 
