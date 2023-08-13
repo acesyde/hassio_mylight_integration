@@ -15,7 +15,7 @@
 
     develop:
       cmds:
-        - hass -c . --debug
+        - docker-compose -f docker-compose.yml up
 
     install:
       cmds:
