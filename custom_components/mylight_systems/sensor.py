@@ -52,7 +52,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_grid_consumption",
         name="Total power consumption from the grid with virtual battery",
-        icon="mdi:transmission-tower",
+        icon="mdi:transmission-tower-import",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -63,7 +63,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_grid_without_battery_consumption",
         name="Grid power consumption",
-        icon="mdi:transmission-tower",
+        icon="mdi:transmission-tower-import",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -139,8 +139,10 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="grid_returned_energy",
         name="Grid returned energy",
-        icon="mdi:transmission-tower",
+        icon="mdi:transmission-tower-export",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: _calculate_grid_returned_energy(data)
 
     ),
@@ -149,8 +151,14 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
 
 def _calculate_grid_returned_energy(data):
     """Calculate grid returned energy."""
+
+    # Energy produced by the solar panels
     produced_energy = round(data.produced_energy.value / 36e2, 2) if data.produced_energy.value is not None else 0
+
+    # Energy consumed from the solar panels
     green_energy = round(data.green_energy.value / 36e2, 2) if data.green_energy.value is not None else 0
+
+    # Virtual battery charge
     msb_charge = round(data.msb_charge.value / 36e2, 2) if data.msb_charge.value is not None else 0
     result = produced_energy - green_energy - msb_charge
     if result > 0:
