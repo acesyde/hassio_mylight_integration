@@ -140,8 +140,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         key="grid_returned_energy",
         name="Grid returned energy",
         icon="mdi:transmission-tower",
-        native_unit_of_measurement=POWER_KILO_WATT,
-        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         value_fn=lambda data: _calculate_grid_returned_energy(data)
 
     ),
@@ -150,10 +149,10 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
 
 def _calculate_grid_returned_energy(data):
     """Calculate grid returned energy."""
-    produced_energy = round(data.produced_energy.value / 36e2, 2) | 0
-    grid_energy = round(data.green_energy.value / 36e2, 2) | 0
-    msb_charge = round(data.msb_charge.value / 36e2, 2) | 0
-    result = produced_energy - grid_energy - msb_charge
+    produced_energy = round(data.produced_energy.value / 36e2, 2) if data.produced_energy.value is not None else 0
+    green_energy = round(data.green_energy.value / 36e2, 2) if data.green_energy.value is not None else 0
+    msb_charge = round(data.msb_charge.value / 36e2, 2) if data.msb_charge.value is not None else 0
+    result = produced_energy - green_energy - msb_charge
     if result > 0:
         return result
     else:
