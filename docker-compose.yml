@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  hassio:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: hassio
+    environment:
+        - TZ=Europe/Paris
+    ports:
+        - 8123:8123
+    volumes:
+      - ./hassio_dev:/config
+      - ./custom_components:/config/custom_components:ro

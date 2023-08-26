@@ -45,6 +45,7 @@ class InstallationDevices:
     __master_report_period: int = 60
     __virtual_device_id: str = None
     __virtual_battery_id: str = None
+    __master_relay_id: str = None
 
     @property
     def master_id(self):
@@ -88,13 +89,23 @@ class InstallationDevices:
         """Set virtual battery id."""
         self.__virtual_battery_id = value
 
+    @property
+    def master_relay_id(self):
+        """Return master relay id."""
+        return self.__master_relay_id
+
+    @master_relay_id.setter
+    def master_relay_id(self, value: str):
+        """Set master relay id."""
+        self.__master_relay_id = value
+
 
 class Measure:
     """Represent a measure."""
 
-    def __init__(self, type: str, value: float, unit: str) -> None:
+    def __init__(self, key: str, value: float, unit: str) -> None:
         """Initialize."""
-        self.__type = type
+        self.__type = key
         self.__value = value
         self.__unit = unit
 
@@ -104,7 +115,7 @@ class Measure:
         return self.__type
 
     @property
-    def value(self) -> str:
+    def value(self) -> float:
         """Return measure value."""
         return self.__value
 

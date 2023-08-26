@@ -7,9 +7,9 @@ Contributing to this project should be as easy and transparent as possible, whet
 - Submitting a fix
 - Proposing new features
 
-## Github is used for everything
+## GitHub is used for everything
 
-Github is used to host code, to track issues and feature requests, as well as accept pull requests.
+GitHub is used to host code, to track issues and feature requests, as well as accept pull requests.
 
 Pull requests are the best way to propose changes to the codebase.
 
@@ -23,9 +23,9 @@ Pull requests are the best way to propose changes to the codebase.
 
 In short, when you submit code changes, your submissions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project. Feel free to contact the maintainers if that's a concern.
 
-## Report bugs using Github's [issues](../../issues)
+## Report bugs using GitHub's [issues](../../issues)
 
-GitHub issues are used to track public bugs.
+GitHub's issues are used to track public bugs.
 Report a bug by [opening a new issue](../../issues/new/choose); it's that easy!
 
 ## Write bug reports with detail, background, and sample code
@@ -53,7 +53,7 @@ This custom component is based on [integration_blueprint template](https://githu
 It comes with development environment in a container, easy to launch
 if you use Visual Studio Code. With this container you will have a stand alone
 Home Assistant instance running and already configured with the included
-[`configuration.yaml`](./configuration.yaml)
+[`configuration.yaml`](hassio_dev/configuration.yaml)
 file.
 
 ## License

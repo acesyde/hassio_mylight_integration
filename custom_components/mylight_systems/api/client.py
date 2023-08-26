@@ -77,12 +77,12 @@ class MyLightApiClient:
             _LOGGER.debug("An error occured : %s", exception, exc_info=True)
             raise CommunicationException() from exception
 
-    async def async_login(self, username: str, password: str) -> Login:
+    async def async_login(self, email: str, password: str) -> Login:
         """Log user and return the authentication token."""
         response = await self._execute_request(
             "get",
             AUTH_URL,
-            params={"email": username, "password": password},
+            params={"email": email, "password": password},
         )
 
         if response["status"] == "error":
@@ -107,11 +107,13 @@ class MyLightApiClient:
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
-        grid_type: str = "one_phase"
-        if response["gridType"] == "1 phase":
-            grid_type = "one_phase"
-        else:
-            grid_type = "three_phases"
+        match response["gridType"]:
+            case "1 phase":
+                grid_type = "one_phase"
+            case "3 phases":
+                grid_type = "three_phases"
+            case _:
+                grid_type = "one_phase"
 
         return UserProfile(response["id"], grid_type)
 
@@ -138,6 +140,8 @@ class MyLightApiClient:
             if device["type"] == "mst":
                 model.master_id = device["id"]
                 model.master_report_period = device["reportPeriod"]
+            if device["type"] == "sw":
+                model.master_relay_id = device["id"]
 
         return model
 
@@ -180,7 +184,7 @@ class MyLightApiClient:
             if response["error"] == "not.authorized":
                 raise UnauthorizedException()
 
-        measure: Measure = None
+        measure: Measure | None = None
 
         for device in response["deviceStates"]:
             if device["deviceId"] == battery_id:

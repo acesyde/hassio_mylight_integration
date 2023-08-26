@@ -1,14 +1,11 @@
 root = true
 
-[*.py]
-max_line_length = 100
+[*]
 indent_style = space
 indent_size = 4
-known_first_party = isort
-ignore_frosted_errors = E103
-skip = build,.tox,venv
-balanced_wrapping = true
+
+[*.py]
+max_line_length = 120
 
 [*.yml]
-indent_style = space
 indent_size = 2

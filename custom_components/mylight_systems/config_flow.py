@@ -22,6 +22,7 @@ from .const import (
     CONF_VIRTUAL_DEVICE_ID,
     DOMAIN,
     LOGGER,
+    CONF_MASTER_RELAY_ID,
 )
 
 
@@ -51,6 +52,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 user_profile = await api_client.async_get_profile(
                     login_response.auth_token
                 )
+
                 device_ids = await api_client.async_get_devices(
                     login_response.auth_token
                 )
@@ -65,6 +67,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_VIRTUAL_BATTERY_ID: device_ids.virtual_battery_id,
                     CONF_MASTER_ID: device_ids.master_id,
                     CONF_MASTER_REPORT_PERIOD: device_ids.master_report_period,
+                    CONF_MASTER_RELAY_ID: device_ids.master_relay_id,
                 }
 
                 await self.async_set_unique_id(

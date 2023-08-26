@@ -5,14 +5,14 @@ updates:
     labels:
       - "pr: dependency-update"
     schedule:
-      interval: weekly
+      interval: monthly
       time: "06:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
   - package-ecosystem: "github-actions"
     directory: "/"
     labels:
       - "pr: dependency-update"
     schedule:
-      interval: weekly
+      interval: monthly
       time: "06:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3
