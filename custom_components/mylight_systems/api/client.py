@@ -16,7 +16,7 @@ from .const import (
     DEVICES_URL,
     MEASURES_TOTAL_URL,
     PROFILE_URL,
-    STATES_URL,
+    STATES_URL, SWITCH_URL,
 )
 from .exceptions import (
     CommunicationException,
@@ -198,3 +198,61 @@ class MyLightApiClient:
                         return measure
 
         return measure
+
+    async def async_turn_off(self, auth_token: str, relay_id: str) -> str:
+        """Turn off the switch."""
+        response = await self._execute_request(
+            "get",
+            SWITCH_URL,
+            params={
+                "authToken": auth_token,
+                "id": relay_id,
+                "on": "false",
+            },
+        )
+
+        if response["status"] == "error":
+            if response["error"] == "switch.not.allowed":
+                return "off"
+            if response["error"] == "not.authorized":
+                raise UnauthorizedException()
+
+        return response["state"]
+
+    async def async_turn_on(self, auth_token: str, relay_id: str) -> str:
+        """Turn on the switch."""
+        response = await self._execute_request(
+            "get",
+            SWITCH_URL,
+            params={
+                "authToken": auth_token,
+                "id": relay_id,
+                "on": "true",
+            },
+        )
+
+        if response["status"] == "error":
+            if response["error"] == "switch.not.allowed":
+                return "on"
+            if response["error"] == "not.authorized":
+                raise UnauthorizedException()
+
+        return response["state"]
+
+    async def async_get_relay_state(
+        self, auth_token: str, relay_id: str
+    ) -> str | None:
+        """Get relay state."""
+        response = await self._execute_request(
+            "get", STATES_URL, params={"authToken": auth_token}
+        )
+
+        if response["status"] == "error":
+            if response["error"] == "not.authorized":
+                raise UnauthorizedException()
+
+        for device in response["deviceStates"]:
+            if device["deviceId"] == relay_id:
+                return device["state"]
+
+        return None

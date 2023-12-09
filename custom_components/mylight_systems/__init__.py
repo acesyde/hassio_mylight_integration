@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api.client import DEFAULT_BASE_URL, MyLightApiClient
-from .const import DOMAIN, PLATFORMS
+from .const import DOMAIN, PLATFORMS, DATA_COORDINATOR
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 
@@ -22,7 +22,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     local_coordinator = MyLightSystemsDataUpdateCoordinator(hass=hass, client=client)
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = local_coordinator
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {DATA_COORDINATOR: local_coordinator}
 
     # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
     await local_coordinator.async_config_entry_first_refresh()
