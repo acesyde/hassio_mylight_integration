@@ -5,7 +5,7 @@
       env:
         PYTEST: true
       cmds:
-        - poetry run pytest -rxf -x -v -l --cov=./ --cov-report=xml
+        - poetry run pytest
 
     coverage:
       deps:

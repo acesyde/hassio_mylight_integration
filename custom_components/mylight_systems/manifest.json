@@ -8,5 +8,5 @@
   "documentation": "https://github.com/acesyde/hassio_mylight_integration",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/acesyde/hassio_mylight_integration/issues",
-  "version": "0.0.2"
+  "version": "0.0.6"
 }

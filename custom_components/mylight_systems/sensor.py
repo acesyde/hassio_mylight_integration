@@ -144,7 +144,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: _calculate_grid_returned_energy(data)
-
     ),
 )
 
