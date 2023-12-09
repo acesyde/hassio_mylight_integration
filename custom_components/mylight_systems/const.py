@@ -8,8 +8,8 @@ LOGGER: Logger = getLogger(__package__)
 # General
 NAME = "MyLight Systems"
 DOMAIN = "mylight_systems"
-PLATFORMS = [Platform.SENSOR]
-VERSION = "0.0.6"
+PLATFORMS = [Platform.SENSOR, Platform.SWITCH]
+VERSION = "0.0.7"
 COORDINATOR = "coordinator"
 ATTRIBUTION = "Data provided by https://www.mylight-systems.com/"
 SCAN_INTERVAL_IN_MINUTES = 15
@@ -23,5 +23,5 @@ CONF_SUBSCRIPTION_ID = "subscription_id"
 CONF_GRID_TYPE = "grid_type"
 CONF_MASTER_RELAY_ID = "master_relay_id"
 
-# MyLight
-# DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"
+# Data
+DATA_COORDINATOR = "coordinator"

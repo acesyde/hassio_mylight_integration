@@ -27,7 +27,7 @@ from .const import (
     CONF_VIRTUAL_DEVICE_ID,
     DOMAIN,
     LOGGER,
-    SCAN_INTERVAL_IN_MINUTES,
+    SCAN_INTERVAL_IN_MINUTES, CONF_MASTER_RELAY_ID,
 )
 
 
@@ -43,6 +43,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     msb_discharge: Measure
     green_energy: Measure
     battery_state: Measure
+    master_relay_state: str
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -77,6 +78,9 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             virtual_battery_id = self.config_entry.data[
                 CONF_VIRTUAL_BATTERY_ID
             ]
+            master_relay_id = self.config_entry.data[
+                CONF_MASTER_RELAY_ID
+            ]
 
             await self.authenticate_user(email, password)
 
@@ -88,7 +92,11 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                 self.__auth_token, virtual_battery_id
             )
 
-            return MyLightSystemsCoordinatorData(
+            master_relay_state = await self.client.async_get_relay_state(
+                self.__auth_token, master_relay_id
+            )
+
+            data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(
                     result, "produced_energy"
                 ),
@@ -106,7 +114,12 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                 ),
                 green_energy=self.find_measure_by_type(result, "green_energy"),
                 battery_state=battery_state,
+                master_relay_state=master_relay_state,
             )
+
+            self._data = data
+
+            return data
         except (
             UnauthorizedException,
             InvalidCredentialsException,
@@ -125,6 +138,24 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             result = await self.client.async_login(email, password)
             self.__auth_token = result.auth_token
             self.__token_expiration = datetime.utcnow() + timedelta(hours=2)
+
+    async def turn_on_master_relay(self):
+        """Turn on master relay."""
+        await self.client.async_turn_on(
+            self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID]
+        )
+
+    async def turn_off_master_relay(self):
+        """Turn off master relay."""
+        await self.client.async_turn_off(
+            self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID]
+        )
+
+    def master_relay_is_on(self) -> bool:
+        """Return true if master relay is on."""
+        if self._data is not None and self._data.master_relay_state is not None:
+            return self._data.master_relay_state == "on"
+        return False
 
     @staticmethod
     def find_measure_by_type(

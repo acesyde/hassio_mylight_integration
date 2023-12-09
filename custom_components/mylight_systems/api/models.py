@@ -45,7 +45,7 @@ class InstallationDevices:
     __master_report_period: int = 60
     __virtual_device_id: str = None
     __virtual_battery_id: str = None
-    __master_relay_id: str = None
+    __master_relay_id: str | None = None
 
     @property
     def master_id(self):
