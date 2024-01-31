@@ -148,18 +148,31 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
 )
 
 
-def _calculate_grid_returned_energy(data):
+def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> float:
     """Calculate grid returned energy."""
+    if data is None:
+        return 0
 
     # Energy produced by the solar panels
-    produced_energy = round(data.produced_energy.value / 36e2, 2) if data.produced_energy.value is not None else 0
+    produced_energy = 0
+
+    if data.produced_energy is not None and data.produced_energy.value is not None:
+        produced_energy = round(data.produced_energy.value / 36e2, 2)
 
     # Energy consumed from the solar panels
-    green_energy = round(data.green_energy.value / 36e2, 2) if data.green_energy.value is not None else 0
+    green_energy = 0
+
+    if data.green_energy is not None and data.green_energy.value is not None:
+        green_energy = round(data.green_energy.value / 36e2, 2)
+
+    msb_charge = 0
 
     # Virtual battery charge
-    msb_charge = round(data.msb_charge.value / 36e2, 2) if data.msb_charge.value is not None else 0
-    result = produced_energy - green_energy - msb_charge
+    if data.msb_charge is not None and data.msb_charge.value is not None:
+        msb_charge = round(data.msb_charge.value / 36e2, 2)
+
+    result = round(produced_energy - green_energy - msb_charge, 2)
+
     if result > 0:
         return result
     else:

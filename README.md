@@ -22,6 +22,7 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 | `sensor.total_msb_discharge`                    | My Smart Battery Discharge.                                    | W/h  | :white_check_mark: |
 | `sensor.battery_state`                          | Current battery state.                                         | kW   | :white_check_mark: |
 | `sensor.total_green_energy`                     | Total power consumned (from the production) by you home.       | W/h  | :white_check_mark: |
+| `sensor.grid_returned_energy`                   | Total power returned to the grid.                              | W/h  | :white_check_mark: |
 
 ## Installation
 
@@ -33,7 +34,7 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
 2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3In the `custom_components` directory (folder) create a new folder called `mylight_systems`.
+   3In the `custom_components` directory (folder) create a new folder called `mylight_systems`.
 3. Download _all_ the files from the `custom_components/mylight_systems/` directory (folder) in this repository.
 4. Place the files you downloaded in the new directory (folder) you created.
 5. Restart Home Assistant
