@@ -38,7 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
     switches: list[MyLightSystemsSwitchEntityDescription] = []
 
-    if entry.data[CONF_MASTER_RELAY_ID] is not None:
+    if entry.data.get(CONF_MASTER_RELAY_ID, None) is not None:
         switches.append(master_relay_switch)
 
     async_add_entities(
