@@ -23,6 +23,7 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 | `sensor.battery_state`                          | Current battery state.                                         | kW   | :white_check_mark: |
 | `sensor.total_green_energy`                     | Total power consumned (from the production) by you home.       | W/h  | :white_check_mark: |
 | `sensor.grid_returned_energy`                   | Total power returned to the grid.                              | W/h  | :white_check_mark: |
+| `switch.master_relay`                           | Master relay switch.                                           | N/A  | :white_check_mark: |
 
 ## Installation
 

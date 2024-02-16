@@ -10,9 +10,12 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, POWER_KILO_WATT, UnitOfEnergy
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import PERCENTAGE, UnitOfEnergy, UnitOfPower
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import DOMAIN, DATA_COORDINATOR
 from .coordinator import (
     MyLightSystemsCoordinatorData,
     MyLightSystemsDataUpdateCoordinator,
@@ -130,7 +133,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         key="battery_state",
         name="Battery state",
         icon="mdi:battery",
-        native_unit_of_measurement=POWER_KILO_WATT,
+        native_unit_of_measurement=UnitOfPower.KILO_WATT,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data: round(data.battery_state.value / 36e2 / 1e3, 2)
         if data.battery_state is not None
@@ -179,9 +182,9 @@ def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> floa
         return 0
 
 
-async def async_setup_entry(hass, entry, async_add_devices):
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_devices: AddEntitiesCallback) -> None:
     """Configure sensor platform."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     async_add_devices(
         MyLightSystemsSensor(
             entry_id=entry.entry_id,
@@ -199,7 +202,7 @@ class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
         self,
         entry_id: str,
         coordinator: MyLightSystemsDataUpdateCoordinator,
-        entity_description: SensorEntityDescription,
+        entity_description: MyLightSensorEntityDescription,
     ) -> None:
         """Init."""
         super().__init__(coordinator)
