@@ -15,6 +15,7 @@ def test_calculate_grid_returned_energy_with_none_data_should_return_0():
         self_conso=None,
         autonomy_rate=None,
         battery_state=None,
+        master_relay_state=None,
     )
 
     # Act
@@ -38,6 +39,7 @@ def test_calculate_grid_returned_energy_with_produced_energy_should_return_produ
         self_conso=None,
         autonomy_rate=None,
         battery_state=None,
+        master_relay_state=None,
     )
 
     # Act
@@ -61,6 +63,7 @@ def test_calculate_grid_returned_energy_with_produced_and_green_return():
         self_conso=None,
         autonomy_rate=None,
         battery_state=None,
+        master_relay_state=None,
     )
 
     # Act
@@ -84,6 +87,7 @@ def test_calculate_grid_returned_energy_with_produced_and_msb_charge_return():
         self_conso=None,
         autonomy_rate=None,
         battery_state=None,
+        master_relay_state=None,
     )
 
     # Act
@@ -106,6 +110,7 @@ def test_calculate_grid_returned_energy_with_all_return():
         self_conso=None,
         autonomy_rate=None,
         battery_state=None,
+        master_relay_state=None,
     )
 
     # Act
