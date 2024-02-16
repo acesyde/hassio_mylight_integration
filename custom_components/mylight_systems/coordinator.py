@@ -78,9 +78,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             virtual_battery_id = self.config_entry.data[
                 CONF_VIRTUAL_BATTERY_ID
             ]
-            master_relay_id = self.config_entry.data[
-                CONF_MASTER_RELAY_ID
-            ]
+            master_relay_id = self.config_entry.data.get(CONF_MASTER_RELAY_ID, None)
 
             await self.authenticate_user(email, password)
 
@@ -92,9 +90,11 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                 self.__auth_token, virtual_battery_id
             )
 
-            master_relay_state = await self.client.async_get_relay_state(
-                self.__auth_token, master_relay_id
-            )
+            master_relay_state = None
+            if master_relay_id is not None:
+                master_relay_state = await self.client.async_get_relay_state(
+                    self.__auth_token, master_relay_id
+                )
 
             data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(
