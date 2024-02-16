@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mylight_systems"
-version = "0.0.7"
+version = "0.1.0"
 description = "MyLight Systems integration for Home Assistant"
 authors = ["Pierre-Emmanuel Mercier <acesyde@gmail.com>"]
 license = "MIT"
