@@ -43,7 +43,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     msb_discharge: Measure
     green_energy: Measure
     battery_state: Measure
-    master_relay_state: str
+    master_relay_state: str | None
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
