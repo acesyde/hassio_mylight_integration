@@ -23,7 +23,7 @@ pytest-asyncio = "^0.23"
 pytest-cov = "^5.0"
 pytest-socket = "^0.7"
 aioresponses = "^0.7"
-ruff = "^0.1"
+ruff = "^0.5"
 pre-commit = "^3.7"
 vulture = "^2.10"
 
