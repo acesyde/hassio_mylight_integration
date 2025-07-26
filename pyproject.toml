@@ -24,7 +24,6 @@ dev = [
   "pytest-socket >= 0.6",
   "ruff >= 0.4",
   "aresponses >= 3.0.0",
-  "vulture >= 2.9",
   "aioresponses>=0.7.8",
 ]
 
@@ -87,8 +86,3 @@ max-returns = 10
 [tool.coverage.run]
 source = ["src"]
 omit = ["**/tests/**", "**/__init__.py", "**/__main__.py"]
-
-[tool.vulture]
-min_confidence = 80
-paths = ["custom_components", "tests"]
-verbose = true
