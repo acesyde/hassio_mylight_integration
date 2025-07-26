@@ -174,22 +174,40 @@ Use fixtures when you need:
 - **Test Data**: Loading or generating test data that multiple tests need
 - **Mock Objects**: Creating complex mock setups used across tests
 
+### pytest_asyncio.fixture vs pytest.fixture
+
+**Use `pytest_asyncio.fixture` when:**
+- The fixture function is `async def`
+- Setting up or tearing down async resources (aiohttp sessions, async database connections, async file operations)
+- The fixture needs to await async operations during setup/teardown
+- Managing resources that require async cleanup (e.g., `await session.close()`)
+
+**Use regular `pytest.fixture` when:**
+- The fixture function is synchronous
+- Managing synchronous resources
+- Loading static test data (JSON files, configuration)
+- Creating mock objects or simple dependencies
+- The fixture doesn't need async operations
+
 ### Fixture Examples
 
-#### Resource Management with Cleanup
+#### Async Resource Management with pytest_asyncio.fixture
+
+For async resources that require async setup/teardown, use `pytest_asyncio.fixture`:
 
 ```python
 import pytest
+import pytest_asyncio
 import aiohttp
 import json
 import os
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session():
     """Create an aiohttp session for testing."""
     session = aiohttp.ClientSession()
     yield session
-    await session.close()  # Automatic cleanup
+    await session.close()  # Async cleanup
 
 @pytest.fixture
 def api_client(session):
@@ -209,6 +227,19 @@ async def test_get_devices__should_return_device_data_when_valid_token(api_clien
 
     # Then
     assert "4tGrXr2CViF8chJEd" == response.master_id
+```
+
+#### Regular Resource Management with pytest.fixture
+
+For non-async resources, use regular `pytest.fixture`:
+
+```python
+@pytest.fixture
+def database_connection():
+    """Create a database connection for testing."""
+    connection = create_connection()
+    yield connection
+    connection.close()  # Sync cleanup
 ```
 
 #### Test Data Loading
@@ -282,6 +313,9 @@ def test_get_user__should_return_user_data_when_valid_id(user_service):
 - **Document fixtures**: Add docstrings explaining what the fixture provides
 - **Avoid fixture overuse**: Don't create fixtures for simple values that don't need setup/cleanup
 - **Use fixture scopes**: Consider `session`, `module`, `class`, or `function` scope based on needs
+- **Choose the right decorator**: Use `pytest_asyncio.fixture` for async resources and `pytest.fixture` for synchronous ones
+- **Async cleanup**: When using `pytest_asyncio.fixture`, ensure async cleanup with `await` statements
+- **Import pytest_asyncio**: Remember to import `pytest_asyncio` when using async fixtures
 
 ## Best Practices
 
