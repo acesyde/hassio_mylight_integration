@@ -1,4 +1,5 @@
 """Constants for MyLight Systems library."""
+
 DEFAULT_TIMEOUT_IN_SECONDS: int = 10
 
 DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"

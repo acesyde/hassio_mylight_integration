@@ -1,4 +1,5 @@
 """WeatherFlow Data Wrapper."""
+
 from __future__ import annotations
 
 import asyncio
@@ -16,12 +17,13 @@ from .const import (
     DEVICES_URL,
     MEASURES_TOTAL_URL,
     PROFILE_URL,
-    STATES_URL, SWITCH_URL,
+    STATES_URL,
+    SWITCH_URL,
 )
 from .exceptions import (
-    CommunicationException,
-    InvalidCredentialsException,
-    UnauthorizedException,
+    CommunicationError,
+    InvalidCredentialsError,
+    UnauthorizedError,
 )
 from .models import InstallationDevices, Login, Measure, UserProfile
 
@@ -36,11 +38,7 @@ class MyLightApiClient:
     def __init__(self, base_url: str, session: aiohttp.ClientSession) -> None:
         """Initialize."""
         self._session = session
-        self._base_url = (
-            base_url
-            if base_url and not base_url.isspace()
-            else DEFAULT_BASE_URL
-        )
+        self._base_url = base_url if base_url and not base_url.isspace() else DEFAULT_BASE_URL
 
     async def _execute_request(
         self,
@@ -75,7 +73,7 @@ class MyLightApiClient:
             Exception,
         ) as exception:
             _LOGGER.debug("An error occured : %s", exception, exc_info=True)
-            raise CommunicationException() from exception
+            raise CommunicationError() from exception
 
     async def async_login(self, email: str, password: str) -> Login:
         """Log user and return the authentication token."""
@@ -91,7 +89,7 @@ class MyLightApiClient:
                 "undefined.email",
                 "undefined.password",
             ):
-                raise InvalidCredentialsException()
+                raise InvalidCredentialsError()
 
         return Login(response["authToken"])
 
@@ -105,7 +103,7 @@ class MyLightApiClient:
 
         if response["status"] == "error":
             if response["error"] == "not.authorized":
-                raise UnauthorizedException()
+                raise UnauthorizedError()
 
         match response["gridType"]:
             case "1 phase":
@@ -127,7 +125,7 @@ class MyLightApiClient:
 
         if response["status"] == "error":
             if response["error"] == "not.authorized":
-                raise UnauthorizedException()
+                raise UnauthorizedError()
 
         model = InstallationDevices()
 
@@ -145,9 +143,7 @@ class MyLightApiClient:
 
         return model
 
-    async def async_get_measures_total(
-        self, auth_token: str, phase: str, device_id: str
-    ) -> list[Measure]:
+    async def async_get_measures_total(self, auth_token: str, phase: str, device_id: str) -> list[Measure]:
         """Get device measures total."""
         response = await self._execute_request(
             "get",
@@ -161,28 +157,22 @@ class MyLightApiClient:
 
         if response["status"] == "error":
             if response["error"] == "not.authorized":
-                raise UnauthorizedException()
+                raise UnauthorizedError()
 
         measures: list[Measure] = []
 
         for value in response["measure"]["values"]:
-            measures.append(
-                Measure(value["type"], value["value"], value["unit"])
-            )
+            measures.append(Measure(value["type"], value["value"], value["unit"]))
 
         return measures
 
-    async def async_get_battery_state(
-        self, auth_token: str, battery_id: str
-    ) -> Measure | None:
+    async def async_get_battery_state(self, auth_token: str, battery_id: str) -> Measure | None:
         """Get battery state."""
-        response = await self._execute_request(
-            "get", STATES_URL, params={"authToken": auth_token}
-        )
+        response = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
 
         if response["status"] == "error":
             if response["error"] == "not.authorized":
-                raise UnauthorizedException()
+                raise UnauthorizedError()
 
         measure: Measure | None = None
 
@@ -215,7 +205,7 @@ class MyLightApiClient:
             if response["error"] == "switch.not.allowed":
                 return "off"
             if response["error"] == "not.authorized":
-                raise UnauthorizedException()
+                raise UnauthorizedError()
 
         return response["state"]
 
@@ -235,21 +225,17 @@ class MyLightApiClient:
             if response["error"] == "switch.not.allowed":
                 return "on"
             if response["error"] == "not.authorized":
-                raise UnauthorizedException()
+                raise UnauthorizedError()
 
         return response["state"]
 
-    async def async_get_relay_state(
-        self, auth_token: str, relay_id: str
-    ) -> str | None:
+    async def async_get_relay_state(self, auth_token: str, relay_id: str) -> str | None:
         """Get relay state."""
-        response = await self._execute_request(
-            "get", STATES_URL, params={"authToken": auth_token}
-        )
+        response = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
 
         if response["status"] == "error":
             if response["error"] == "not.authorized":
-                raise UnauthorizedException()
+                raise UnauthorizedError()
 
         for device in response["deviceStates"]:
             if device["deviceId"] == relay_id:

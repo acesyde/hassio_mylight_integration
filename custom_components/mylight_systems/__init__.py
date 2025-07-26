@@ -1,4 +1,5 @@
 """Custom integration to integrate mylight_systems with Home Assistant."""
+
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
@@ -7,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api.client import DEFAULT_BASE_URL, MyLightApiClient
-from .const import DOMAIN, PLATFORMS, DATA_COORDINATOR
+from .const import DATA_COORDINATOR, DOMAIN, PLATFORMS
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 
@@ -35,9 +36,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Handle removal of an entry."""
-    if unloaded := await hass.config_entries.async_unload_platforms(
-        entry, PLATFORMS
-    ):
+    if unloaded := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         hass.data[DOMAIN].pop(entry.entry_id)
     return unloaded
 

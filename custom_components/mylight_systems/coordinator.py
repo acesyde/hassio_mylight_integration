@@ -1,4 +1,5 @@
 """DataUpdateCoordinator for mylight_systems."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta
@@ -17,17 +18,18 @@ from custom_components.mylight_systems.api.models import Measure
 
 from .api.client import MyLightApiClient
 from .api.exceptions import (
-    InvalidCredentialsException,
-    MyLightSystemsException,
-    UnauthorizedException,
+    InvalidCredentialsError,
+    MyLightSystemsError,
+    UnauthorizedError,
 )
 from .const import (
     CONF_GRID_TYPE,
+    CONF_MASTER_RELAY_ID,
     CONF_VIRTUAL_BATTERY_ID,
     CONF_VIRTUAL_DEVICE_ID,
     DOMAIN,
     LOGGER,
-    SCAN_INTERVAL_IN_MINUTES, CONF_MASTER_RELAY_ID,
+    SCAN_INTERVAL_IN_MINUTES,
 )
 
 
@@ -75,43 +77,27 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             password = self.config_entry.data[CONF_PASSWORD]
             grid_type = self.config_entry.data[CONF_GRID_TYPE]
             device_id = self.config_entry.data[CONF_VIRTUAL_DEVICE_ID]
-            virtual_battery_id = self.config_entry.data[
-                CONF_VIRTUAL_BATTERY_ID
-            ]
+            virtual_battery_id = self.config_entry.data[CONF_VIRTUAL_BATTERY_ID]
             master_relay_id = self.config_entry.data.get(CONF_MASTER_RELAY_ID, None)
 
             await self.authenticate_user(email, password)
 
-            result = await self.client.async_get_measures_total(
-                self.__auth_token, grid_type, device_id
-            )
+            result = await self.client.async_get_measures_total(self.__auth_token, grid_type, device_id)
 
-            battery_state = await self.client.async_get_battery_state(
-                self.__auth_token, virtual_battery_id
-            )
+            battery_state = await self.client.async_get_battery_state(self.__auth_token, virtual_battery_id)
 
             master_relay_state = None
             if master_relay_id is not None:
-                master_relay_state = await self.client.async_get_relay_state(
-                    self.__auth_token, master_relay_id
-                )
+                master_relay_state = await self.client.async_get_relay_state(self.__auth_token, master_relay_id)
 
             data = MyLightSystemsCoordinatorData(
-                produced_energy=self.find_measure_by_type(
-                    result, "produced_energy"
-                ),
+                produced_energy=self.find_measure_by_type(result, "produced_energy"),
                 grid_energy=self.find_measure_by_type(result, "grid_energy"),
-                grid_energy_without_battery=self.find_measure_by_type(
-                    result, "grid_sans_msb_energy"
-                ),
-                autonomy_rate=self.find_measure_by_type(
-                    result, "autonomy_rate"
-                ),
+                grid_energy_without_battery=self.find_measure_by_type(result, "grid_sans_msb_energy"),
+                autonomy_rate=self.find_measure_by_type(result, "autonomy_rate"),
                 self_conso=self.find_measure_by_type(result, "self_conso"),
                 msb_charge=self.find_measure_by_type(result, "msb_charge"),
-                msb_discharge=self.find_measure_by_type(
-                    result, "msb_discharge"
-                ),
+                msb_discharge=self.find_measure_by_type(result, "msb_discharge"),
                 green_energy=self.find_measure_by_type(result, "green_energy"),
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
@@ -121,35 +107,27 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
 
             return data
         except (
-            UnauthorizedException,
-            InvalidCredentialsException,
+            UnauthorizedError,
+            InvalidCredentialsError,
         ) as exception:
             raise ConfigEntryAuthFailed(exception) from exception
-        except MyLightSystemsException as exception:
+        except MyLightSystemsError as exception:
             raise UpdateFailed(exception) from exception
 
     async def authenticate_user(self, email, password):
         """Reauthenticate user if needed."""
-        if (
-            self.__auth_token is None
-            or self.__token_expiration is None
-            or self.__token_expiration < datetime.utcnow()
-        ):
+        if self.__auth_token is None or self.__token_expiration is None or self.__token_expiration < datetime.utcnow():
             result = await self.client.async_login(email, password)
             self.__auth_token = result.auth_token
             self.__token_expiration = datetime.utcnow() + timedelta(hours=2)
 
     async def turn_on_master_relay(self):
         """Turn on master relay."""
-        await self.client.async_turn_on(
-            self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID]
-        )
+        await self.client.async_turn_on(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
 
     async def turn_off_master_relay(self):
         """Turn off master relay."""
-        await self.client.async_turn_off(
-            self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID]
-        )
+        await self.client.async_turn_off(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
 
     def master_relay_is_on(self) -> bool:
         """Return true if master relay is on."""
@@ -158,8 +136,6 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
         return False
 
     @staticmethod
-    def find_measure_by_type(
-        measures: list[Measure], name: str
-    ) -> Measure | None:
+    def find_measure_by_type(measures: list[Measure], name: str) -> Measure | None:
         """Find measure by name."""
         return next((m for m in measures if m.type == name), None)

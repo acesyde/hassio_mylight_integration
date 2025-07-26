@@ -1,0 +1,330 @@
+# Unit Testing Standards
+
+## Test Framework
+
+- Use pytest as the test framework and executor
+- Use plain Python functions for test structure (no classes required)
+- Use `pytest.raises` for exception testing and `assert` statements for other assertions
+- Use `pytest` fixtures for setup and teardown
+- Use `unittest.mock` or `pytest-mock` for mocking
+
+## Naming Convention
+
+- All test functions must start with `test_`
+- Test names should follow the pattern: `test_[method]__should_[expected_result]_when_[condition]`
+- Examples:
+  - `test_add__should_return_sum_when_valid_numbers`
+  - `test_find_by_id__should_return_none_when_user_does_not_exist`
+
+## Structure
+
+Every test should follow the Given/When/Then pattern using plain functions:
+
+```python
+import pytest
+
+def test_method__should_expected_result_when_condition():
+    # Given
+    # setup code
+
+    # When
+    # action code
+
+    # Then
+    # assertion code
+```
+
+For more complex test scenarios, you can use test classes to group related tests:
+
+```python
+import pytest
+
+class TestCalculator:
+    def test_method__should_expected_result_when_condition(self):
+        # Given
+        # setup code
+
+        # When
+        # action code
+
+        # Then
+        # assertion code
+```
+
+## Assertion Practices
+
+- Use `pytest.raises` for exception testing
+- Use Python's built-in `assert` statements for other assertions
+- For all assertions, the first argument must be the expected value and the second argument must be the actual result
+- Assert both state and behavior when relevant
+- For mocks, verify interactions with `mock.assert_called_once()` or `mock.assert_called_once_with()`
+
+### Assertion Order Convention
+
+**Always use the pattern: `assert expected == actual`**
+
+✅ **Correct:**
+
+```python
+# Expected value first, actual result second
+assert 42 == calculator.add(20, 22)
+assert "John" == user.name
+assert True == user.is_active
+```
+
+❌ **Incorrect:**
+
+```python
+# Don't put actual result first
+assert calculator.add(20, 22) == 42  # Wrong order
+assert user.name == "John"  # Wrong order
+assert user.is_active == True  # Wrong order
+```
+
+## Example Tests
+
+### Basic Function Test
+
+```python
+import pytest
+
+def test_add__should_return_sum_when_valid_numbers():
+    # Given
+    calculator = Calculator()
+    a, b = 20, 22
+
+    # When
+    result = calculator.add(a, b)
+
+    # Then
+    assert 42 == result
+```
+
+### Exception Testing
+
+```python
+import pytest
+
+def test_add__should_raise_value_error_when_use_strings():
+    # Given
+    calculator = Calculator()
+    a, b = "5", 3
+
+    # When / Then
+    with pytest.raises(ValueError) as exc_info:
+        calculator.add(a, b)
+
+    assert "Invalid input: strings not allowed" in str(exc_info.value)
+```
+
+### Mock Testing
+
+```python
+import pytest
+from unittest.mock import MagicMock, patch
+
+def test_get_user__should_return_user_data_when_database_called():
+    # Given
+    mock_database = MagicMock()
+    mock_database.find_by_id.return_value = {"id": 1, "name": "John"}
+    user_service = UserService(mock_database)
+
+    # When
+    result = user_service.get_user(1)
+
+    # Then
+    # Expected first, actual second
+    assert "John" == result["name"]
+    assert 1 == result["id"]
+    mock_database.find_by_id.assert_called_once_with(1)
+
+@patch('user_service.external_api_call')
+def test_sync_user__should_raise_sync_error_when_api_fails(mock_api):
+    # Given
+    mock_api.side_effect = ConnectionError("API unavailable")
+    user_service = UserService()
+
+    # When / Then
+    with pytest.raises(SyncError) as exc_info:
+        user_service.sync_user(1)
+
+    assert "Failed to sync user" in str(exc_info.value)
+    mock_api.assert_called_once()
+```
+
+## Pytest Fixtures
+
+### Why Use Fixtures
+
+Fixtures provide several key benefits in testing:
+
+- **Resource Management**: Automatic setup and cleanup of resources (database connections, HTTP sessions, files)
+- **Dependency Injection**: Clean way to inject dependencies into tests without tight coupling
+- **Reusability**: Share common setup code across multiple tests
+- **Isolation**: Ensure each test gets a fresh instance/state
+- **Readability**: Keep test functions focused on the actual test logic
+
+### When to Use Fixtures
+
+Use fixtures when you need:
+
+- **Expensive Setup**: Creating objects that are costly to instantiate (database connections, API clients)
+- **Resource Cleanup**: Managing resources that need proper teardown (sessions, file handles, connections)
+- **Common Dependencies**: Sharing the same setup across multiple tests
+- **Test Data**: Loading or generating test data that multiple tests need
+- **Mock Objects**: Creating complex mock setups used across tests
+
+### pytest_asyncio.fixture vs pytest.fixture
+
+**Use `pytest_asyncio.fixture` when:**
+- The fixture function is `async def`
+- Setting up or tearing down async resources (aiohttp sessions, async database connections, async file operations)
+- The fixture needs to await async operations during setup/teardown
+- Managing resources that require async cleanup (e.g., `await session.close()`)
+
+**Use regular `pytest.fixture` when:**
+- The fixture function is synchronous
+- Managing synchronous resources
+- Loading static test data (JSON files, configuration)
+- Creating mock objects or simple dependencies
+- The fixture doesn't need async operations
+
+### Fixture Examples
+
+#### Async Resource Management with pytest_asyncio.fixture
+
+For async resources that require async setup/teardown, use `pytest_asyncio.fixture`:
+
+```python
+import pytest
+import pytest_asyncio
+import aiohttp
+import json
+import os
+
+@pytest_asyncio.fixture
+async def session():
+    """Create an aiohttp session for testing."""
+    session = aiohttp.ClientSession()
+    yield session
+    await session.close()  # Async cleanup
+
+@pytest.fixture
+def api_client(session):
+    """Create a MyLightApiClient instance for testing."""
+    return MyLightApiClient(DEFAULT_BASE_URL, session)
+
+@pytest.mark.asyncio
+async def test_get_devices__should_return_device_data_when_valid_token(api_client):
+    """Test with valid token should return device data."""
+    # Given
+    token = "abcdef"  # noqa: S105
+
+    # When
+    with aioresponses() as session_mock:
+        session_mock.get(url, status=200, payload=fixture_data)
+        response = await api_client.async_get_devices(token)
+
+    # Then
+    assert "4tGrXr2CViF8chJEd" == response.master_id
+```
+
+#### Regular Resource Management with pytest.fixture
+
+For non-async resources, use regular `pytest.fixture`:
+
+```python
+@pytest.fixture
+def database_connection():
+    """Create a database connection for testing."""
+    connection = create_connection()
+    yield connection
+    connection.close()  # Sync cleanup
+```
+
+#### Test Data Loading
+
+```python
+@pytest.fixture
+def unauthorized_response_fixture():
+    """Load unauthorized response fixture."""
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/devices/unauthorized.json")
+    with open(fixture_path, encoding="utf-8") as file:
+        return json.load(file)
+
+@pytest.fixture
+def valid_response_fixture():
+    """Load valid response fixture."""
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    fixture_path = os.path.normcase(dir_path + "/fixtures/devices/ok.json")
+    with open(fixture_path, encoding="utf-8") as file:
+        return json.load(file)
+
+def test_get_devices__should_raise_unauthorized_exception_when_invalid_token(
+    api_client, unauthorized_response_fixture
+):
+    """Test with invalid token should raise UnauthorizedException."""
+    # Given
+    token = "abcdef"  # noqa: S105
+    url = DEFAULT_BASE_URL + DEVICES_URL + f"?authToken={token}"
+
+    # When / Then
+    with aioresponses() as session_mock:
+        session_mock.get(url, status=200, payload=unauthorized_response_fixture)
+
+        with pytest.raises(Exception) as exc_info:
+            await api_client.async_get_devices(token)
+
+    assert UnauthorizedException == exc_info.type
+```
+
+#### Dependency Injection
+
+```python
+@pytest.fixture
+def mock_database():
+    """Create a mock database for testing."""
+    return MagicMock()
+
+@pytest.fixture
+def user_service(mock_database):
+    """Create a UserService with mocked database dependency."""
+    return UserService(mock_database)
+
+def test_get_user__should_return_user_data_when_valid_id(user_service):
+    """Test user service returns correct data."""
+    # Given
+    user_service.database.find_by_id.return_value = {"id": 1, "name": "John"}
+
+    # When
+    result = user_service.get_user(1)
+
+    # Then
+    assert "John" == result["name"]
+    assert 1 == result["id"]
+```
+
+### Fixture Best Practices
+
+- **Use descriptive names**: Make it clear what the fixture provides
+- **Keep fixtures focused**: Each fixture should have a single responsibility
+- **Use proper cleanup**: Always clean up resources using `yield` and teardown code
+- **Document fixtures**: Add docstrings explaining what the fixture provides
+- **Avoid fixture overuse**: Don't create fixtures for simple values that don't need setup/cleanup
+- **Use fixture scopes**: Consider `session`, `module`, `class`, or `function` scope based on needs
+- **Choose the right decorator**: Use `pytest_asyncio.fixture` for async resources and `pytest.fixture` for synchronous ones
+- **Async cleanup**: When using `pytest_asyncio.fixture`, ensure async cleanup with `await` statements
+- **Import pytest_asyncio**: Remember to import `pytest_asyncio` when using async fixtures
+
+## Best Practices
+
+- Keep tests isolated and independent
+- Use pytest fixtures for common setup and dependency injection
+- Mock external dependencies using `unittest.mock` or `pytest-mock`
+- Each test should focus on a single behavior
+- Tests should be deterministic with no external dependencies
+- Assertion order: expected value first, actual result second
+- Use descriptive test names following the naming convention
+- Group related tests using test classes when it makes sense
+- Run tests with pytest: `uv run pytest test_file.py`
