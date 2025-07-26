@@ -5,9 +5,9 @@ from homeassistant.components.switch import SwitchEntity, SwitchEntityDescriptio
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from mylightsystems.exceptions import MyLightSystemsError
 
 from . import DOMAIN
-from .api.exceptions import MyLightSystemsError
 from .const import CONF_MASTER_RELAY_ID, DATA_COORDINATOR, LOGGER
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 from .entity import IntegrationMyLightSystemsEntity

@@ -1,8 +1,8 @@
 """Unit tests for sensor module."""
 
 import pytest
+from mylightsystems.models import Measure
 
-from custom_components.mylight_systems.api.models import Measure
 from custom_components.mylight_systems.coordinator import MyLightSystemsCoordinatorData
 from custom_components.mylight_systems.sensor import _calculate_grid_returned_energy
 

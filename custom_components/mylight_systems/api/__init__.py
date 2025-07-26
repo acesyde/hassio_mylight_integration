@@ -1,1 +1,0 @@
-"""MyLight Systems API."""

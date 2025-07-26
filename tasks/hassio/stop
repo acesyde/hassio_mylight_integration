@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="🛑 Stop Hassio"
+#MISE depends=["hassio:check-prerequisites"]
+
+set -e
+
+echo "🛑 Stopping Hassio..."
+
+docker compose -f docker-compose.yml down

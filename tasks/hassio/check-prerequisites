@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="✅ Check prerequisites for hassio"
+#MISE hide=true
+
+set -e
+
+# Check if docker is installed
+if ! command -v docker &> /dev/null; then
+    echo "❌ DOCKER is not installed"
+    exit 1
+fi

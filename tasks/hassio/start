@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="🚀 Start Hassio"
+#MISE depends=["hassio:check-prerequisites"]
+
+set -e
+
+echo "🚀 Starting Hassio..."
+
+docker compose -f docker-compose.yml up --remove-orphans

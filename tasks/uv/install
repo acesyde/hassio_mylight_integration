@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="📩 Install packages with uv"
+#MISE depends=["uv:check-prerequisites"]
+
+set -e
+
+uv sync --dev

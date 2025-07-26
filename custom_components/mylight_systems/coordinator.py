@@ -13,15 +13,14 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
-
-from custom_components.mylight_systems.api.models import Measure
-
-from .api.client import MyLightApiClient
-from .api.exceptions import (
-    InvalidCredentialsError,
+from mylightsystems import (
+    MyLightSystemsApiClient,
     MyLightSystemsError,
-    UnauthorizedError,
+    MyLightSystemsInvalidAuthError,
+    MyLightSystemsUnauthorizedError,
 )
+from mylightsystems.models import Measure
+
 from .const import (
     CONF_GRID_TYPE,
     CONF_MASTER_RELAY_ID,
@@ -59,7 +58,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass: HomeAssistant,
-        client: MyLightApiClient,
+        client: MyLightSystemsApiClient,
     ) -> None:
         """Initialize."""
         self.client = client
@@ -107,8 +106,8 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
 
             return data
         except (
-            UnauthorizedError,
-            InvalidCredentialsError,
+            MyLightSystemsUnauthorizedError,
+            MyLightSystemsInvalidAuthError,
         ) as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except MyLightSystemsError as exception:

@@ -7,13 +7,10 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from mylightsystems import MyLightSystemsApiClient
+from mylightsystems.const import DEFAULT_BASE_URL
+from mylightsystems.exceptions import MyLightSystemsConnectionError, MyLightSystemsError, MyLightSystemsInvalidAuthError
 
-from .api.client import DEFAULT_BASE_URL, MyLightApiClient
-from .api.exceptions import (
-    CommunicationError,
-    InvalidCredentialsError,
-    MyLightSystemsError,
-)
 from .const import (
     CONF_GRID_TYPE,
     CONF_MASTER_ID,
@@ -41,7 +38,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         _errors = {}
         if user_input is not None:
             try:
-                api_client = MyLightApiClient(
+                api_client = MyLightSystemsApiClient(
                     base_url=user_input[CONF_URL],
                     session=async_create_clientsession(self.hass),
                 )
@@ -69,10 +66,10 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
                 self._abort_if_unique_id_configured()
 
-            except InvalidCredentialsError as exception:
+            except MyLightSystemsInvalidAuthError as exception:
                 LOGGER.warning(exception)
                 _errors["base"] = "auth"
-            except CommunicationError as exception:
+            except MyLightSystemsConnectionError as exception:
                 LOGGER.error(exception)
                 _errors["base"] = "connection"
             except MyLightSystemsError as exception:

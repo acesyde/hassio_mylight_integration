@@ -1119,6 +1119,7 @@ dependencies = [
     { name = "async-timeout" },
     { name = "colorlog" },
     { name = "homeassistant" },
+    { name = "mylightsystems" },
     { name = "requests" },
     { name = "yarl" },
 ]
@@ -1127,7 +1128,9 @@ dependencies = [
 dev = [
     { name = "aioresponses" },
     { name = "aresponses" },
+    { name = "coverage" },
     { name = "pytest" },
+    { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "pytest-socket" },
     { name = "ruff" },
@@ -1139,6 +1142,7 @@ requires-dist = [
     { name = "async-timeout", specifier = ">=5.0" },
     { name = "colorlog", specifier = ">=6.7" },
     { name = "homeassistant", specifier = ">=2025.7.0" },
+    { name = "mylightsystems", specifier = ">=0.0.5" },
     { name = "requests", specifier = ">=2.31" },
     { name = "yarl", specifier = ">=1.9" },
 ]
@@ -1147,10 +1151,27 @@ requires-dist = [
 dev = [
     { name = "aioresponses", specifier = ">=0.7.8" },
     { name = "aresponses", specifier = ">=3.0.0" },
+    { name = "coverage", specifier = ">=7.10.0" },
     { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-asyncio", specifier = ">=1.1.0" },
     { name = "pytest-cov", specifier = ">=6.2.1" },
     { name = "pytest-socket", specifier = ">=0.6" },
     { name = "ruff", specifier = ">=0.4" },
+]
+
+[[package]]
+name = "mylightsystems"
+version = "0.0.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "mashumaro" },
+    { name = "orjson" },
+    { name = "yarl" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/30/ae/f1aad6ff02af7affc8fb47319a1587caadfb20292908f1ea0b76f9526e93/mylightsystems-0.0.5.tar.gz", hash = "sha256:7a778affced586af9286261925e124c9f77c9822fb6b27e6ada53baf07a1f0b8", size = 6681, upload-time = "2025-07-20T18:32:00.161Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/72/c2/7a34435e331f662c26bcd1770c7f6a43f7181a505beeb65aecbaae996a28/mylightsystems-0.0.5-py3-none-any.whl", hash = "sha256:cf79460c3c604102573b1a6c6616b999a10a7eb468bb6e4e20250ce564449229", size = 8004, upload-time = "2025-07-20T18:31:58.797Z" },
 ]
 
 [[package]]

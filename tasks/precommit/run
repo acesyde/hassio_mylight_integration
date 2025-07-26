@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="▶️ Run all pre-commit hooks"
+#MISE depends=["precommit:check-prerequisites"]
+
+set -e
+
+echo "▶️ Run all pre-commit hooks..."
+
+pre-commit run -a

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE description="🧪 Execute tests with uv"
+#USAGE flag "--skip-coverage" "Skip coverage"
+#MISE depends=["uv:check-prerequisites"]
+
+set -e
+
+if [ -n "${usage_skip_coverage}" ]; then
+  uv run pytest
+else
+  uv run coverage run -m pytest
+  uv run coverage report
+  uv run coverage xml
+fi
