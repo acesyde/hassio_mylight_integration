@@ -42,4 +42,4 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           name: pytest
           fail_ci_if_error: true
-          file: coverage.xml
+          files: coverage.xml
