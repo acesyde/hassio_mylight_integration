@@ -1,7 +1,7 @@
 """Exception handling for MyLight Systems API."""
 
 
-class MyLightSystemsException(Exception):
+class MyLightSystemsError(Exception):
     """Exception to indicate a general API error."""
 
     def __init__(self, msg: str) -> None:
@@ -15,7 +15,7 @@ class MyLightSystemsException(Exception):
         return self.__msg
 
 
-class CommunicationException(MyLightSystemsException):
+class CommunicationError(MyLightSystemsError):
     """Exception to indicate a communication error."""
 
     def __init__(self) -> None:
@@ -23,7 +23,7 @@ class CommunicationException(MyLightSystemsException):
         super().__init__("A communication error occured")
 
 
-class InvalidCredentialsException(MyLightSystemsException):
+class InvalidCredentialsError(MyLightSystemsError):
     """Exception to indicate an authentication error."""
 
     def __init__(self) -> None:
@@ -31,7 +31,7 @@ class InvalidCredentialsException(MyLightSystemsException):
         super().__init__("Invalid credentials")
 
 
-class UnauthorizedException(MyLightSystemsException):
+class UnauthorizedError(MyLightSystemsError):
     """Exception to indicate an authorization error."""
 
     def __init__(self) -> None:

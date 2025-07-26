@@ -1,0 +1,54 @@
+[tools]
+pre-commit = "4.2"
+python = "3.13"
+uv = "0.8.3"
+
+[settings]
+experimental = true
+auto_install = false
+
+[env]
+_.python.venv = { path = ".venv" }
+
+[tasks."project:setup"]
+description = "Setup the project"
+run = "uv sync --dev"
+
+[tasks."project:update-dependencies"]
+description = "Update dependencies"
+run = "uv lock"
+
+[tasks."project:tests"]
+description = "Run tests"
+run = "uv run pytest"
+
+[tasks."project:coverage"]
+description = "Run coverage"
+run = "uv run coverage report --skip-covered"
+
+[tasks."project:lint"]
+description = "Run linting"
+run = ["uv run ruff check", "uv run ruff format --check --diff"]
+
+[tasks."project:lint-fix"]
+description = "Run linting and fix"
+run = ["uv run ruff check --fix", "uv run ruff format"]
+
+[tasks."precommit:install"]
+description = "Install pre-commit hooks"
+run = [
+  "uv run pre-commit install --install-hooks",
+  "uv run pre-commit install --hook-type commit-msg --hook-type pre-push",
+]
+
+[tasks."precommit:run"]
+description = "Run pre-commit hooks"
+run = "uv run pre-commit run --all-files"
+
+[tasks."hassio:start"]
+description = "Start Hassio"
+run = "docker compose -f docker-compose.yml up --remove-orphans"
+
+[tasks."hassio:stop"]
+description = "Stop Hassio"
+run = "docker compose -f docker-compose.yml down"

@@ -1,49 +1,92 @@
-[tool.poetry]
+[project]
 name = "mylight_systems"
-version = "0.1.1"
+version = "0.1.0"
 description = "MyLight Systems integration for Home Assistant"
-authors = ["Pierre-Emmanuel Mercier <acesyde@gmail.com>"]
+authors = [{ name = "Pierre-Emmanuel Mercier", email = "acesyde@gmail.com" }]
+requires-python = ">=3.13.2,<4.0"
 license = "MIT"
 keywords = ["homeassistant", "hassio", "mylight", "solar", "power", "energy"]
 readme = "README.md"
 repository = "https://github.com/acesyde/hassio_mylight_integration"
-packages = [{ include = "custom_components/mylight_systems" }]
+dependencies = [
+  "colorlog >= 6.7",
+  "homeassistant >= 2025.7.0",
+  "requests >= 2.31",
+  "aiohttp >= 3.8",
+  "yarl >= 1.9",
+  "async-timeout >= 5.0",
+]
 
-[tool.poetry.dependencies]
-python = "~3.11"
-colorlog = "^6.7"
-aiohttp = "^3.8"
-homeassistant = "^2024.1"
-async-timeout = "^4.0"
-
-[tool.poetry.group.dev.dependencies]
-asynctest = "^0.13"
-pytest = "^8.2"
-pytest-asyncio = "^0.23"
-pytest-cov = "^5.0"
-pytest-socket = "^0.7"
-aioresponses = "^0.7"
-ruff = "^0.1"
-pre-commit = "^3.7"
-vulture = "^2.10"
-
-[virtualenvs]
-create = true
-in-project = true
+[dependency-groups]
+dev = [
+  "pytest >= 8.4.1",
+  "pytest-cov >= 6.2.1",
+  "pytest-socket >= 0.6",
+  "ruff >= 0.4",
+  "aresponses >= 3.0.0",
+  "vulture >= 2.9",
+  "aioresponses>=0.7.8",
+]
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
+indent-width = 4
 exclude = [
-    ".venv"
+  ".venv",
+  ".codeclimate.yml",
+  ".codecov.yml",
+  ".coveragerc",
+  ".editorconfig",
+  ".gitattributes",
+  ".gitignore",
+  ".pre-commit-config.yaml",
+  "venv",
+  "mise.toml",
+  "mise.lock",
 ]
 
 [tool.pytest.ini_options]
 addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
 pythonpath = ["custom_components/mylight_systems"]
-testpaths = [
-    "tests"
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+select = [
+  "E",     # pycodestyle
+  "F",     # pyflakes
+  "I",     # isort
+  "C90",   # mccabe
+  "N",     # pep8-naming
+  "G",     # flake8-logging-format
+  "S",     # flake8-bandit
+  "ASYNC", # flake8-async,
+  "PL",    # pylint
 ]
+ignore = [
+  "G004",    # logging-fstring-interpolation
+  "E501",    # line-too-long
+  "RET505",  # no-else-return
+  "RET507",  # no-else-continue
+  "UP032",   # f-string
+  "BLE001",  # broad-exception-caught
+  "PLR2004", # magic-value-comparison
+  "S101",    # assert
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-positional-args = 10
+max-returns = 10
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["**/tests/**", "**/__init__.py", "**/__main__.py"]
 
 [tool.vulture]
 min_confidence = 80

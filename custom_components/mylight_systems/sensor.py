@@ -1,4 +1,5 @@
 """Sensor platform for integration_blueprint."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -15,7 +16,7 @@ from homeassistant.const import PERCENTAGE, UnitOfEnergy, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, DATA_COORDINATOR
+from .const import DATA_COORDINATOR, DOMAIN
 from .coordinator import (
     MyLightSystemsCoordinatorData,
     MyLightSystemsDataUpdateCoordinator,
@@ -27,9 +28,7 @@ from .entity import IntegrationMyLightSystemsEntity
 class MyLightSensorRequiredKeysMixin:
     """Mixin for required keys."""
 
-    value_fn: Callable[
-        [MyLightSystemsCoordinatorData], int | float | str | None
-    ]
+    value_fn: Callable[[MyLightSystemsCoordinatorData], int | float | str | None]
 
 
 @dataclass
@@ -48,9 +47,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: round(data.produced_energy.value / 36e2, 2)
-        if data.produced_energy is not None
-        else 0,
+        value_fn=lambda data: round(data.produced_energy.value / 36e2, 2) if data.produced_energy is not None else 0,
     ),
     MyLightSensorEntityDescription(
         key="total_grid_consumption",
@@ -59,9 +56,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: round(data.grid_energy.value / 36e2, 2)
-        if data.grid_energy is not None
-        else 0,
+        value_fn=lambda data: round(data.grid_energy.value / 36e2, 2) if data.grid_energy is not None else 0,
     ),
     MyLightSensorEntityDescription(
         key="total_grid_without_battery_consumption",
@@ -70,9 +65,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: round(
-            data.grid_energy_without_battery.value / 36e2, 2
-        )
+        value_fn=lambda data: round(data.grid_energy_without_battery.value / 36e2, 2)
         if data.grid_energy_without_battery is not None
         else 0,
     ),
@@ -82,9 +75,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         icon="mdi:percent-box",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda data: round(data.autonomy_rate.value, 2)
-        if data.autonomy_rate is not None
-        else 0,
+        value_fn=lambda data: round(data.autonomy_rate.value, 2) if data.autonomy_rate is not None else 0,
     ),
     MyLightSensorEntityDescription(
         key="total_self_conso",
@@ -92,9 +83,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         icon="mdi:percent-box",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda data: round(data.self_conso.value, 2)
-        if data.self_conso is not None
-        else 0,
+        value_fn=lambda data: round(data.self_conso.value, 2) if data.self_conso is not None else 0,
     ),
     MyLightSensorEntityDescription(
         key="total_msb_charge",
@@ -103,9 +92,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: round(data.msb_charge.value / 36e2, 2)
-        if data.msb_charge is not None
-        else 0,
+        value_fn=lambda data: round(data.msb_charge.value / 36e2, 2) if data.msb_charge is not None else 0,
     ),
     MyLightSensorEntityDescription(
         key="total_msb_discharge",
@@ -114,9 +101,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: round(data.msb_discharge.value / 36e2, 2)
-        if data.msb_discharge is not None
-        else 0,
+        value_fn=lambda data: round(data.msb_discharge.value / 36e2, 2) if data.msb_discharge is not None else 0,
     ),
     MyLightSensorEntityDescription(
         key="total_green_energy",
@@ -125,9 +110,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: round(data.green_energy.value / 36e2, 2)
-        if data.green_energy is not None
-        else 0,
+        value_fn=lambda data: round(data.green_energy.value / 36e2, 2) if data.green_energy is not None else 0,
     ),
     MyLightSensorEntityDescription(
         key="battery_state",
@@ -135,9 +118,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         icon="mdi:battery",
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda data: round(data.battery_state.value / 36e2 / 1e3, 2)
-        if data.battery_state is not None
-        else 0,
+        value_fn=lambda data: round(data.battery_state.value / 36e2 / 1e3, 2) if data.battery_state is not None else 0,
     ),
     MyLightSensorEntityDescription(
         key="grid_returned_energy",
@@ -146,7 +127,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
-        value_fn=lambda data: _calculate_grid_returned_energy(data)
+        value_fn=lambda data: _calculate_grid_returned_energy(data),
     ),
 )
 

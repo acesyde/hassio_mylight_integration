@@ -14,42 +14,32 @@ concurrency:
 
 jobs:
   run:
-    name: With pytest for Python ${{ matrix.python_version }}
+    name: With pytest
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python_version: [ "3.11" ]
     steps:
       - name: 📥 Checkout the repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install Task
-        uses: arduino/setup-task@v2
+      - uses: jdx/mise-action@v2
+        name: 🤖 Mise action
         with:
-          version: 3.x
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🎵 Install poetry
-        run: pipx install poetry
-
-      - name: 🛠️ Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: "${{ matrix.python_version }}"
-          cache: 'poetry'
+          version: 2025.7.27
 
       - name: 📦 Install requirements
-        run: task install
+        run: mise project:setup
 
       - name: 🏃 Run tests
-        env:
-          PYTEST: true
-        run: task tests
+        run: mise project:tests
+
+      - name: 📊 Generate coverage
+        run: mise project:coverage
 
       - name: 📤 Upload coverage to Codecov
-        if: ${{ matrix.python_version == '3.11' }}
-        run: |
-          task coverage
-          curl -sfSL https://codecov.io/bash | bash -
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: pytest
+          fail_ci_if_error: true
+          file: coverage.xml

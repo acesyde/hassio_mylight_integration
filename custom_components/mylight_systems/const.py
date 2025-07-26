@@ -1,4 +1,5 @@
 """Constants for mylight_systems."""
+
 from logging import Logger, getLogger
 
 from homeassistant.const import Platform

@@ -1,4 +1,5 @@
 """Adds config flow for mylight_systems."""
+
 from __future__ import annotations
 
 import voluptuous as vol
@@ -9,20 +10,20 @@ from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .api.client import DEFAULT_BASE_URL, MyLightApiClient
 from .api.exceptions import (
-    CommunicationException,
-    InvalidCredentialsException,
-    MyLightSystemsException,
+    CommunicationError,
+    InvalidCredentialsError,
+    MyLightSystemsError,
 )
 from .const import (
     CONF_GRID_TYPE,
     CONF_MASTER_ID,
+    CONF_MASTER_RELAY_ID,
     CONF_MASTER_REPORT_PERIOD,
     CONF_SUBSCRIPTION_ID,
     CONF_VIRTUAL_BATTERY_ID,
     CONF_VIRTUAL_DEVICE_ID,
     DOMAIN,
     LOGGER,
-    CONF_MASTER_RELAY_ID,
 )
 
 
@@ -45,17 +46,11 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     session=async_create_clientsession(self.hass),
                 )
 
-                login_response = await api_client.async_login(
-                    user_input[CONF_EMAIL], user_input[CONF_PASSWORD]
-                )
+                login_response = await api_client.async_login(user_input[CONF_EMAIL], user_input[CONF_PASSWORD])
 
-                user_profile = await api_client.async_get_profile(
-                    login_response.auth_token
-                )
+                user_profile = await api_client.async_get_profile(login_response.auth_token)
 
-                device_ids = await api_client.async_get_devices(
-                    login_response.auth_token
-                )
+                device_ids = await api_client.async_get_devices(login_response.auth_token)
 
                 data = {
                     CONF_EMAIL: user_input[CONF_EMAIL],
@@ -70,19 +65,17 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_MASTER_RELAY_ID: device_ids.master_relay_id,
                 }
 
-                await self.async_set_unique_id(
-                    str(user_profile.subscription_id)
-                )
+                await self.async_set_unique_id(str(user_profile.subscription_id))
 
                 self._abort_if_unique_id_configured()
 
-            except InvalidCredentialsException as exception:
+            except InvalidCredentialsError as exception:
                 LOGGER.warning(exception)
                 _errors["base"] = "auth"
-            except CommunicationException as exception:
+            except CommunicationError as exception:
                 LOGGER.error(exception)
                 _errors["base"] = "connection"
-            except MyLightSystemsException as exception:
+            except MyLightSystemsError as exception:
                 LOGGER.exception(exception)
                 _errors["base"] = "unknown"
             else:
@@ -99,18 +92,12 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_EMAIL,
                         default=(user_input or {}).get(CONF_EMAIL),
                     ): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.EMAIL
-                        ),
+                        selector.TextSelectorConfig(type=selector.TextSelectorType.EMAIL),
                     ),
                     vol.Required(CONF_PASSWORD): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.PASSWORD
-                        ),
+                        selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD),
                     ),
-                    vol.Optional(
-                        CONF_URL, default=DEFAULT_BASE_URL
-                    ): selector.TextSelector(
+                    vol.Optional(CONF_URL, default=DEFAULT_BASE_URL): selector.TextSelector(
                         selector.TextSelectorConfig(
                             type=selector.TextSelectorType.URL,
                         ),
