@@ -177,7 +177,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_d
 
 
 class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
-    """MyLightSystems Sensor class."""
+    """MyLightSystems Sensor Integration class."""
 
     def __init__(
         self,

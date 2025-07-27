@@ -23,7 +23,8 @@ from .const import (
 class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for MyLightSystems."""
 
-    VERSION = 2
+    VERSION = 1  # TODO: increment version when changing the config flow
+    MINOR_VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     @staticmethod

@@ -10,7 +10,8 @@ LOGGER: Logger = getLogger(__package__)
 # General
 NAME = "MyLight Systems"
 DOMAIN = "mylight_systems"
-PLATFORMS = [Platform.SENSOR, Platform.SWITCH]
+# PLATFORMS = [Platform.SENSOR, Platform.SWITCH]
+PLATFORMS = [Platform.SENSOR]
 VERSION = "1.0.0"
 COORDINATOR = "coordinator"
 ATTRIBUTION = "Data provided by https://www.mylight-systems.com/"

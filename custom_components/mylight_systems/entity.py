@@ -1,4 +1,4 @@
-"""BlueprintEntity class."""
+"""MyLightSystemsEntity Integration class."""
 
 from __future__ import annotations
 
@@ -10,12 +10,12 @@ from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 
 class IntegrationMyLightSystemsEntity(CoordinatorEntity):
-    """BlueprintEntity class."""
+    """MyLightSystemsEntity Integration class."""
 
     _attr_attribution = ATTRIBUTION
 
     def __init__(self, coordinator: MyLightSystemsDataUpdateCoordinator) -> None:
-        """Initialize."""
+        """Initialize MyLightSystemsEntity Integration."""
         super().__init__(coordinator)
         self._attr_unique_id = coordinator.config_entry.entry_id
         self._attr_device_info = DeviceInfo(
