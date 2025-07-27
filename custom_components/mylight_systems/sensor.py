@@ -25,9 +25,8 @@ from .entity import IntegrationMyLightSystemsEntity
 class MyLightDeviceSensorEntityDescription(SensorEntityDescription):
     """Describes a device-based sensor entity."""
 
-    value_fn: Callable[[Any], int | float | str | None] = lambda device: None
+    value_fn: Callable[[Any, dict[str, Any]], int | float | str | None] = lambda device, states: None
     attributes_fn: Callable[[Any], dict[str, Any]] | None = None
-    device_info: dict[str, Any] | None = None
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_devices: AddEntitiesCallback) -> None:
@@ -56,11 +55,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_d
             entity_name = entity_name(device)
 
         # Add device identifier in parentheses for clarity
-        full_name = (
-            f"{entity_name} ({getattr(device, 'name', device_id)})"
-            if entity_name != getattr(device, "name", device_id)
-            else entity_name
-        )
+        device_name = getattr(device, "name", str(device_id))
+        full_name = f"{entity_name} ({device_name})" if entity_name != device_name else entity_name
 
         # Create entity description
         entity_description = MyLightDeviceSensorEntityDescription(
@@ -72,7 +68,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_d
             state_class=entity_config.get("state_class"),
             value_fn=entity_config["value_fn"],
             attributes_fn=entity_config.get("attributes_fn"),
-            device_info=device_mapper.get_device_info(device),
         )
 
         sensor = MyLightSystemsDeviceSensor(
@@ -85,7 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_d
 
     if sensors:
         async_add_devices(sensors)
-        LOGGER.info("Added %d device-based sensors", len(sensors))
+        LOGGER.info("Added %d device-based sensors to unified MyLight Systems device", len(sensors))
     else:
         LOGGER.warning("No sensor entities could be created from devices")
 
@@ -107,9 +102,11 @@ class MyLightSystemsDeviceSensor(IntegrationMyLightSystemsEntity, SensorEntity):
         self.entity_description = entity_description
         self._device = device
 
-        # Set device info for device registry
-        if entity_description.device_info:
-            self._attr_device_info = entity_description.device_info
+        # Set the name from the entity description
+        self._attr_name = entity_description.name
+
+        # Device info is inherited from the base class (unified device)
+        # No need to override _attr_device_info as it's set in the parent class
 
     @property
     def native_value(self) -> int | float | str | None:
@@ -121,7 +118,13 @@ class MyLightSystemsDeviceSensor(IntegrationMyLightSystemsEntity, SensorEntity):
                 LOGGER.warning("Device not found in coordinator data for sensor %s", self.entity_id)
                 return None
 
-            return self.entity_description.value_fn(current_device)
+            # Get states from coordinator data
+            states = {}
+            if self.coordinator.data and hasattr(self.coordinator.data, "states"):
+                states = self.coordinator.data.states or {}
+
+            # Pass both device and states to value_fn
+            return self.entity_description.value_fn(current_device, states)
         except Exception as exc:
             LOGGER.error("Error getting sensor value for %s: %s", self.entity_id, exc)
             return None

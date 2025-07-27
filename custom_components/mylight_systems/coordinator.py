@@ -31,6 +31,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     """Data returned by the coordinator."""
 
     devices: list = []
+    states: dict = {}
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -68,7 +69,16 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
 
             LOGGER.debug("Fetched %d devices from API", len(devices))
 
-            data = MyLightSystemsCoordinatorData(devices=devices)
+            # Fetch states from the API
+            states = {}
+            try:
+                states = await self.client.get_states(self.__auth_token)
+                LOGGER.debug("Fetched %d states from API", len(states) if states else 0)
+            except Exception as exc:
+                LOGGER.warning("Failed to fetch states from API: %s", exc)
+                states = {}
+
+            data = MyLightSystemsCoordinatorData(devices=devices, states=states)
 
             self._data = data
 

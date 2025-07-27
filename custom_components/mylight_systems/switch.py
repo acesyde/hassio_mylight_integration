@@ -24,7 +24,6 @@ class MyLightDeviceSwitchEntityDescription(SwitchEntityDescription):
     is_on_fn: Callable[[Any], bool] = lambda device: False
     turn_on_fn: Callable[[Any], Callable[[], Coroutine[Any, Any, None]] | None] = lambda device: None
     turn_off_fn: Callable[[Any], Callable[[], Coroutine[Any, Any, None]] | None] = lambda device: None
-    device_info: dict[str, Any] | None = None
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
@@ -47,15 +46,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         device = entity_config["device"]
         device_id = getattr(device, "id", None) or getattr(device, "device_id", None) or id(device)
 
+        # Handle dynamic name (function or string)
+        entity_name = entity_config["name"]
+        if callable(entity_name):
+            entity_name = entity_name(device)
+
+        # Add device identifier in parentheses for clarity
+        device_name = getattr(device, "name", str(device_id))
+        full_name = f"{entity_name} ({device_name})" if entity_name != device_name else entity_name
+
         # Create entity description
         entity_description = MyLightDeviceSwitchEntityDescription(
             key=f"{device_id}_{entity_config['key']}",
-            name=f"{entity_config['name']} ({getattr(device, 'name', device_id)})",
+            name=full_name,
             icon=entity_config.get("icon"),
             is_on_fn=entity_config["is_on_fn"],
             turn_on_fn=entity_config["turn_on_fn"],
             turn_off_fn=entity_config["turn_off_fn"],
-            device_info=device_mapper.get_device_info(device),
         )
 
         switch = MyLightSystemsDeviceSwitch(
@@ -68,7 +75,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
     if switches:
         async_add_entities(switches)
-        LOGGER.info("Added %d device-based switches", len(switches))
+        LOGGER.info("Added %d device-based switches to unified MyLight Systems device", len(switches))
     else:
         LOGGER.info("No switch entities found in devices")
 
@@ -90,9 +97,11 @@ class MyLightSystemsDeviceSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
         self.entity_description = entity_description
         self._device = device
 
-        # Set device info for device registry
-        if entity_description.device_info:
-            self._attr_device_info = entity_description.device_info
+        # Set the name from the entity description
+        self._attr_name = entity_description.name
+
+        # Device info is inherited from the base class (unified device)
+        # No need to override _attr_device_info as it's set in the parent class
 
     @property
     def is_on(self) -> bool:

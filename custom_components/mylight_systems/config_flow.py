@@ -73,7 +73,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
-                    title=f"MyLight Systems ({user_input[CONF_EMAIL]})",
+                    title="MyLight Systems",
                     data=data,
                 )
 

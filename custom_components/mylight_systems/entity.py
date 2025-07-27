@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from homeassistant.const import CONF_EMAIL
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -18,9 +19,14 @@ class IntegrationMyLightSystemsEntity(CoordinatorEntity):
         """Initialize MyLightSystemsEntity Integration."""
         super().__init__(coordinator)
         self._attr_unique_id = coordinator.config_entry.entry_id
+
+        # Create a unified device for the entire integration
+        user_email = coordinator.config_entry.data.get(CONF_EMAIL, "unknown")
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self.unique_id)},
-            name=NAME,
-            model=VERSION,
+            identifiers={(DOMAIN, coordinator.config_entry.entry_id)},
+            name=user_email,
+            model="MyLight Integration",
             manufacturer=NAME,
+            sw_version=VERSION,
+            configuration_url="https://www.mylight-systems.com/",
         )

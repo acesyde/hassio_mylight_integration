@@ -18,7 +18,9 @@ DEVICE_TYPE_MAPPINGS = {
                 "key": "master_device",
                 "name": lambda device: getattr(device, "name", "Master Device"),
                 "icon": "mdi:power-plug",
-                "value_fn": lambda device: getattr(device, "state", False),
+                "value_fn": lambda device, states: _get_state_value(
+                    device, states, "state", fallback=getattr(device, "state", False)
+                ),
                 "attributes_fn": lambda device: {
                     "device_type_name": getattr(device, "device_type_name", None),
                     "report_period": getattr(device, "report_period", None),
@@ -28,7 +30,79 @@ DEVICE_TYPE_MAPPINGS = {
             }
         ],
     },
+    "bat": {
+        "platform": "sensor",
+        "entities": [
+            {
+                "key": "battery_capacity",
+                "name": lambda device: f"{getattr(device, 'name', 'My Smart Battery')} Capacity",
+                "icon": "mdi:battery-charging",
+                "device_class": "power",
+                "state_class": "measurement",
+                "unit_of_measurement": "kW",
+                # Manual value specification: Use states from API or fallback to device attribute
+                "value_fn": lambda device, states: _get_battery_capacity_value(device, states),
+                "attributes_fn": lambda device: {
+                    "device_type_name": getattr(device, "device_type_name", None),
+                    "type_id": getattr(device, "type_id", None),
+                    "device_id": getattr(device, "id", None),
+                },
+            },
+        ],
+    },
+    "vrt": {
+        "platform": "sensor",
+        "entities": [
+            {
+                "key": "virtual_device",
+                "name": lambda device: getattr(device, "name", "Virtual Device"),
+                "icon": "mdi:cloud-outline",
+                "value_fn": lambda device, states: _get_virtual_device_value(device, states),
+                "attributes_fn": lambda device: {
+                    "device_type_name": getattr(device, "device_type_name", None),
+                    "type_id": getattr(device, "type_id", None),
+                    "device_id": getattr(device, "id", None),
+                    "state": getattr(device, "state", None),
+                },
+            }
+        ],
+    },
 }
+
+
+def _get_state_value(device, states: dict, state_key: str, fallback=None):
+    """Get state value from API states or fallback to device attribute."""
+    device_id = getattr(device, "id", None) or getattr(device, "device_id", None)
+    if device_id and states and device_id in states:
+        device_states = states[device_id]
+        if isinstance(device_states, dict) and state_key in device_states:
+            return device_states[state_key]
+    return fallback
+
+
+def _get_battery_capacity_value(device, states: dict):
+    """Get battery capacity value with manual specification from states."""
+    device_id = getattr(device, "id", None) or getattr(device, "device_id", None)
+
+    # Try to get value from states first
+    if device_id and states and device_id in states:
+        device_states = states[device_id]
+        if isinstance(device_states, dict):
+            # Check for specific battery capacity state keys from API
+            for key in ["battery_capacity", "capacity", "battery_level", "charge_level"]:
+                if key in device_states:
+                    value = device_states[key]
+                    if value is not None:
+                        return value
+
+    # Fallback to device attribute if no state found
+    return getattr(device, "capacity", None)
+
+
+def _get_virtual_device_value(device, states: dict):
+    """Get virtual device value from states."""
+    state_value = _get_state_value(device, states, "state", fallback=getattr(device, "state", False))
+    return "on" if state_value else "off"
 
 
 class DeviceMapper:
@@ -49,6 +123,10 @@ class DeviceMapper:
             class_name = device.__class__.__name__.lower()
             if "master" in class_name or "mst" in class_name:
                 return "mst"
+            elif "battery" in class_name or "bat" in class_name:
+                return "bat"
+            elif "virtual" in class_name or "vrt" in class_name:
+                return "vrt"
 
         LOGGER.warning("Could not determine device type for device: %s", device)
         return "unknown"
