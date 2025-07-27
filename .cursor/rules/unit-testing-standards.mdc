@@ -223,7 +223,7 @@ async def test_get_devices__should_return_device_data_when_valid_token(api_clien
     # When
     with aioresponses() as session_mock:
         session_mock.get(url, status=200, payload=fixture_data)
-        response = await api_client.async_get_devices(token)
+        response = await api_client.get_devices(token)
 
     # Then
     assert "4tGrXr2CViF8chJEd" == response.master_id
@@ -274,7 +274,7 @@ def test_get_devices__should_raise_unauthorized_exception_when_invalid_token(
         session_mock.get(url, status=200, payload=unauthorized_response_fixture)
 
         with pytest.raises(Exception) as exc_info:
-            await api_client.async_get_devices(token)
+            await api_client.get_devices(token)
 
     assert UnauthorizedException == exc_info.type
 ```

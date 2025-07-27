@@ -12,11 +12,3 @@ _.python.venv = { path = ".venv" }
 
 [task_config]
 includes = ["tasks"]
-
-[tasks."hassio:start"]
-description = "Start Hassio"
-run = "docker compose -f docker-compose.yml up --remove-orphans"
-
-[tasks."hassio:stop"]
-description = "Stop Hassio"
-run = "docker compose -f docker-compose.yml down"
