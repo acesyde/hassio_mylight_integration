@@ -5,6 +5,7 @@ from __future__ import annotations
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
+from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from mylightsystems import MyLightSystemsApiClient
@@ -22,8 +23,15 @@ from .const import (
 class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for MyLightSystems."""
 
-    VERSION = 1
+    VERSION = 2
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> MyLightSystemsFlowHandler:
+        return MyLightSystemsFlowHandler(config_entry)
 
     async def async_step_user(
         self,
