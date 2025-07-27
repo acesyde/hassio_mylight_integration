@@ -1,0 +1,166 @@
+# Python Development Guidelines
+
+This document outlines the Python development standards and practices for this Home Assistant custom component project.
+
+## Package Management with UV
+
+This project uses **UV** as the primary package manager for fast and reliable dependency management.
+
+### Configuration
+- **UV Version**: 0.8.3 (managed via mise)
+- **Python Version**: 3.13+ (minimum 3.13.2, <4.0)
+- **Virtual Environment**: Located at `.venv` (auto-managed by mise)
+
+### Dependency Management
+- **Project dependencies**: Defined in `pyproject.toml` under `[project.dependencies]`
+- **Development dependencies**: Defined in `[dependency-groups.dev]`
+- **Lock file**: `uv.lock` tracks exact versions for reproducible builds
+
+### Common UV Commands
+```bash
+# Install all dependencies (including dev)
+mise run uv:install
+
+# Update lock file
+mise run uv:lock
+
+# Add new dependency
+uv add <package-name>
+
+# Add development dependency
+uv add --group dev <package-name>
+```
+
+## Project Layout
+
+### Top-Level Directory Structure
+```
+├── custom_components/          # Main Home Assistant integration code
+├── tests/                     # Test suite
+├── hassio_dev/               # Local Home Assistant development environment
+├── tasks/                    # Mise task definitions (uv/, hassio/, precommit/)
+├── pyproject.toml           # Project configuration and dependencies
+├── uv.lock                  # Locked dependency versions
+├── mise.toml                # Tool version management
+└── README.md                # Project documentation
+```
+
+### Source Code Organization
+- **`custom_components/mylight_systems/`**: Main integration package
+  - `__init__.py`: Integration entry point and setup
+  - `config_flow.py`: Configuration flow for Home Assistant UI
+  - `const.py`: Constants and configuration values
+  - `coordinator.py`: Data update coordination
+  - `entity.py`: Base entity classes
+  - `sensor.py`: Sensor platform implementation
+  - `manifest.json`: Integration metadata
+  - `translations/`: Localization files (en, fr, pt)
+
+## Code Style and Linting with Ruff
+
+### Configuration
+- **Line Length**: 120 characters
+- **Indentation**: 4 spaces
+- **Tool**: Ruff (configured in `pyproject.toml`)
+
+### Enabled Rule Categories
+- **E**: pycodestyle errors
+- **F**: pyflakes (unused imports, variables)
+- **I**: isort (import sorting)
+- **C90**: mccabe (complexity)
+- **N**: pep8-naming (naming conventions)
+- **G**: flake8-logging-format
+- **S**: flake8-bandit (security)
+- **ASYNC**: flake8-async (async/await patterns)
+- **PL**: pylint rules
+
+### Complexity Limits
+- **Max Complexity**: 15 (mccabe)
+- **Max Arguments**: 10 per function
+- **Max Positional Args**: 10 per function
+- **Max Returns**: 10 per function
+
+### Ignored Rules
+- `G004`: f-string interpolation in logging (allowed)
+- `E501`: line-too-long (handled by line-length setting)
+- `S101`: assert statements (allowed in tests)
+- `PLR2004`: magic value comparison (allowed)
+- `BLE001`: broad exception caught (allowed)
+
+### Linting Commands
+```bash
+# Run linting checks
+mise run uv:lint
+
+# Auto-fix linting issues
+mise run uv:lint-fix
+```
+
+## Development Workflow
+
+### Prerequisites Check
+```bash
+mise run uv:check-prerequisites
+```
+
+### Testing
+```bash
+# Run test suite
+mise run uv:tests
+```
+
+**Note**: Comprehensive unit testing standards, patterns, and best practices are covered in the dedicated [`unit-testing-standards.mdc`](.cursor/rules/unit-testing-standards.mdc) rule.
+
+### Code Quality Pipeline
+1. **Pre-commit hooks**: Automatically run linting and formatting
+2. **Ruff**: Code style and error checking
+3. **Coverage**: Code coverage reporting (configured in `pyproject.toml`)
+
+## Home Assistant Integration
+
+This project is a **custom component** for Home Assistant, implementing the MyLight Systems integration. The code follows Home Assistant's integration patterns and requirements for custom components.
+
+**Note**: Detailed Home Assistant-specific development patterns and best practices are covered in the dedicated [`homeassistant.mdc`](.cursor/rules/homeassistant.mdc) rule.
+
+### Key Integration Components
+- **Config Flow**: User-friendly setup via Home Assistant UI
+- **Coordinator**: Efficient data fetching and updates
+- **Entities**: Sensor implementations for device data
+- **Translations**: Multi-language support
+
+## Dependencies
+
+### Core Dependencies
+- `homeassistant >= 2025.7.0`: Home Assistant core
+- `mylightsystems >= 0.0.5`: External API library for MyLight Systems
+- `aiohttp >= 3.8`: Async HTTP client
+- `requests >= 2.31`: HTTP library
+- `colorlog >= 6.7`: Enhanced logging
+
+### Development Dependencies
+- `pytest`: Testing framework with async support
+- `ruff`: Linting and formatting
+- `coverage`: Code coverage analysis
+- `aresponses` & `aioresponses`: HTTP mocking for tests
+
+## Best Practices
+
+### Code Organization
+- Keep functions under 15 complexity points
+- Use type hints for better code clarity
+- Follow Home Assistant entity naming conventions
+- Organize imports using isort (handled by ruff)
+
+### Error Handling
+- Use specific exception types over broad catches
+- Implement proper logging with appropriate levels
+- Handle async operations correctly
+
+### Performance
+- Use async/await patterns consistently
+- Leverage Home Assistant's coordinator pattern for data updates
+- Minimize API calls through efficient data coordination
+description: Python best practices
+globs: custom_components/**/*.py, tests/**/*.py
+alwaysApply: false
+---

@@ -1,0 +1,46 @@
+---
+alwaysApply: true
+description: "Project overview and context for the mylight150 Home Assistant integration"
+---
+
+# mylight150 Home Assistant Integration Project
+
+## Project Goal
+This project is a **Home Assistant custom integration** for tracking solar production and energy consumption from [mylight150](https://www.mylight150.com/) products and services.
+
+## About mylight150
+mylight150 is a French energy company that provides:
+- **Solar panels**: Photovoltaic panels for energy production
+- **Virtual battery storage**: MySmartBattery and MyBattery solutions for storing excess solar energy
+- **Smart energy management**: MySmartPilot for controlling energy-intensive appliances
+- **Energy monitoring**: Real-time consumption and production tracking via mobile applications
+- **Energy supplier services**: Acting as both equipment provider and energy supplier
+
+Over 20,000 households are equipped with mylight150 solutions, with customers achieving significant energy bill reductions through intelligent energy management.
+
+## Technical Architecture
+The integration uses a **self-developed Python API client library** to communicate with mylight150's services:
+- **API Client**: [python-mylight-systems-api-client](https://github.com/acesyde/python-mylight-systems-api-client)
+- **Integration Structure**: Located in [custom_components/mylight_systems/](mdc:custom_components/mylight_systems/)
+
+## Key Integration Components
+- [__init__.py](mdc:custom_components/mylight_systems/__init__.py): Integration setup and platform loading
+- [config_flow.py](mdc:custom_components/mylight_systems/config_flow.py): Configuration flow for user setup
+- [coordinator.py](mdc:custom_components/mylight_systems/coordinator.py): Data coordinator for API communication
+- [sensor.py](mdc:custom_components/mylight_systems/sensor.py): Sensor entities for energy metrics
+- [entity.py](mdc:custom_components/mylight_systems/entity.py): Base entity classes
+- [const.py](mdc:custom_components/mylight_systems/const.py): Constants and configuration
+
+## Supported Languages
+The integration includes translations for:
+- English ([en.json](mdc:custom_components/mylight_systems/translations/en.json))
+- French ([fr.json](mdc:custom_components/mylight_systems/translations/fr.json))
+- Portuguese ([pt.json](mdc:custom_components/mylight_systems/translations/pt.json))
+
+## Development Environment
+- Uses [mise](mdc:mise.toml) for tool management
+- Development Home Assistant instance in [hassio_dev/](mdc:hassio_dev/)
+- Automated tasks for linting, testing, and development workflow in [tasks/](mdc:tasks/)
+
+## Purpose
+Enable Home Assistant users with mylight150 installations to monitor their solar production, energy consumption, battery storage levels, and overall energy management directly within their Home Assistant dashboard.
