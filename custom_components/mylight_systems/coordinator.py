@@ -30,6 +30,8 @@ from .const import (
 class MyLightSystemsCoordinatorData(NamedTuple):
     """Data returned by the coordinator."""
 
+    devices: list = []
+
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
 class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
@@ -61,7 +63,12 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
 
             await self.authenticate_user(email, password)
 
-            data = MyLightSystemsCoordinatorData()
+            # Fetch devices from the API
+            devices = await self.client.get_devices(self.__auth_token)
+
+            LOGGER.debug("Fetched %d devices from API", len(devices))
+
+            data = MyLightSystemsCoordinatorData(devices=devices)
 
             self._data = data
 
