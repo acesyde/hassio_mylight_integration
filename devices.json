@@ -1,0 +1,251 @@
+{
+    "status": "ok",
+    "devices": [
+        {
+            "id": "F8DFE301A81C",
+            "name": "Relais",
+            "type": "sw",
+            "state": "on",
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "masterMac": "F8DFE101A81C",
+            "masterType": "mst",
+            "time": "2025-07-27 18:44:26Z",
+            "deviceTypeId": "other_device_type",
+            "typeOverride": "MST-G3-Relay",
+            "preProcessingEpsilon": 0.0,
+            "deviceTypeName": "Autre",
+            "powerColor": "#39b54a",
+            "power": 0.0,
+            "programs": {
+                "scheduleEnabled": false,
+                "greenPlayeEnabled": false,
+                "autoOffEnabled": false,
+                "standByEnabled": false
+            },
+            "room": {
+                "id": "9ZrdrIniODxvKecP",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "xRqpDvwC1GZO9gwo",
+            "name": "Consommation",
+            "type": "cmp",
+            "state": "on",
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "masterMac": "F8DFE201A81C",
+            "masterType": "gmd",
+            "deviceTypeId": "asoka_electric_counter",
+            "phase": "1",
+            "typeOverride": null,
+            "preProcessingEpsilon": 0.0,
+            "deviceTypeName": "Compteur",
+            "powerColor": "#39b54a",
+            "power": 132.65,
+            "programs": {},
+            "room": {
+                "id": "9ZrdrIniODxvKecP",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "nDH2E2B3yU5SDnMw",
+            "name": "Production",
+            "type": "cmp",
+            "state": "on",
+            "state": "on",
+            "module_number": 8,
+            "provider": "MyLight Systems",
+            "unit_electric_capacity": 370,
+            "masterMac": "F8DFE201A81C",
+            "masterType": "gmd",
+            "deviceTypeId": "production_counter",
+            "phase": "3",
+            "typeOverride": null,
+            "preProcessingEpsilon": 0.0,
+            "deviceTypeName": "Production device",
+            "powerColor": "#39b54a",
+            "power": 74.38,
+            "programs": {},
+            "room": {
+                "id": "9ZrdrIniODxvKecP",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "NK32Y2D2IBlxcXF4",
+            "name": "Ignoré",
+            "type": "cmp",
+            "state": "on",
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "masterMac": "F8DFE201A81C",
+            "masterType": "gmd",
+            "deviceTypeId": "production_counter_ignored",
+            "phase": "2",
+            "typeOverride": null,
+            "preProcessingEpsilon": 0.0,
+            "deviceTypeName": "Ignored production counter",
+            "powerColor": "#39b54a",
+            "power": 0.0,
+            "programs": {},
+            "room": {
+                "id": "9ZrdrIniODxvKecP",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "F8DFE201A81C",
+            "name": "Compteur",
+            "type": "gmd",
+            "state": "on",
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "masterMac": "F8DFE101A81C",
+            "masterType": "mst",
+            "time": "2025-07-27 18:44:26Z",
+            "deviceTypeId": "composite_device",
+            "typeOverride": "MST-G3-Meter",
+            "preProcessingEpsilon": 0.0,
+            "deviceTypeName": "Composite device",
+            "powerColor": "#39b54a",
+            "power": 207.03,
+            "pow1": 132.65,
+            "pow2": 0.0,
+            "pow3": 74.38,
+            "pVar1": 498.54,
+            "pf1": -78.26,
+            "pVar2": 0.0,
+            "pf2": 0.0,
+            "pVar3": 177.63,
+            "pf3": 37.76,
+            "programs": {},
+            "phasesConfiguration": {
+                "phase1": {
+                    "multipilcationCoefficient": 1,
+                    "phaseVoltagePath": 1
+                },
+                "phase2": {
+                    "multipilcationCoefficient": 1,
+                    "phaseVoltagePath": 1
+                },
+                "phase3": {
+                    "multipilcationCoefficient": 1,
+                    "phaseVoltagePath": 1
+                }
+            },
+            "children": [
+                {
+                    "mac": "xRqpDvwC1GZO9gwo",
+                    "phase": 1
+                },
+                {
+                    "mac": "NK32Y2D2IBlxcXF4",
+                    "phase": 2
+                },
+                {
+                    "mac": "nDH2E2B3yU5SDnMw",
+                    "phase": 3
+                }
+            ],
+            "room": {
+                "id": "9ZrdrIniODxvKecP",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "F8DFE101A81C",
+            "name": "Master",
+            "type": "mst",
+            "serialNumber": "M2202G302058P",
+            "reportPeriod": 300,
+            "state": "on",
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "time": "2025-07-27 18:44:26Z",
+            "deviceTypeId": "asoka_red_plug",
+            "typeOverride": "MST-G3",
+            "preProcessingEpsilon": 0.0,
+            "deviceTypeName": "Appareil rouge",
+            "powerColor": "#39b54a",
+            "power": 0.0,
+            "programs": {},
+            "room": {
+                "id": "9ZrdrIniODxvKecP",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "IgjiM5ClaJgTfkZX",
+            "name": "Virtual 1",
+            "type": "vrt",
+            "state": "on",
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "deviceTypeId": "virtual",
+            "typeOverride": null,
+            "preProcessingEpsilon": 0.0,
+            "deviceTypeName": "Virtual device",
+            "powerColor": "#39b54a",
+            "power": 0.0,
+            "programs": {},
+            "room": {
+                "id": "9ZrdrIniODxvKecP",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        },
+        {
+            "id": "30oXYqq6nM8R9zFU_msb",
+            "name": "Battery 1",
+            "type": "bat",
+            "batteryCapacity": 100.0,
+            "batteryNumberOfBoxes": 1,
+            "msbType": "MYLIGHT",
+            "msb_SN_filled": true,
+            "msb_AC_filled": false,
+            "msb_provider_registration_ok": false,
+            "msb_enedis_ok": false,
+            "msb_ok": true,
+            "msb_enedis_grid_injection_requested": false,
+            "msb_strasbourg_electricity_administrative_procedure_requested": false,
+            "state": "on",
+            "module_number": 0,
+            "unit_electric_capacity": 0,
+            "deviceTypeId": "my_smart_battery",
+            "typeOverride": "MySmartBattery",
+            "preProcessingEpsilon": 0.0,
+            "deviceTypeName": "My Smart Battery",
+            "powerColor": "#39b54a",
+            "power": 0.0,
+            "programs": {},
+            "batteryAdjustment": [
+                {
+                    "effectiveTime": "2023-04-27 02:00:00",
+                    "deltaChargeEnergy": 0.0,
+                    "deltaDischargeEnergy": 0.0,
+                    "deltaSoc": 0.0
+                }
+            ],
+            "room": {
+                "id": "9ZrdrIniODxvKecP",
+                "name": "Habitation",
+                "color": "#a1cbe1"
+            }
+        }
+    ]
+}
