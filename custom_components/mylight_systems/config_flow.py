@@ -23,9 +23,8 @@ from .const import (
 class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for MyLightSystems."""
 
-    VERSION = 1  # TODO: increment version when changing the config flow
+    VERSION = 1
     MINOR_VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     @staticmethod
     @callback
@@ -51,8 +50,6 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
                 user_profile = await api_client.get_profile(login_response.token)
 
-                devices = await api_client.get_devices(login_response.token)
-
                 data = {
                     CONF_EMAIL: user_input[CONF_EMAIL],
                     CONF_PASSWORD: user_input[CONF_PASSWORD],
@@ -76,7 +73,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
-                    title=user_profile.id,
+                    title=f"MyLight Systems ({user_input[CONF_EMAIL]})",
                     data=data,
                 )
 
