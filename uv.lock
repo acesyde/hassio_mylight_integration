@@ -1142,7 +1142,7 @@ requires-dist = [
     { name = "async-timeout", specifier = ">=5.0" },
     { name = "colorlog", specifier = ">=6.7" },
     { name = "homeassistant", specifier = ">=2025.7.0" },
-    { name = "mylightsystems", specifier = ">=0.0.5" },
+    { name = "mylightsystems", specifier = ">=0.0.7" },
     { name = "requests", specifier = ">=2.31" },
     { name = "yarl", specifier = ">=1.9" },
 ]
@@ -1161,7 +1161,7 @@ dev = [
 
 [[package]]
 name = "mylightsystems"
-version = "0.0.5"
+version = "0.0.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -1169,9 +1169,9 @@ dependencies = [
     { name = "orjson" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/30/ae/f1aad6ff02af7affc8fb47319a1587caadfb20292908f1ea0b76f9526e93/mylightsystems-0.0.5.tar.gz", hash = "sha256:7a778affced586af9286261925e124c9f77c9822fb6b27e6ada53baf07a1f0b8", size = 6681, upload-time = "2025-07-20T18:32:00.161Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/67/76/aded244bbff0575572a8d4c4720e3abc06675306f285bb238d1753e20c1a/mylightsystems-0.0.7.tar.gz", hash = "sha256:ba731dbeb2bf455410b01235a838c067f6bdbd8d286ba4b214d7fa73b32fd2a2", size = 10039, upload-time = "2025-07-28T07:29:26.934Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/72/c2/7a34435e331f662c26bcd1770c7f6a43f7181a505beeb65aecbaae996a28/mylightsystems-0.0.5-py3-none-any.whl", hash = "sha256:cf79460c3c604102573b1a6c6616b999a10a7eb468bb6e4e20250ce564449229", size = 8004, upload-time = "2025-07-20T18:31:58.797Z" },
+    { url = "https://files.pythonhosted.org/packages/0e/7c/2fe954222a39d529c9f4e4a12ebca8a529f4b67d0b716bcaf47f7deecc26/mylightsystems-0.0.7-py3-none-any.whl", hash = "sha256:12828d678bbbdc8899bb075bb5fcbeff3c5fdf609c96b7d87fdfca1f457f454f", size = 9312, upload-time = "2025-07-28T07:29:25.545Z" },
 ]
 
 [[package]]

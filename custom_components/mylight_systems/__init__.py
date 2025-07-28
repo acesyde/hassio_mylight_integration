@@ -23,6 +23,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         session=session,
     )
     local_coordinator = MyLightSystemsDataUpdateCoordinator(hass=hass, client=client)
+    local_coordinator.config_entry = entry
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {DATA_COORDINATOR: local_coordinator}
 

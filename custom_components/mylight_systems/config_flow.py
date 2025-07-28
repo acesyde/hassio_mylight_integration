@@ -50,6 +50,8 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
                 user_profile = await api_client.get_profile(login_response.token)
 
+                LOGGER.info(f"User profile: {user_profile}")
+
                 data = {
                     CONF_EMAIL: user_input[CONF_EMAIL],
                     CONF_PASSWORD: user_input[CONF_PASSWORD],
@@ -57,6 +59,13 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_SUBSCRIPTION_ID: user_profile.id,
                     CONF_GRID_TYPE: user_profile.grid_type,
                 }
+
+                integration_name = f"{user_profile.address} {user_profile.postal_code} {user_profile.city}"
+
+                if integration_name.strip() == "" or integration_name.strip() is None:
+                    integration_name = f"{user_profile.id} - {user_profile.tenant}"
+
+                LOGGER.info(f"Integration name: {integration_name}")
 
                 await self.async_set_unique_id(str(user_profile.id))
 
@@ -73,7 +82,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
-                    title="MyLight Systems",
+                    title=integration_name,
                     data=data,
                 )
 

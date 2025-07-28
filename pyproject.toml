@@ -15,7 +15,7 @@ dependencies = [
   "aiohttp >= 3.8",
   "yarl >= 1.9",
   "async-timeout >= 5.0",
-  "mylightsystems>=0.0.5",
+  "mylightsystems>=0.0.7",
 ]
 
 [dependency-groups]

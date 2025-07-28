@@ -20,7 +20,7 @@ Over 20,000 households are equipped with mylight150 solutions, with customers ac
 
 ## Technical Architecture
 The integration uses a **self-developed Python API client library** to communicate with mylight150's services:
-- **API Client**: [python-mylight-systems-api-client](https://github.com/acesyde/python-mylight-systems-api-client)
+- **API Client**: [python-mylight-systems-api-client](https://github.com/acesyde/python-mylight-systems-api-client/blob/main/docs/index.md)
 - **Integration Structure**: Located in [custom_components/mylight_systems/](mdc:custom_components/mylight_systems/)
 
 ## Key Integration Components

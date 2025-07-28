@@ -10,6 +10,6 @@
   "issue_tracker": "https://github.com/acesyde/hassio_mylight_integration/issues",
   "version": "1.0.0",
   "requirements": [
-    "mylightsystems"
+    "mylightsystems>=0.0.7"
   ]
 }
