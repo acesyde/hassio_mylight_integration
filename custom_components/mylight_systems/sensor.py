@@ -149,7 +149,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                                 "device_class": None,
                                 "unit": sensor_state.measure.unit if sensor_state.measure else None,
                                 "state_class": SensorStateClass.MEASUREMENT,
-                                "name_suffix": f"Sensor {sensor_id.split('-')[-1]}",
+                                "name_suffix": f"Sensor {sensor_id.split('-')[-1].lower()}",
                             },
                         )
                     )
@@ -170,6 +170,9 @@ class MyLightSystemsSensor(MyLightSystemsSensorEntity, SensorEntity):
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator, device_id, sensor_id)
+
+        LOGGER.debug("Sensor ID: %s", sensor_id)
+        LOGGER.debug("Device ID: %s", device_id)
 
         self._sensor_config = sensor_config
         self._attr_device_class = sensor_config.get("device_class")
@@ -204,7 +207,7 @@ class MyLightSystemsSensor(MyLightSystemsSensorEntity, SensorEntity):
             return None
 
         return {
-            "sensor_id": self._sensor_id,
+            "sensor_id": self._sensor_id.lower(),
             "measure_type": sensor_state.measure.type,
             "original_unit": sensor_state.measure.unit,
             "last_updated": sensor_state.measure.date,

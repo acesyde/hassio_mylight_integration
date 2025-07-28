@@ -5,7 +5,7 @@ from __future__ import annotations
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import ATTRIBUTION, DOMAIN, LOGGER, NAME
+from .const import ATTRIBUTION, CONF_SUBSCRIPTION_ID, DOMAIN, LOGGER, NAME
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 
@@ -23,7 +23,10 @@ class MyLightSystemsEntity(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
         """Initialize the entity."""
         super().__init__(coordinator)
         self._device_id = device_id
-        self._attr_unique_id = f"{DOMAIN}_{device_id}"
+
+        # Get subscription_id from config entry and convert to lowercase
+        subscription_id = coordinator.config_entry.data[CONF_SUBSCRIPTION_ID]
+        self._attr_unique_id = f"{str(subscription_id).lower()}_{device_id.lower().replace('_', '-')}"
 
         # Find the device in coordinator data
         self._device = None
@@ -42,7 +45,6 @@ class MyLightSystemsEntity(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
             name=self._device.name,
             manufacturer=NAME,
             model=self._device.device_type_name,
-            sw_version=getattr(self._device, "sw_version", None),
         )
 
     @property
@@ -65,7 +67,10 @@ class MyLightSystemsSensorEntity(MyLightSystemsEntity):
         """Initialize the sensor entity."""
         super().__init__(coordinator, device_id)
         self._sensor_id = sensor_id
-        self._attr_unique_id = f"{DOMAIN}_{sensor_id}"
+
+        # Get subscription_id from config entry and convert all components to lowercase
+        subscription_id = coordinator.config_entry.data[CONF_SUBSCRIPTION_ID]
+        self._attr_unique_id = f"{str(subscription_id).lower()}_{device_id.lower()}_{sensor_id.lower()}"
 
         # Find the device state and sensor state
         self._device_state = None
