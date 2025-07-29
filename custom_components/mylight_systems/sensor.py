@@ -5,6 +5,7 @@ from __future__ import annotations
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
+    SensorEntityDescription,
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -14,86 +15,99 @@ from homeassistant.const import (
     UnitOfPower,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DATA_COORDINATOR, DOMAIN, LOGGER
+from .const import ATTRIBUTION, CONF_SUBSCRIPTION_ID, DATA_COORDINATOR, DOMAIN, LOGGER, NAME
 from .coordinator import MyLightSystemsDataUpdateCoordinator
-from .entity import MyLightSystemsSensorEntity
 
-# Mapping of sensor measure types to Home Assistant sensor configurations
+# Mapping of sensor measure types to Home Assistant sensor entity descriptions
 SENSOR_TYPE_MAPPING = {
-    "electric_power": {
-        "device_class": SensorDeviceClass.POWER,
-        "unit": UnitOfPower.WATT,
-        "state_class": SensorStateClass.MEASUREMENT,
-        "name_suffix": "Power",
-    },
-    "produced_energy": {
-        "device_class": SensorDeviceClass.ENERGY,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.TOTAL,
-        "name_suffix": "Produced Energy",
-    },
-    "electricity_meter_energy": {
-        "device_class": SensorDeviceClass.ENERGY,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.TOTAL,
-        "name_suffix": "Grid Energy",
-    },
-    "total_energy": {
-        "device_class": SensorDeviceClass.ENERGY,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.TOTAL,
-        "name_suffix": "Total Energy",
-    },
-    "green_energy": {
-        "device_class": SensorDeviceClass.ENERGY,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.TOTAL,
-        "name_suffix": "Green Energy",
-    },
-    "grid_energy": {
-        "device_class": SensorDeviceClass.ENERGY,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.TOTAL,
-        "name_suffix": "Grid Energy Consumed",
-    },
-    "charge_energy": {
-        "device_class": SensorDeviceClass.ENERGY,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.TOTAL,
-        "name_suffix": "Charge Energy",
-    },
-    "discharge_energy": {
-        "device_class": SensorDeviceClass.ENERGY,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.TOTAL,
-        "name_suffix": "Discharge Energy",
-    },
-    "loss_energy": {
-        "device_class": SensorDeviceClass.ENERGY,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.TOTAL,
-        "name_suffix": "Loss Energy",
-    },
-    "soc": {
-        "device_class": SensorDeviceClass.ENERGY_STORAGE,
-        "unit": UnitOfEnergy.WATT_HOUR,
-        "state_class": SensorStateClass.MEASUREMENT,
-        "name_suffix": "State of Charge",
-    },
-    "autonomy_rate": {
-        "device_class": None,
-        "unit": PERCENTAGE,
-        "state_class": SensorStateClass.MEASUREMENT,
-        "name_suffix": "Autonomy Rate",
-    },
-    "selfconso": {
-        "device_class": None,
-        "unit": PERCENTAGE,
-        "state_class": SensorStateClass.MEASUREMENT,
-        "name_suffix": "Self Consumption",
-    },
+    "electric_power": SensorEntityDescription(
+        key="electric_power",
+        device_class=SensorDeviceClass.POWER,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        name="Power",
+    ),
+    "produced_energy": SensorEntityDescription(
+        key="produced_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL,
+        name="Produced Energy",
+    ),
+    "electricity_meter_energy": SensorEntityDescription(
+        key="electricity_meter_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL,
+        name="Grid Energy",
+    ),
+    "total_energy": SensorEntityDescription(
+        key="total_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL,
+        name="Total Energy",
+    ),
+    "green_energy": SensorEntityDescription(
+        key="green_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL,
+        name="Green Energy",
+    ),
+    "grid_energy": SensorEntityDescription(
+        key="grid_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL,
+        name="Grid Energy Consumed",
+    ),
+    "charge_energy": SensorEntityDescription(
+        key="charge_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL,
+        name="Charge Energy",
+    ),
+    "discharge_energy": SensorEntityDescription(
+        key="discharge_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL,
+        name="Discharge Energy",
+    ),
+    "loss_energy": SensorEntityDescription(
+        key="loss_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL,
+        name="Loss Energy",
+    ),
+    "soc": SensorEntityDescription(
+        key="soc",
+        device_class=SensorDeviceClass.ENERGY_STORAGE,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.MEASUREMENT,
+        name="State of Charge",
+    ),
+    "autonomy_rate": SensorEntityDescription(
+        key="autonomy_rate",
+        device_class=None,
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        name="Autonomy Rate",
+    ),
+    "selfconso": SensorEntityDescription(
+        key="selfconso",
+        device_class=None,
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        name="Self Consumption",
+    ),
 }
 
 
@@ -130,7 +144,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                             coordinator=coordinator,
                             device_id=device_id,
                             sensor_id=sensor_id,
-                            sensor_config=SENSOR_TYPE_MAPPING[measure_type],
+                            description=SENSOR_TYPE_MAPPING[measure_type],
                         )
                     )
                 else:
@@ -140,17 +154,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                         measure_type,
                         sensor_id,
                     )
+                    generic_description = SensorEntityDescription(
+                        key=f"generic_{sensor_id}",
+                        device_class=None,
+                        native_unit_of_measurement=sensor_state.measure.unit if sensor_state.measure else None,
+                        state_class=SensorStateClass.MEASUREMENT,
+                        name=f"Sensor {sensor_id.split('-')[-1].lower()}",
+                    )
                     entities.append(
                         MyLightSystemsSensor(
                             coordinator=coordinator,
                             device_id=device_id,
                             sensor_id=sensor_id,
-                            sensor_config={
-                                "device_class": None,
-                                "unit": sensor_state.measure.unit if sensor_state.measure else None,
-                                "state_class": SensorStateClass.MEASUREMENT,
-                                "name_suffix": f"Sensor {sensor_id.split('-')[-1].lower()}",
-                            },
+                            description=generic_description,
                         )
                     )
 
@@ -158,31 +174,87 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     async_add_entities(entities, update_before_add=True)
 
 
-class MyLightSystemsSensor(MyLightSystemsSensorEntity, SensorEntity):
+class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator], SensorEntity):
     """MyLight Systems sensor entity."""
+
+    _attr_attribution = ATTRIBUTION
+    _attr_has_entity_name = True
 
     def __init__(
         self,
         coordinator: MyLightSystemsDataUpdateCoordinator,
         device_id: str,
         sensor_id: str,
-        sensor_config: dict,
+        description: SensorEntityDescription,
     ) -> None:
         """Initialize the sensor."""
-        super().__init__(coordinator, device_id, sensor_id)
+        super().__init__(coordinator)
 
-        LOGGER.debug("Sensor ID: %s", sensor_id)
-        LOGGER.debug("Device ID: %s", device_id)
+        self.entity_description = description
+        self._device_id = device_id
+        self._sensor_id = sensor_id
 
-        self._sensor_config = sensor_config
-        self._attr_device_class = sensor_config.get("device_class")
-        self._attr_native_unit_of_measurement = sensor_config.get("unit")
-        self._attr_state_class = sensor_config.get("state_class")
+        # Get subscription_id from config entry and convert all components to lowercase
+        subscription_id = coordinator.config_entry.data[CONF_SUBSCRIPTION_ID]
+        self._attr_unique_id = f"{str(subscription_id).lower()}_{device_id.lower().replace('-', '_')}_{sensor_id.lower().replace('-', '_')}"
 
-        # Set the entity name
-        device_name = self._device.name if self._device else device_id
-        sensor_name = sensor_config.get("name_suffix", sensor_id)
-        self._attr_name = f"{device_name} {sensor_name}"
+        # Find the device in coordinator data
+        self._device = None
+        for device in coordinator.data.devices:
+            if device.id == device_id:
+                self._device = device
+                break
+
+        if not self._device:
+            LOGGER.error("Device %s not found in coordinator data", device_id)
+            return
+
+        # Set device info
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, device_id)},
+            name=self._device.name,
+            manufacturer=NAME,
+            model=self._device.device_type_name,
+        )
+
+        # Find the device state and sensor state
+        self._device_state = None
+        self._sensor_state = None
+
+        for state in coordinator.data.states:
+            if state.device_id == device_id:
+                self._device_state = state
+                # Find the specific sensor state
+                for sensor_state in state.sensor_states:
+                    if sensor_state.sensor_id == sensor_id:
+                        self._sensor_state = sensor_state
+                        break
+                break
+
+        if not self._sensor_state:
+            LOGGER.error("Sensor %s not found for device %s", sensor_id, device_id)
+
+    def _get_current_sensor_state(self):
+        """Get the current sensor state from coordinator data."""
+        if not self.coordinator.data or not self.coordinator.data.states:
+            return None
+
+        for state in self.coordinator.data.states:
+            if state.device_id == self._device_id:
+                for sensor_state in state.sensor_states:
+                    if sensor_state.sensor_id == self._sensor_id:
+                        return sensor_state
+        return None
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return (
+            self.coordinator.last_update_success
+            and self._device is not None
+            and getattr(self._device, "state", True)
+            and self._get_current_sensor_state() is not None
+        )
 
     @property
     def native_value(self) -> float | int | None:
@@ -194,7 +266,10 @@ class MyLightSystemsSensor(MyLightSystemsSensorEntity, SensorEntity):
         value = sensor_state.measure.value
 
         # Convert Ws (watt-seconds) to Wh (watt-hours) for energy sensors
-        if sensor_state.measure.unit == "Ws" and self._attr_native_unit_of_measurement == UnitOfEnergy.WATT_HOUR:
+        if (
+            sensor_state.measure.unit == "Ws"
+            and self.entity_description.native_unit_of_measurement == UnitOfEnergy.WATT_HOUR
+        ):
             return round(value / 3600, 2)  # Convert Ws to Wh
 
         return value

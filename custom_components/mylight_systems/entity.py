@@ -26,7 +26,7 @@ class MyLightSystemsEntity(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
 
         # Get subscription_id from config entry and convert to lowercase
         subscription_id = coordinator.config_entry.data[CONF_SUBSCRIPTION_ID]
-        self._attr_unique_id = f"{str(subscription_id).lower()}_{device_id.lower().replace('_', '-')}"
+        self._attr_unique_id = f"{str(subscription_id)}_{device_id.replace('-', '_')}".lower()
 
         # Find the device in coordinator data
         self._device = None
@@ -53,55 +53,3 @@ class MyLightSystemsEntity(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
         return (
             self.coordinator.last_update_success and self._device is not None and getattr(self._device, "state", True)
         )
-
-
-class MyLightSystemsSensorEntity(MyLightSystemsEntity):
-    """Base sensor entity for MyLight Systems devices."""
-
-    def __init__(
-        self,
-        coordinator: MyLightSystemsDataUpdateCoordinator,
-        device_id: str,
-        sensor_id: str,
-    ) -> None:
-        """Initialize the sensor entity."""
-        super().__init__(coordinator, device_id)
-        self._sensor_id = sensor_id
-
-        # Get subscription_id from config entry and convert all components to lowercase
-        subscription_id = coordinator.config_entry.data[CONF_SUBSCRIPTION_ID]
-        self._attr_unique_id = f"{str(subscription_id).lower()}_{device_id.lower()}_{sensor_id.lower()}"
-
-        # Find the device state and sensor state
-        self._device_state = None
-        self._sensor_state = None
-
-        for state in coordinator.data.states:
-            if state.device_id == device_id:
-                self._device_state = state
-                # Find the specific sensor state
-                for sensor_state in state.sensor_states:
-                    if sensor_state.sensor_id == sensor_id:
-                        self._sensor_state = sensor_state
-                        break
-                break
-
-        if not self._sensor_state:
-            LOGGER.error("Sensor %s not found for device %s", sensor_id, device_id)
-
-    def _get_current_sensor_state(self):
-        """Get the current sensor state from coordinator data."""
-        if not self.coordinator.data or not self.coordinator.data.states:
-            return None
-
-        for state in self.coordinator.data.states:
-            if state.device_id == self._device_id:
-                for sensor_state in state.sensor_states:
-                    if sensor_state.sensor_id == self._sensor_id:
-                        return sensor_state
-        return None
-
-    @property
-    def available(self) -> bool:
-        """Return True if sensor is available."""
-        return super().available and self._get_current_sensor_state() is not None
