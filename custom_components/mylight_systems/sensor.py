@@ -138,6 +138,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                 sensor_id = sensor_state.sensor_id
                 measure_type = sensor_state.measure.type if sensor_state.measure else None
 
+                # Handle cases where type is missing but can be inferred from sensor ID
+                if measure_type is None and sensor_state.measure:
+                    if "autonomy_rate" in sensor_id:
+                        measure_type = "autonomy_rate"
+                        LOGGER.debug("Inferred measure type 'autonomy_rate' for sensor %s", sensor_id)
+                    elif "selfconso" in sensor_id:
+                        measure_type = "selfconso"
+                        LOGGER.debug("Inferred measure type 'selfconso' for sensor %s", sensor_id)
+
                 if measure_type in SENSOR_TYPE_MAPPING:
                     entities.append(
                         MyLightSystemsSensor(
@@ -281,9 +290,17 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
         if not sensor_state or not sensor_state.measure:
             return None
 
+        # Get measure type, infer from sensor ID if missing
+        measure_type = sensor_state.measure.type
+        if measure_type is None:
+            if "autonomy_rate" in self._sensor_id:
+                measure_type = "autonomy_rate"
+            elif "selfconso" in self._sensor_id:
+                measure_type = "selfconso"
+
         return {
             "sensor_id": self._sensor_id.lower(),
-            "measure_type": sensor_state.measure.type,
+            "measure_type": measure_type,
             "original_unit": sensor_state.measure.unit,
             "last_updated": sensor_state.measure.date,
         }
