@@ -19,7 +19,7 @@ from mylightsystems import (
     MyLightSystemsInvalidAuthError,
     MyLightSystemsUnauthorizedError,
 )
-from mylightsystems.models import VirtualDevice
+from mylightsystems.models import Device, DeviceState, Measure, VirtualDevice
 
 from .const import (
     DOMAIN,
@@ -31,9 +31,9 @@ from .const import (
 class MyLightSystemsCoordinatorData(NamedTuple):
     """Data returned by the coordinator."""
 
-    devices: list = []
-    states: dict = {}
-    total_measures: dict = {}
+    devices: list[Device] = []
+    states: list[DeviceState] = []
+    total_measures: list[Measure] = []
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -72,13 +72,13 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             LOGGER.debug("Fetched %d devices from API", len(devices))
 
             # Fetch states from the API
-            states = {}
+            states = []
             try:
                 states = await self.client.get_states(self.__auth_token)
                 LOGGER.debug("Fetched %d states from API", len(states) if states else 0)
             except Exception as exc:
                 LOGGER.warning("Failed to fetch states from API: %s", exc)
-                states = {}
+                states = []
 
             # Fetch total measures from the API
             try:
@@ -89,12 +89,12 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                     LOGGER.debug("Fetched %d total measures from API", len(total_measures) if total_measures else 0)
                 else:
                     LOGGER.warning("No virtual device found")
-                    total_measures = {}
+                    total_measures = []
             except Exception as exc:
                 LOGGER.warning("Failed to fetch total measures from API: %s", exc)
                 # Log in debug mode the full exception
                 LOGGER.debug("Full exception: %s", exc_info=True)
-                total_measures = {}
+                total_measures = []
 
             data = MyLightSystemsCoordinatorData(devices=devices, states=states, total_measures=total_measures)
 

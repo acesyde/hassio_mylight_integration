@@ -299,14 +299,18 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
         # Check if this sensor key has a mapping to total_measures
         sensor_key = self.entity_description.key
         if sensor_key not in TOTAL_MEASURES_MAPPING:
+            LOGGER.debug("Sensor %s has no mapping to total_measures", sensor_key)
             return None
 
         total_measure_type = TOTAL_MEASURES_MAPPING[sensor_key]
+        LOGGER.debug("Total measure type: %s", total_measure_type)
 
-        # total_measures is a dict, get the measure by type
-        if total_measure_type in self.coordinator.data.total_measures:
-            measure = self.coordinator.data.total_measures[total_measure_type]
-            return measure.value if hasattr(measure, "value") else measure
+        # total_measures is a list, find the measure by type
+        for measure in self.coordinator.data.total_measures:
+            if hasattr(measure, "type") and measure.type == total_measure_type:
+                LOGGER.debug("Sensor %s has mapping to total_measures", sensor_key)
+                LOGGER.debug("Measure value: %s", measure.value)
+                return measure.value if hasattr(measure, "value") else measure
 
         return None
 
@@ -323,13 +327,12 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
             sensor_key = self.entity_description.key
             if sensor_key in TOTAL_MEASURES_MAPPING:
                 total_measure_type = TOTAL_MEASURES_MAPPING[sensor_key]
-                if (
-                    self.coordinator.data
-                    and self.coordinator.data.total_measures
-                    and total_measure_type in self.coordinator.data.total_measures
-                ):
-                    measure = self.coordinator.data.total_measures[total_measure_type]
-                    unit = measure.unit if hasattr(measure, "unit") else None
+                if self.coordinator.data and self.coordinator.data.total_measures:
+                    # Find the measure by type in the list
+                    for measure in self.coordinator.data.total_measures:
+                        if hasattr(measure, "type") and measure.type == total_measure_type:
+                            unit = measure.unit if hasattr(measure, "unit") else None
+                            break
         else:
             # Fallback to sensor state value
             sensor_state = self._get_current_sensor_state()
@@ -363,18 +366,16 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
         if uses_total_measures:
             # Get data from total_measures
             total_measure_type = TOTAL_MEASURES_MAPPING[sensor_key]
-            if (
-                self.coordinator.data
-                and self.coordinator.data.total_measures
-                and total_measure_type in self.coordinator.data.total_measures
-            ):
-                measure = self.coordinator.data.total_measures[total_measure_type]
-                return {
-                    "sensor_id": self._sensor_id.lower(),
-                    "measure_type": total_measure_type,
-                    "original_unit": measure.unit if hasattr(measure, "unit") else None,
-                    "data_source": "total_measures",
-                }
+            if self.coordinator.data and self.coordinator.data.total_measures:
+                # Find the measure by type in the list
+                for measure in self.coordinator.data.total_measures:
+                    if hasattr(measure, "type") and measure.type == total_measure_type:
+                        return {
+                            "sensor_id": self._sensor_id.lower(),
+                            "measure_type": total_measure_type,
+                            "original_unit": measure.unit if hasattr(measure, "unit") else None,
+                            "data_source": "total_measures",
+                        }
 
         # Fallback to sensor state
         sensor_state = self._get_current_sensor_state()
