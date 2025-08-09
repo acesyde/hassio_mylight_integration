@@ -19,6 +19,7 @@ from mylightsystems import (
     MyLightSystemsInvalidAuthError,
     MyLightSystemsUnauthorizedError,
 )
+from mylightsystems.models import VirtualDevice
 
 from .const import (
     DOMAIN,
@@ -32,6 +33,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
 
     devices: list = []
     states: dict = {}
+    total_measures: dict = {}
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -78,7 +80,23 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
                 LOGGER.warning("Failed to fetch states from API: %s", exc)
                 states = {}
 
-            data = MyLightSystemsCoordinatorData(devices=devices, states=states)
+            # Fetch total measures from the API
+            try:
+                virtual_device = next(device for device in devices if isinstance(device, VirtualDevice))
+                if virtual_device:
+                    LOGGER.debug("Fetching total measures for virtual device %s", virtual_device.id)
+                    total_measures = await self.client.get_measures_total(self.__auth_token, virtual_device.id)
+                    LOGGER.debug("Fetched %d total measures from API", len(total_measures) if total_measures else 0)
+                else:
+                    LOGGER.warning("No virtual device found")
+                    total_measures = {}
+            except Exception as exc:
+                LOGGER.warning("Failed to fetch total measures from API: %s", exc)
+                # Log in debug mode the full exception
+                LOGGER.debug("Full exception: %s", exc_info=True)
+                total_measures = {}
+
+            data = MyLightSystemsCoordinatorData(devices=devices, states=states, total_measures=total_measures)
 
             self._data = data
 
