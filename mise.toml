@@ -1,14 +1,14 @@
 [tools]
 pre-commit = "4.2"
 python = "3.13"
-uv = "0.8.3"
+uv = "0.8.8"
 
 [settings]
 experimental = true
 auto_install = false
 
 [env]
-_.python.venv = { path = ".venv" }
+_.python.venv = { path = ".venv", create = true}
 
 [task_config]
 includes = ["tasks"]
