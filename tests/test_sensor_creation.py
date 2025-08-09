@@ -51,7 +51,7 @@ def test_sensor_type_mapping__should_have_correct_energy_sensor_config():
     assert actual_description.key == "produced_energy"
     assert actual_description.device_class == SensorDeviceClass.ENERGY
     assert actual_description.native_unit_of_measurement == UnitOfEnergy.WATT_HOUR
-    assert actual_description.state_class == SensorStateClass.MEASUREMENT
+    assert actual_description.state_class == SensorStateClass.TOTAL_INCREASING
     assert actual_description.name == "Produced Energy"
 
 
@@ -213,6 +213,7 @@ def test_mylight_systems_sensor__should_have_correct_extra_attributes():
         "measure_type": "electric_power",
         "original_unit": "watt",
         "last_updated": "2025-07-28 13:54:42",
+        "data_source": "sensor_states",
     }
     assert attributes == expected_attributes
 

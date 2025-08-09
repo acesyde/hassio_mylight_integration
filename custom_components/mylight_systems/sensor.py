@@ -22,6 +22,19 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import ATTRIBUTION, CONF_SUBSCRIPTION_ID, DATA_COORDINATOR, DOMAIN, LOGGER, NAME
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
+# Mapping of sensor keys to their corresponding total_measures type
+TOTAL_MEASURES_MAPPING = {
+    "produced_energy": "produced_energy",
+    "electricity_meter_energy": "electricity_meter_energy",
+    "green_energy": "green_energy",
+    "grid_energy": "grid_energy",
+    "autonomy_rate": "autonomy_rate",
+    "selfconso": "self_conso",
+    "discharge_energy": "msb_discharge",
+    "loss_energy": "msb_loss",
+    "charge_energy": "msb_charge",
+}
+
 # Mapping of sensor measure types to Home Assistant sensor entity descriptions
 SENSOR_TYPE_MAPPING = {
     "electric_power": SensorEntityDescription(
@@ -111,6 +124,36 @@ SENSOR_TYPE_MAPPING = {
 }
 
 
+def _find_device_by_id(devices: list, device_id: str):
+    """Find device by ID in devices list."""
+    for device in devices:
+        if device.id == device_id:
+            return device
+    return None
+
+
+def _infer_measure_type_from_sensor_id(sensor_id: str) -> str | None:
+    """Infer measure type from sensor ID when type is missing."""
+    if "autonomy_rate" in sensor_id:
+        LOGGER.debug("Inferred measure type 'autonomy_rate' for sensor %s", sensor_id)
+        return "autonomy_rate"
+    elif "selfconso" in sensor_id:
+        LOGGER.debug("Inferred measure type 'selfconso' for sensor %s", sensor_id)
+        return "selfconso"
+    return None
+
+
+def _create_generic_sensor_description(sensor_id: str, sensor_state) -> SensorEntityDescription:
+    """Create a generic sensor description for unknown sensor types."""
+    return SensorEntityDescription(
+        key=f"generic_{sensor_id}",
+        device_class=None,
+        native_unit_of_measurement=sensor_state.measure.unit if sensor_state.measure else None,
+        state_class=SensorStateClass.MEASUREMENT,
+        name=f"Sensor {sensor_id.split('-')[-1].lower()}",
+    )
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Set up MyLight Systems sensor entities."""
     coordinator: MyLightSystemsDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
@@ -121,13 +164,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     if coordinator.data and coordinator.data.states:
         for device_state in coordinator.data.states:
             device_id = device_state.device_id
-
-            # Find the corresponding device to get its name
-            device = None
-            for dev in coordinator.data.devices:
-                if dev.id == device_id:
-                    device = dev
-                    break
+            device = _find_device_by_id(coordinator.data.devices, device_id)
 
             if not device:
                 LOGGER.warning("Device %s not found for device state", device_id)
@@ -140,12 +177,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
                 # Handle cases where type is missing but can be inferred from sensor ID
                 if measure_type is None and sensor_state.measure:
-                    if "autonomy_rate" in sensor_id:
-                        measure_type = "autonomy_rate"
-                        LOGGER.debug("Inferred measure type 'autonomy_rate' for sensor %s", sensor_id)
-                    elif "selfconso" in sensor_id:
-                        measure_type = "selfconso"
-                        LOGGER.debug("Inferred measure type 'selfconso' for sensor %s", sensor_id)
+                    measure_type = _infer_measure_type_from_sensor_id(sensor_id)
 
                 if measure_type in SENSOR_TYPE_MAPPING:
                     entities.append(
@@ -163,13 +195,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                         measure_type,
                         sensor_id,
                     )
-                    generic_description = SensorEntityDescription(
-                        key=f"generic_{sensor_id}",
-                        device_class=None,
-                        native_unit_of_measurement=sensor_state.measure.unit if sensor_state.measure else None,
-                        state_class=SensorStateClass.MEASUREMENT,
-                        name=f"Sensor {sensor_id.split('-')[-1].lower()}",
-                    )
+                    generic_description = _create_generic_sensor_description(sensor_id, sensor_state)
                     entities.append(
                         MyLightSystemsSensor(
                             coordinator=coordinator,
@@ -265,20 +291,56 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
             and self._get_current_sensor_state() is not None
         )
 
+    def _get_total_measure_value(self) -> float | int | None:
+        """Get value from total_measures if this sensor has a mapping."""
+        if not self.coordinator.data or not self.coordinator.data.total_measures:
+            return None
+
+        # Check if this sensor key has a mapping to total_measures
+        sensor_key = self.entity_description.key
+        if sensor_key not in TOTAL_MEASURES_MAPPING:
+            return None
+
+        total_measure_type = TOTAL_MEASURES_MAPPING[sensor_key]
+
+        # total_measures is a dict, get the measure by type
+        if total_measure_type in self.coordinator.data.total_measures:
+            measure = self.coordinator.data.total_measures[total_measure_type]
+            return measure.value if hasattr(measure, "value") else measure
+
+        return None
+
     @property
     def native_value(self) -> float | int | None:
         """Return the state of the sensor."""
-        sensor_state = self._get_current_sensor_state()
-        if not sensor_state or not sensor_state.measure:
-            return None
+        # First try to get value from total_measures if this sensor has a mapping
+        total_measure_value = self._get_total_measure_value()
+        if total_measure_value is not None:
+            value = total_measure_value
+            unit = None
 
-        value = sensor_state.measure.value
+            # Get unit from total_measures if available
+            sensor_key = self.entity_description.key
+            if sensor_key in TOTAL_MEASURES_MAPPING:
+                total_measure_type = TOTAL_MEASURES_MAPPING[sensor_key]
+                if (
+                    self.coordinator.data
+                    and self.coordinator.data.total_measures
+                    and total_measure_type in self.coordinator.data.total_measures
+                ):
+                    measure = self.coordinator.data.total_measures[total_measure_type]
+                    unit = measure.unit if hasattr(measure, "unit") else None
+        else:
+            # Fallback to sensor state value
+            sensor_state = self._get_current_sensor_state()
+            if not sensor_state or not sensor_state.measure:
+                return None
+
+            value = sensor_state.measure.value
+            unit = sensor_state.measure.unit
 
         # Convert Ws (watt-seconds) to Wh (watt-hours) for energy sensors
-        if (
-            sensor_state.measure.unit == "Ws"
-            and self.entity_description.native_unit_of_measurement == UnitOfEnergy.WATT_HOUR
-        ):
+        if unit == "Ws" and self.entity_description.native_unit_of_measurement == UnitOfEnergy.WATT_HOUR:
             value = value / 3600  # Convert Ws to Wh
 
         # Ensure certain sensors always return positive values
@@ -294,6 +356,27 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
     @property
     def extra_state_attributes(self) -> dict[str, str] | None:
         """Return additional state attributes."""
+        # Check if this sensor uses total_measures
+        sensor_key = self.entity_description.key
+        uses_total_measures = sensor_key in TOTAL_MEASURES_MAPPING
+
+        if uses_total_measures:
+            # Get data from total_measures
+            total_measure_type = TOTAL_MEASURES_MAPPING[sensor_key]
+            if (
+                self.coordinator.data
+                and self.coordinator.data.total_measures
+                and total_measure_type in self.coordinator.data.total_measures
+            ):
+                measure = self.coordinator.data.total_measures[total_measure_type]
+                return {
+                    "sensor_id": self._sensor_id.lower(),
+                    "measure_type": total_measure_type,
+                    "original_unit": measure.unit if hasattr(measure, "unit") else None,
+                    "data_source": "total_measures",
+                }
+
+        # Fallback to sensor state
         sensor_state = self._get_current_sensor_state()
         if not sensor_state or not sensor_state.measure:
             return None
@@ -311,4 +394,5 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
             "measure_type": measure_type,
             "original_unit": sensor_state.measure.unit,
             "last_updated": sensor_state.measure.date,
+            "data_source": "sensor_states",
         }
