@@ -51,7 +51,7 @@ def test_sensor_type_mapping__should_have_correct_energy_sensor_config():
     assert actual_description.key == "produced_energy"
     assert actual_description.device_class == SensorDeviceClass.ENERGY
     assert actual_description.native_unit_of_measurement == UnitOfEnergy.WATT_HOUR
-    assert actual_description.state_class == SensorStateClass.TOTAL
+    assert actual_description.state_class == SensorStateClass.MEASUREMENT
     assert actual_description.name == "Produced Energy"
 
 
@@ -64,7 +64,7 @@ def test_sensor_type_mapping__should_have_correct_percentage_sensor_config():
     assert actual_description.key == "autonomy_rate"
     assert actual_description.device_class is None
     assert actual_description.native_unit_of_measurement == PERCENTAGE
-    assert actual_description.state_class == SensorStateClass.MEASUREMENT
+    assert actual_description.state_class == SensorStateClass.TOTAL
     assert actual_description.name == "Autonomy Rate"
 
 

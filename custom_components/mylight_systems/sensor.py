@@ -279,7 +279,15 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
             sensor_state.measure.unit == "Ws"
             and self.entity_description.native_unit_of_measurement == UnitOfEnergy.WATT_HOUR
         ):
-            return round(value / 3600, 2)  # Convert Ws to Wh
+            value = value / 3600  # Convert Ws to Wh
+
+        # Ensure certain sensors always return positive values
+        if self.entity_description.key == "grid_energy" and value is not None and value < 0:
+            value = abs(value)
+
+        # Round the final value if it's a float
+        if isinstance(value, float):
+            return round(value, 2)
 
         return value
 
