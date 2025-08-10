@@ -33,6 +33,7 @@ TOTAL_MEASURES_MAPPING = {
     "discharge_energy": "msb_discharge",
     "loss_energy": "msb_loss",
     "charge_energy": "msb_charge",
+    "total_energy": "energy",
 }
 
 # Mapping of sensor measure types to Home Assistant sensor entity descriptions
@@ -55,14 +56,14 @@ SENSOR_TYPE_MAPPING = {
         key="electricity_meter_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
-        state_class=SensorStateClass.TOTAL,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         name="Grid Energy",
     ),
     "total_energy": SensorEntityDescription(
         key="total_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
-        state_class=SensorStateClass.TOTAL,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         name="Total Energy",
     ),
     "green_energy": SensorEntityDescription(
