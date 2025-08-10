@@ -39,7 +39,6 @@ def test_sensor_type_mapping__should_have_correct_power_sensor_config():
     assert actual_description.device_class == SensorDeviceClass.POWER
     assert actual_description.native_unit_of_measurement == UnitOfPower.WATT
     assert actual_description.state_class == SensorStateClass.MEASUREMENT
-    assert actual_description.name == "Power"
 
 
 def test_sensor_type_mapping__should_have_correct_energy_sensor_config():
@@ -52,7 +51,6 @@ def test_sensor_type_mapping__should_have_correct_energy_sensor_config():
     assert actual_description.device_class == SensorDeviceClass.ENERGY
     assert actual_description.native_unit_of_measurement == UnitOfEnergy.WATT_HOUR
     assert actual_description.state_class == SensorStateClass.TOTAL_INCREASING
-    assert actual_description.name == "Produced Energy"
 
 
 def test_sensor_type_mapping__should_have_correct_percentage_sensor_config():
@@ -65,7 +63,6 @@ def test_sensor_type_mapping__should_have_correct_percentage_sensor_config():
     assert actual_description.device_class is None
     assert actual_description.native_unit_of_measurement == PERCENTAGE
     assert actual_description.state_class == SensorStateClass.TOTAL
-    assert actual_description.name == "Autonomy Rate"
 
 
 def test_mylight_systems_sensor__should_convert_ws_to_wh_for_energy():

@@ -14,7 +14,7 @@ PLATFORMS = [Platform.SENSOR, Platform.SWITCH]
 VERSION = "1.0.0"
 COORDINATOR = "coordinator"
 ATTRIBUTION = "Data provided by https://www.mylight-systems.com/"
-SCAN_INTERVAL_IN_MINUTES = timedelta(minutes=5)
+SCAN_INTERVAL_IN_MINUTES = timedelta(minutes=15)
 
 # Configuration
 CONF_SUBSCRIPTION_ID = "subscription_id"

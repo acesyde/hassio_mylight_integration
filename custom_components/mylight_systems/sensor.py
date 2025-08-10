@@ -35,6 +35,7 @@ TOTAL_MEASURES_MAPPING = {
     "loss_energy": "msb_loss",
     "charge_energy": "msb_charge",
     "total_energy": "energy",
+    "grid_consumed_without_battery_energy": "grid_sans_msb_energy",
 }
 
 # Mapping of sensor measure types to Home Assistant sensor entity descriptions
@@ -45,7 +46,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfPower.WATT,
         state_class=SensorStateClass.MEASUREMENT,
         translation_key="power",
-        name="Power",  # Fallback name
     ),
     "produced_energy": SensorEntityDescription(
         key="produced_energy",
@@ -53,7 +53,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="produced_energy",
-        name="Produced Energy",  # Fallback name
     ),
     "electricity_meter_energy": SensorEntityDescription(
         key="electricity_meter_energy",
@@ -61,7 +60,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="grid_energy_meter",
-        name="Grid Energy",  # Fallback name
     ),
     "total_energy": SensorEntityDescription(
         key="total_energy",
@@ -69,7 +67,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="total_energy",
-        name="Total Energy",  # Fallback name
     ),
     "green_energy": SensorEntityDescription(
         key="green_energy",
@@ -77,7 +74,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="green_energy",
-        name="Green Energy",  # Fallback name
     ),
     "grid_energy": SensorEntityDescription(
         key="grid_energy",
@@ -85,7 +81,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="grid_energy_consumed",
-        name="Grid Energy Consumed",  # Fallback name
     ),
     "charge_energy": SensorEntityDescription(
         key="charge_energy",
@@ -93,7 +88,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="charge_energy",
-        name="Charge Energy",  # Fallback name
     ),
     "discharge_energy": SensorEntityDescription(
         key="discharge_energy",
@@ -101,7 +95,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="discharge_energy",
-        name="Discharge Energy",  # Fallback name
     ),
     "loss_energy": SensorEntityDescription(
         key="loss_energy",
@@ -109,7 +102,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="loss_energy",
-        name="Loss Energy",  # Fallback name
     ),
     "soc": SensorEntityDescription(
         key="soc",
@@ -117,7 +109,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
         translation_key="state_of_charge",
-        name="State of Charge",  # Fallback name
     ),
     "autonomy_rate": SensorEntityDescription(
         key="autonomy_rate",
@@ -125,7 +116,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.TOTAL,
         translation_key="autonomy_rate",
-        name="Autonomy Rate",  # Fallback name
     ),
     "selfconso": SensorEntityDescription(
         key="selfconso",
@@ -133,7 +123,6 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.TOTAL,
         translation_key="self_consumption",
-        name="Self Consumption",  # Fallback name
     ),
     "grid_returned_energy": SensorEntityDescription(
         key="grid_returned_energy",
@@ -141,7 +130,13 @@ SENSOR_TYPE_MAPPING = {
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         translation_key="grid_returned_energy",
-        name="Grid Returned Energy",  # Fallback name
+    ),
+    "grid_consumed_without_battery_energy": SensorEntityDescription(
+        key="grid_consumed_without_battery_energy",
+        device_class=SensorDeviceClass.ENERGY,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        translation_key="grid_consumed_without_battery_energy",
     ),
 }
 
@@ -239,7 +234,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                     )
                 )
                 LOGGER.info("Added grid_returned_energy computed sensor for virtual device %s", device.id)
-                break  # Only create one computed sensor for the first virtual device
+                break
 
     LOGGER.info("Setting up %d sensor entities", len(entities))
     async_add_entities(entities, update_before_add=True)

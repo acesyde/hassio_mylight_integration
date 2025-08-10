@@ -75,7 +75,6 @@ def test_grid_returned_energy_sensor_type_mapping__should_have_correct_config():
     assert actual_description.native_unit_of_measurement == UnitOfEnergy.WATT_HOUR
     assert actual_description.state_class == SensorStateClass.TOTAL_INCREASING
     assert actual_description.translation_key == "grid_returned_energy"
-    assert actual_description.name == "Grid Returned Energy"  # Fallback name
 
 
 def test_grid_returned_energy_sensor__should_compute_basic_formula():

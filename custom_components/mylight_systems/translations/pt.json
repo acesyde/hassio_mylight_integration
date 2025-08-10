@@ -55,6 +55,9 @@
             },
             "grid_returned_energy": {
                 "name": "Energia Devolvida à Rede"
+            },
+            "grid_consumed_without_battery_energy": {
+                "name": "Energia da Rede Consumida Sem Bateria"
             }
         }
     }
