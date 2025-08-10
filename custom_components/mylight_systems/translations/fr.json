@@ -14,5 +14,12 @@
             "connection": "Impossible de se connecter au serveur.",
             "unknown": "Une erreur inconnue s'est produite."
         }
+    },
+    "entity": {
+        "sensor": {
+            "grid_returned_energy": {
+                "name": "Énergie Retournée au Réseau"
+            }
+        }
     }
 }

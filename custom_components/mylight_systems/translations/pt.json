@@ -14,5 +14,12 @@
             "connection": "Erro na ligação ao servidor.",
             "unknown": "Erro desconhecido."
         }
+    },
+    "entity": {
+        "sensor": {
+            "grid_returned_energy": {
+                "name": "Energia Devolvida à Rede"
+            }
+        }
     }
 }
