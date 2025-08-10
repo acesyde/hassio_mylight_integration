@@ -99,7 +99,7 @@ SENSOR_TYPE_MAPPING = {
         key="loss_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         name="Loss Energy",
     ),
     "soc": SensorEntityDescription(
@@ -315,15 +315,8 @@ class MyLightSystemsGridReturnedEnergySensor(CoordinatorEntity[MyLightSystemsDat
     @property
     def extra_state_attributes(self) -> dict[str, str | float] | None:
         """Return additional state attributes."""
-        produced_energy = self._get_total_measure_value_by_type("produced_energy")
-        green_energy = self._get_total_measure_value_by_type("green_energy")
-        msb_charge = self._get_total_measure_value_by_type("msb_charge")
 
         return {
-            "produced_energy": produced_energy,
-            "green_energy": green_energy,
-            "msb_charge": msb_charge,
-            "computation": f"{produced_energy} - {green_energy} - {msb_charge}",
             "data_source": "computed_from_total_measures",
         }
 

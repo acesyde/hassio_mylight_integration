@@ -301,10 +301,6 @@ def test_grid_returned_energy_sensor__should_have_correct_extra_attributes():
 
     # Then
     expected_attributes = {
-        "produced_energy": 1000.0,
-        "green_energy": 300.0,
-        "msb_charge": 200.0,
-        "computation": "1000.0 - 300.0 - 200.0",
         "data_source": "computed_from_total_measures",
     }
     assert attributes == expected_attributes
