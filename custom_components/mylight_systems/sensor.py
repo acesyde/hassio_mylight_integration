@@ -310,8 +310,9 @@ class MyLightSystemsSensor(CoordinatorEntity[MyLightSystemsDataUpdateCoordinator
         for measure in self.coordinator.data.total_measures:
             if hasattr(measure, "type") and measure.type == total_measure_type:
                 LOGGER.debug("Sensor %s has mapping to total_measures", sensor_key)
-                LOGGER.debug("Measure value: %s", measure.value)
-                return measure.value if hasattr(measure, "value") else measure
+                value = measure.value if hasattr(measure, "value") else measure
+                LOGGER.debug("Measure value: %s", value)
+                return value
 
         return None
 

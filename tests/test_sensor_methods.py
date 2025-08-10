@@ -115,7 +115,9 @@ class TestGetTotalMeasureValue:
         mock_device = Mock()
         mock_device.id = "test-device"
 
-        mock_total_measures = {"some_measure": Mock()}
+        mock_measure = Mock()
+        mock_measure.type = "some_measure"
+        mock_total_measures = [mock_measure]
         mock_coordinator.data = MyLightSystemsCoordinatorData(
             devices=[mock_device], states=[], total_measures=mock_total_measures
         )
@@ -142,7 +144,9 @@ class TestGetTotalMeasureValue:
         mock_device = Mock()
         mock_device.id = "test-device"
 
-        mock_total_measures = {"other_measure": Mock()}  # Different from what we're looking for
+        mock_measure = Mock()
+        mock_measure.type = "other_measure"  # Different from what we're looking for
+        mock_total_measures = [mock_measure]
         mock_coordinator.data = MyLightSystemsCoordinatorData(
             devices=[mock_device], states=[], total_measures=mock_total_measures
         )
@@ -169,9 +173,10 @@ class TestGetTotalMeasureValue:
         mock_device.id = "test-device"
 
         mock_measure = Mock()
+        mock_measure.type = "produced_energy"
         mock_measure.value = 123.45
 
-        mock_total_measures = {"produced_energy": mock_measure}
+        mock_total_measures = [mock_measure]
         mock_coordinator.data = MyLightSystemsCoordinatorData(
             devices=[mock_device], states=[], total_measures=mock_total_measures
         )
@@ -198,9 +203,11 @@ class TestGetTotalMeasureValue:
         mock_device.id = "test-device"
 
         # Create a measure without value attribute (e.g., just a number)
-        mock_measure = 67.89
+        mock_measure = Mock(spec=["type"])  # Only allow 'type' attribute
+        mock_measure.type = "grid_energy"
+        # Don't set .value attribute to test the fallback
 
-        mock_total_measures = {"grid_energy": mock_measure}
+        mock_total_measures = [mock_measure]
         mock_coordinator.data = MyLightSystemsCoordinatorData(
             devices=[mock_device], states=[], total_measures=mock_total_measures
         )
@@ -217,7 +224,7 @@ class TestGetTotalMeasureValue:
         result = sensor._get_total_measure_value()
 
         # Then
-        assert 67.89 == result
+        assert mock_measure == result
 
     def test_get_total_measure_value__should_work_with_all_mapped_sensor_types(self):
         """Test that method works correctly with all sensor types in TOTAL_MEASURES_MAPPING."""
@@ -227,13 +234,14 @@ class TestGetTotalMeasureValue:
         mock_device.id = "test-device"
 
         # Create measures for all mapped types
-        mock_total_measures = {}
+        mock_total_measures = []
         expected_values = {}
 
         for sensor_key, total_measure_type in TOTAL_MEASURES_MAPPING.items():
             mock_measure = Mock()
+            mock_measure.type = total_measure_type
             mock_measure.value = float(hash(sensor_key) % 1000)  # Generate unique test values
-            mock_total_measures[total_measure_type] = mock_measure
+            mock_total_measures.append(mock_measure)
             expected_values[sensor_key] = mock_measure.value
 
         mock_coordinator.data = MyLightSystemsCoordinatorData(
@@ -265,9 +273,10 @@ class TestGetTotalMeasureValue:
         mock_device.id = "test-device"
 
         mock_measure = Mock()
+        mock_measure.type = "autonomy_rate"
         mock_measure.value = 100  # Integer value
 
-        mock_total_measures = {"autonomy_rate": mock_measure}
+        mock_total_measures = [mock_measure]
         mock_coordinator.data = MyLightSystemsCoordinatorData(
             devices=[mock_device], states=[], total_measures=mock_total_measures
         )
