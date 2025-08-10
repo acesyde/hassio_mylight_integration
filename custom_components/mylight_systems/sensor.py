@@ -44,84 +44,96 @@ SENSOR_TYPE_MAPPING = {
         device_class=SensorDeviceClass.POWER,
         native_unit_of_measurement=UnitOfPower.WATT,
         state_class=SensorStateClass.MEASUREMENT,
-        name="Power",
+        translation_key="power",
+        name="Power",  # Fallback name
     ),
     "produced_energy": SensorEntityDescription(
         key="produced_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Produced Energy",
+        translation_key="produced_energy",
+        name="Produced Energy",  # Fallback name
     ),
     "electricity_meter_energy": SensorEntityDescription(
         key="electricity_meter_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Grid Energy",
+        translation_key="grid_energy_meter",
+        name="Grid Energy",  # Fallback name
     ),
     "total_energy": SensorEntityDescription(
         key="total_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Total Energy",
+        translation_key="total_energy",
+        name="Total Energy",  # Fallback name
     ),
     "green_energy": SensorEntityDescription(
         key="green_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Green Energy",
+        translation_key="green_energy",
+        name="Green Energy",  # Fallback name
     ),
     "grid_energy": SensorEntityDescription(
         key="grid_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Grid Energy Consumed",
+        translation_key="grid_energy_consumed",
+        name="Grid Energy Consumed",  # Fallback name
     ),
     "charge_energy": SensorEntityDescription(
         key="charge_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Charge Energy",
+        translation_key="charge_energy",
+        name="Charge Energy",  # Fallback name
     ),
     "discharge_energy": SensorEntityDescription(
         key="discharge_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Discharge Energy",
+        translation_key="discharge_energy",
+        name="Discharge Energy",  # Fallback name
     ),
     "loss_energy": SensorEntityDescription(
         key="loss_energy",
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        name="Loss Energy",
+        translation_key="loss_energy",
+        name="Loss Energy",  # Fallback name
     ),
     "soc": SensorEntityDescription(
         key="soc",
         device_class=SensorDeviceClass.ENERGY_STORAGE,
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
-        name="State of Charge",
+        translation_key="state_of_charge",
+        name="State of Charge",  # Fallback name
     ),
     "autonomy_rate": SensorEntityDescription(
         key="autonomy_rate",
         device_class=None,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.TOTAL,
-        name="Autonomy Rate",
+        translation_key="autonomy_rate",
+        name="Autonomy Rate",  # Fallback name
     ),
     "selfconso": SensorEntityDescription(
         key="selfconso",
         device_class=None,
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.TOTAL,
-        name="Self Consumption",
+        translation_key="self_consumption",
+        name="Self Consumption",  # Fallback name
     ),
     "grid_returned_energy": SensorEntityDescription(
         key="grid_returned_energy",

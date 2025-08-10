@@ -17,6 +17,42 @@
     },
     "entity": {
         "sensor": {
+            "power": {
+                "name": "Power"
+            },
+            "produced_energy": {
+                "name": "Produced Energy"
+            },
+            "grid_energy_meter": {
+                "name": "Grid Energy"
+            },
+            "total_energy": {
+                "name": "Total Energy"
+            },
+            "green_energy": {
+                "name": "Green Energy"
+            },
+            "grid_energy_consumed": {
+                "name": "Grid Energy Consumed"
+            },
+            "charge_energy": {
+                "name": "Charge Energy"
+            },
+            "discharge_energy": {
+                "name": "Discharge Energy"
+            },
+            "loss_energy": {
+                "name": "Loss Energy"
+            },
+            "state_of_charge": {
+                "name": "State of Charge"
+            },
+            "autonomy_rate": {
+                "name": "Autonomy Rate"
+            },
+            "self_consumption": {
+                "name": "Self Consumption"
+            },
             "grid_returned_energy": {
                 "name": "Grid Returned Energy"
             }
