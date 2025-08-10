@@ -197,6 +197,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                     measure_type = _infer_measure_type_from_sensor_id(sensor_id)
 
                 if measure_type in SENSOR_TYPE_MAPPING:
+                    # Skip creating regular sensors for those handled by custom sensor classes
+                    if measure_type == "grid_consumed_without_battery_energy":
+                        continue
+
                     entities.append(
                         MyLightSystemsSensor(
                             coordinator=coordinator,
@@ -222,10 +226,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                         )
                     )
 
-    # Add grid_returned_energy computed sensor for virtual devices
+    # Add custom sensors for virtual devices
     if coordinator.data and coordinator.data.devices:
         for device in coordinator.data.devices:
             if isinstance(device, VirtualDevice):
+                # Add grid_returned_energy computed sensor
                 entities.append(
                     MyLightSystemsGridReturnedEnergySensor(
                         coordinator=coordinator,
@@ -234,6 +239,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
                     )
                 )
                 LOGGER.info("Added grid_returned_energy computed sensor for virtual device %s", device.id)
+
+                # Add grid_consumed_without_battery_energy sensor
+                entities.append(
+                    MyLightSystemsGridConsumedWithoutBatteryEnergySensor(
+                        coordinator=coordinator,
+                        virtual_device_id=device.id,
+                        description=SENSOR_TYPE_MAPPING["grid_consumed_without_battery_energy"],
+                    )
+                )
+                LOGGER.info("Added grid_consumed_without_battery_energy sensor for virtual device %s", device.id)
                 break
 
     LOGGER.info("Setting up %d sensor entities", len(entities))
@@ -325,6 +340,89 @@ class MyLightSystemsGridReturnedEnergySensor(CoordinatorEntity[MyLightSystemsDat
 
         return {
             "data_source": "computed_from_total_measures",
+        }
+
+
+class MyLightSystemsGridConsumedWithoutBatteryEnergySensor(
+    CoordinatorEntity[MyLightSystemsDataUpdateCoordinator], SensorEntity
+):
+    """Grid Consumed Without Battery Energy sensor entity."""
+
+    _attr_attribution = ATTRIBUTION
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: MyLightSystemsDataUpdateCoordinator,
+        virtual_device_id: str,
+        description: SensorEntityDescription,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+
+        self.entity_description = description
+        self._virtual_device_id = virtual_device_id
+
+        # Get subscription_id from config entry and convert all components to lowercase
+        subscription_id = coordinator.config_entry.data[CONF_SUBSCRIPTION_ID]
+        self._attr_unique_id = f"{str(subscription_id).lower()}_{virtual_device_id.lower().replace('-', '_')}_grid_consumed_without_battery_energy"
+
+        # Find the virtual device in coordinator data
+        self._device = None
+        for device in coordinator.data.devices if coordinator.data else []:
+            if device.id == virtual_device_id:
+                self._device = device
+                break
+
+        if not self._device:
+            LOGGER.error("Virtual device %s not found in coordinator data", virtual_device_id)
+            return
+
+        # Set device info
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, virtual_device_id)},
+            name=self._device.name,
+            manufacturer=NAME,
+            model=self._device.device_type_name,
+        )
+
+    def _get_total_measure_value_by_type(self, measure_type: str) -> float:
+        """Get value from total_measures by type."""
+        if not self.coordinator.data or not self.coordinator.data.total_measures:
+            return 0.0
+
+        # Find the measure by type in the total_measures list
+        for measure in self.coordinator.data.total_measures:
+            if hasattr(measure, "type") and measure.type == measure_type:
+                value = measure.value if hasattr(measure, "value") else 0.0
+                # Convert Ws to Wh if needed
+                unit = measure.unit if hasattr(measure, "unit") else None
+                if unit == "Ws":
+                    value = value / 3600  # Convert Ws to Wh
+                return float(value) if value is not None else 0.0
+
+        return 0.0
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return (
+            self.coordinator.last_update_success and self._device is not None and getattr(self._device, "state", True)
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the grid consumed without battery energy value."""
+        # Get the value directly from total_measures using the mapped type
+        grid_sans_msb_energy = self._get_total_measure_value_by_type("grid_sans_msb_energy")
+        return round(grid_sans_msb_energy, 2) if grid_sans_msb_energy is not None else 0.0
+
+    @property
+    def extra_state_attributes(self) -> dict[str, str | float] | None:
+        """Return additional state attributes."""
+        return {
+            "data_source": "total_measures",
+            "measure_type": "grid_sans_msb_energy",
         }
 
 
