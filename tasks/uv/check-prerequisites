@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="✅ Check prerequisites for uv / ruff"
+#MISE hide=true
+
+set -e
+
+# Check if uv is installed
+if ! command -v uv &> /dev/null; then
+    echo "❌ UV is not installed"
+    exit 1
+fi

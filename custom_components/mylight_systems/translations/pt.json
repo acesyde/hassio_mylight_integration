@@ -14,5 +14,51 @@
             "connection": "Erro na ligação ao servidor.",
             "unknown": "Erro desconhecido."
         }
+    },
+    "entity": {
+        "sensor": {
+            "power": {
+                "name": "Potência"
+            },
+            "produced_energy": {
+                "name": "Energia Produzida"
+            },
+            "grid_energy_meter": {
+                "name": "Energia da Rede"
+            },
+            "total_energy": {
+                "name": "Energia Total"
+            },
+            "green_energy": {
+                "name": "Energia Verde"
+            },
+            "grid_energy_consumed": {
+                "name": "Energia da Rede Consumida"
+            },
+            "charge_energy": {
+                "name": "Energia de Carga"
+            },
+            "discharge_energy": {
+                "name": "Energia de Descarga"
+            },
+            "loss_energy": {
+                "name": "Energia Perdida"
+            },
+            "state_of_charge": {
+                "name": "Estado de Carga"
+            },
+            "autonomy_rate": {
+                "name": "Taxa de Autonomia"
+            },
+            "self_consumption": {
+                "name": "Autoconsumo"
+            },
+            "grid_returned_energy": {
+                "name": "Energia Devolvida à Rede"
+            },
+            "grid_consumed_without_battery_energy": {
+                "name": "Energia da Rede Consumida Sem Bateria"
+            }
+        }
     }
 }

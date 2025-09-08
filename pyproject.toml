@@ -7,7 +7,6 @@ requires-python = ">=3.13.2,<4.0"
 license = "MIT"
 keywords = ["homeassistant", "hassio", "mylight", "solar", "power", "energy"]
 readme = "README.md"
-repository = "https://github.com/acesyde/hassio_mylight_integration"
 dependencies = [
   "colorlog >= 6.7",
   "homeassistant >= 2025.7.0",
@@ -15,16 +14,19 @@ dependencies = [
   "aiohttp >= 3.8",
   "yarl >= 1.9",
   "async-timeout >= 5.0",
+  "mylightsystems>=0.0.9",
 ]
 
 [dependency-groups]
 dev = [
   "pytest >= 8.4.1",
-  "pytest-cov >= 6.2.1",
+  "pytest-cov>=6.2.1",
   "pytest-socket >= 0.6",
   "ruff >= 0.4",
   "aresponses >= 3.0.0",
   "aioresponses>=0.7.8",
+  "coverage>=7.10.0",
+  "pytest-asyncio>=1.1.0",
 ]
 
 [tool.ruff]
@@ -45,7 +47,6 @@ exclude = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
 pythonpath = ["custom_components/mylight_systems"]
 testpaths = ["tests"]
 
@@ -84,5 +85,5 @@ max-positional-args = 10
 max-returns = 10
 
 [tool.coverage.run]
-source = ["src"]
+source = ["custom_components"]
 omit = ["**/tests/**", "**/__init__.py", "**/__main__.py"]

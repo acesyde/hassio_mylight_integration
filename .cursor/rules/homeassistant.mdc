@@ -1,0 +1,518 @@
+
+# Home Assistant Custom Components Development Guide
+
+This document outlines the standards and best practices for developing Home Assistant custom components based on the official Home Assistant Developer Documentation.
+
+## Integration Architecture
+
+### Integration Types
+
+Home Assistant recognizes four main integration types:
+
+1. **Define IoT Domains**: Components that define device categories (e.g., `light`, `sensor`, `switch`)
+2. **Interact with External Devices/Services**: Components that communicate with external APIs/devices and expose them via IoT domains
+3. **Virtual/Computed Data**: Components representing virtual entities or derived data (e.g., `template`, `utility_meter`)
+4. **Automation Actions**: Components providing automation logic or responding to events
+
+### Key Principles
+
+- **Single Responsibility**: Each integration should have a clear, focused purpose
+- **External API Separation**: All API-specific code must be in a separate PyPI library
+- **Config Entry Based**: Modern integrations use config entries, not YAML configuration
+- **Async First**: Use async/await patterns consistently
+
+## File Structure and Organization
+
+### Required Files
+
+```
+custom_components/<domain>/
+├── __init__.py              # Integration setup and entry point
+├── manifest.json           # Integration metadata and dependencies
+├── config_flow.py          # Configuration flow handler
+├── const.py               # Constants and configuration values
+├── coordinator.py         # Data update coordination
+├── entity.py             # Base entity classes
+├── sensor.py             # Sensor platform implementation
+├── services.yaml         # Service action descriptions (if needed)
+└── translations/         # Multi-language support
+    ├── en.json
+    ├── fr.json
+    └── pt.json
+```
+
+### File Responsibilities
+
+- **`__init__.py`**: Entry point, config entry setup/unload, migration
+- **`manifest.json`**: Integration metadata, dependencies, version
+- **`config_flow.py`**: User configuration flow, discovery, authentication
+- **`coordinator.py`**: Data fetching and coordination across entities
+- **`entity.py`**: Base entity classes with common functionality
+- **Platform files** (`sensor.py`, `switch.py`): Entity implementations
+
+## Configuration Flow Implementation
+
+### Basic Config Flow Structure
+
+```python
+from homeassistant import config_entries
+from homeassistant.data_entry_flow import FlowResult
+import voluptuous as vol
+
+@config_entries.HANDLERS.register(DOMAIN)
+class ExampleConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Example Integration."""
+
+    VERSION = 1
+    MINOR_VERSION = 1
+
+    async def async_step_user(self, user_input=None) -> FlowResult:
+        """Handle the initial step."""
+        errors = {}
+
+        if user_input is not None:
+            # Validate user input
+            try:
+                # Test connection with API
+                await self._test_connection(user_input)
+                # Set unique ID if available
+                await self.async_set_unique_id(unique_id)
+                self._abort_if_unique_id_configured()
+
+                return self.async_create_entry(
+                    title="Example Integration",
+                    data=user_input
+                )
+            except Exception:
+                errors["base"] = "cannot_connect"
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema({
+                vol.Required("host"): str,
+                vol.Required("api_key"): str,
+            }),
+            errors=errors
+        )
+```
+
+### Config Flow Requirements
+
+- **VERSION**: Must be defined for migration support
+- **Unique ID**: Required for discovery protocols (DHCP, Zeroconf, etc.)
+- **Validation**: Always validate user input before creating entries
+- **Error Handling**: Provide meaningful error messages
+- **Translations**: All strings must be in `strings.json`
+
+### Discovery Support
+
+For integrations supporting discovery (DHCP, Zeroconf, etc.):
+
+```python
+async def async_step_zeroconf(self, discovery_info):
+    """Handle zeroconf discovery."""
+    # Extract device info from discovery
+    host = discovery_info.host
+
+    # Set unique ID to prevent duplicates
+    await self.async_set_unique_id(serial_number)
+    self._abort_if_unique_id_configured(updates={CONF_HOST: host})
+
+    # Store discovery info and continue to user step
+    self.context["title_placeholders"] = {"name": device_name}
+    return await self.async_step_user()
+```
+
+### Reauthentication Support
+
+For handling expired credentials:
+
+```python
+async def async_step_reauth(self, entry_data):
+    """Handle reauthentication."""
+    return await self.async_step_reauth_confirm()
+
+async def async_step_reauth_confirm(self, user_input=None):
+    """Confirm reauthentication."""
+    if user_input is None:
+        return self.async_show_form(step_id="reauth_confirm")
+
+    # Update credentials and reload
+    return self.async_update_reload_and_abort(
+        self._get_reauth_entry(),
+        data_updates=user_input
+    )
+```
+
+## Data Update Coordinator
+
+### Coordinator Implementation
+
+```python
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.exceptions import ConfigEntryAuthFailed
+
+class ExampleDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching data from the API."""
+
+    def __init__(self, hass: HomeAssistant, api_client):
+        """Initialize."""
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=DOMAIN,
+            update_interval=SCAN_INTERVAL,
+        )
+        self.api = api_client
+
+    async def _async_setup(self) -> None:
+        """Set up the coordinator."""
+        # One-time setup logic (new in HA 2024.8)
+        self.initial_data = await self.api.get_device_info()
+
+    async def _async_update_data(self):
+        """Fetch data from API endpoint."""
+        try:
+            # Fetch data from your API
+            return await self.api.get_data()
+        except AuthError as err:
+            # Trigger reauthentication flow
+            raise ConfigEntryAuthFailed("Authentication failed") from err
+        except APIError as err:
+            raise UpdateFailed(f"Error communicating with API: {err}") from err
+```
+
+### Coordinator Best Practices
+
+- **Single Coordinator**: Use one coordinator per config entry for efficiency
+- **Error Handling**: Handle authentication and API errors appropriately
+- **Update Intervals**: Use reasonable intervals to avoid overwhelming APIs
+- **Setup Method**: Use `_async_setup()` for one-time initialization (HA 2024.8+)
+
+## Entity Implementation
+
+### Base Entity Class
+
+```python
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.entity import DeviceInfo
+
+class ExampleEntity(CoordinatorEntity):
+    """Base Example entity."""
+
+    def __init__(self, coordinator, device_key):
+        """Initialize the entity."""
+        super().__init__(coordinator)
+        self._device_key = device_key
+        self._attr_unique_id = f"{coordinator.data['id']}_{device_key}"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.coordinator.data["id"])},
+            name=self.coordinator.data["name"],
+            manufacturer="Example Manufacturer",
+            model=self.coordinator.data["model"],
+            sw_version=self.coordinator.data["firmware_version"],
+        )
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return self.coordinator.last_update_success
+```
+
+### Platform Implementation
+
+```python
+# sensor.py
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.const import UnitOfPower
+
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up sensors."""
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
+
+    entities = []
+    for device_id, device_data in coordinator.data.items():
+        entities.append(ExamplePowerSensor(coordinator, device_id))
+
+    async_add_entities(entities)
+
+class ExamplePowerSensor(ExampleEntity, SensorEntity):
+    """Example power sensor."""
+
+    def __init__(self, coordinator, device_id):
+        """Initialize the sensor."""
+        super().__init__(coordinator, device_id)
+        self._attr_name = f"{device_data['name']} Power"
+        self._attr_device_class = SensorDeviceClass.POWER
+        self._attr_native_unit_of_measurement = UnitOfPower.WATT
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        device_data = self.coordinator.data[self._device_id]
+        return device_data.get("power")
+```
+
+## Integration Setup and Lifecycle
+
+### Config Entry Setup
+
+```python
+# __init__.py
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
+
+PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SWITCH]
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up integration from a config entry."""
+
+    # Initialize API client
+    api_client = ExampleAPI(entry.data["host"], entry.data["api_key"])
+
+    # Test connection
+    try:
+        await api_client.test_connection()
+    except AuthError as err:
+        raise ConfigEntryAuthFailed("Invalid credentials") from err
+
+    # Create coordinator
+    coordinator = ExampleDataUpdateCoordinator(hass, api_client)
+    await coordinator.async_config_entry_first_refresh()
+
+    # Store coordinator
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+
+    # Forward setup to platforms
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    return True
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        hass.data[DOMAIN].pop(entry.entry_id)
+    return unload_ok
+```
+
+### Migration Support
+
+```python
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Migrate old entry."""
+    _LOGGER.debug("Migrating from version %s.%s", config_entry.version, config_entry.minor_version)
+
+    if config_entry.version > 1:
+        # Downgrade not supported
+        return False
+
+    if config_entry.version == 1:
+        new_data = {**config_entry.data}
+
+        if config_entry.minor_version < 2:
+            # Add new required field
+            new_data["timeout"] = 30
+
+        hass.config_entries.async_update_entry(
+            config_entry,
+            data=new_data,
+            minor_version=2,
+            version=1
+        )
+
+    return True
+```
+
+## Manifest Configuration
+
+### Required Manifest Fields
+
+```json
+{
+  "domain": "example_integration",
+  "name": "Example Integration",
+  "version": "1.0.0",
+  "documentation": "https://github.com/example/example_integration",
+  "issue_tracker": "https://github.com/example/example_integration/issues",
+  "dependencies": [],
+  "codeowners": ["@example"],
+  "requirements": ["example-api>=1.0.0"],
+  "config_flow": true,
+  "iot_class": "cloud_polling"
+}
+```
+
+### Manifest Best Practices
+
+- **Requirements**: Pin exact versions, host libraries on PyPI
+- **IoT Class**: Accurately describe communication method (`cloud_polling`, `local_polling`, `local_push`, etc.)
+- **Config Flow**: Always use `"config_flow": true` for modern integrations
+- **Dependencies**: Only include if you use core HA integrations
+
+## External API Library Requirements
+
+### Library Structure
+
+All API communication must be in a separate PyPI library:
+
+```python
+# ❌ BAD - Direct API calls in integration
+status = requests.get(f"{self.host}/api/status")
+
+# ✅ GOOD - Use external library
+from example_api import ExampleAPI
+api = ExampleAPI(host, api_key)
+status = await api.get_status()
+```
+
+### Library Requirements
+
+- **PyPI Hosted**: Must be available on PyPI with source distribution
+- **Issue Tracker**: Must have enabled issue tracker
+- **Home Assistant Focus**: If mainly for HA, link to HA core issues
+- **Async Support**: Should support async/await patterns
+- **Error Handling**: Provide specific exception types
+
+## Testing and Quality
+
+### Required Test Coverage
+
+- **100% coverage** of `config_flow.py` is mandatory
+- Test all config flow steps, error conditions, and edge cases
+- Test coordinator error handling and authentication failures
+- Test entity state updates and availability
+
+### Testing Example
+
+```python
+async def test_config_flow_success(hass):
+    """Test successful config flow."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+
+    assert result["type"] == "form"
+    assert result["step_id"] == "user"
+
+    with patch("custom_components.example_integration.ExampleAPI") as mock_api:
+        mock_api.return_value.test_connection.return_value = True
+
+        result2 = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {"host": "192.168.1.100", "api_key": "test_key"}
+        )
+
+    assert result2["type"] == "create_entry"
+    assert result2["title"] == "Example Integration"
+```
+
+## Error Handling and Reliability
+
+### Common Error Patterns
+
+```python
+from homeassistant.exceptions import (
+    ConfigEntryAuthFailed,
+    ConfigEntryNotReady,
+    HomeAssistantError,
+)
+
+# Authentication errors
+try:
+    await api.authenticate()
+except AuthError as err:
+    raise ConfigEntryAuthFailed("Invalid credentials") from err
+
+# Temporary failures
+try:
+    await api.connect()
+except ConnectionError as err:
+    raise ConfigEntryNotReady("Unable to connect") from err
+
+# Update coordinator errors
+try:
+    data = await api.get_data()
+except APIError as err:
+    raise UpdateFailed(f"Failed to fetch data: {err}") from err
+```
+
+### Repairs Integration
+
+For non-blocking issues that need user attention:
+
+```python
+from homeassistant.helpers import issue_registry as ir
+
+ir.async_create_issue(
+    hass,
+    DOMAIN,
+    "deprecated_api_version",
+    is_fixable=False,
+    severity=ir.IssueSeverity.WARNING,
+    translation_key="deprecated_api_version",
+)
+```
+
+## Translation Support
+
+### Strings Structure
+
+```json
+{
+  "title": "Example Integration",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Example Integration",
+        "description": "Enter your credentials",
+        "data": {
+          "host": "Host",
+          "api_key": "API Key"
+        }
+      },
+      "reauth_confirm": {
+        "title": "[%key:common::config_flow::title::reauth%]",
+        "description": "The integration needs to re-authenticate"
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
+    }
+  }
+}
+```
+
+## Development Workflow
+
+### Code Quality Checklist
+
+1. **External Library**: All API code in separate PyPI package ✓
+2. **Config Flow**: 100% test coverage of config_flow.py ✓
+3. **Async Patterns**: Consistent use of async/await ✓
+4. **Error Handling**: Proper exception handling and user feedback ✓
+5. **Translations**: All user-facing strings in strings.json ✓
+6. **Unique IDs**: Stable unique identifiers for entities ✓
+7. **Device Info**: Proper device registry integration ✓
+
+## Best Practices Summary
+
+1. **Architecture**: Follow single responsibility principle, use external libraries
+2. **Config Flow**: Always implement config flows, support discovery and reauthentication
+3. **Coordinator**: Use DataUpdateCoordinator for efficient data management
+4. **Entities**: Extend CoordinatorEntity, provide proper device info
+5. **Error Handling**: Handle all error cases gracefully, provide user feedback
+6. **Testing**: Achieve 100% test coverage, test all error conditions
+7. **Documentation**: Provide clear documentation with supported devices and limitations
+8. **Quality**: Strive for higher quality scale ratings through comprehensive features
+9. **Deprecations**: Stay updated with Home Assistant entity deprecations and changes

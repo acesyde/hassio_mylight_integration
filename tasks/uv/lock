@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="🔒 Lock dependencies with uv"
+#MISE depends=["uv:check-prerequisites"]
+
+set -e
+
+echo "🔒 Updating lockfile..."
+uv lock

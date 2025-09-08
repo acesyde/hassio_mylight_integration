@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="🧪 Lint project with uv / ruff"
+#MISE depends=["uv:check-prerequisites"]
+
+set -e
+
+# Check the code with ruff
+uv run ruff check --diff
+
+# Check the code with ruff format
+uv run ruff format --diff --check

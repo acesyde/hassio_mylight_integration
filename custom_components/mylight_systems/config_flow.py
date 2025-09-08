@@ -5,23 +5,16 @@ from __future__ import annotations
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
+from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
+from mylightsystems import MyLightSystemsApiClient
+from mylightsystems.const import DEFAULT_BASE_URL
+from mylightsystems.exceptions import MyLightSystemsConnectionError, MyLightSystemsError, MyLightSystemsInvalidAuthError
 
-from .api.client import DEFAULT_BASE_URL, MyLightApiClient
-from .api.exceptions import (
-    CommunicationError,
-    InvalidCredentialsError,
-    MyLightSystemsError,
-)
 from .const import (
     CONF_GRID_TYPE,
-    CONF_MASTER_ID,
-    CONF_MASTER_RELAY_ID,
-    CONF_MASTER_REPORT_PERIOD,
     CONF_SUBSCRIPTION_ID,
-    CONF_VIRTUAL_BATTERY_ID,
-    CONF_VIRTUAL_DEVICE_ID,
     DOMAIN,
     LOGGER,
 )
@@ -31,7 +24,14 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for MyLightSystems."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+    MINOR_VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> MyLightSystemsFlowHandler:
+        return MyLightSystemsFlowHandler(config_entry)
 
     async def async_step_user(
         self,
@@ -41,38 +41,40 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         _errors = {}
         if user_input is not None:
             try:
-                api_client = MyLightApiClient(
+                api_client = MyLightSystemsApiClient(
                     base_url=user_input[CONF_URL],
                     session=async_create_clientsession(self.hass),
                 )
 
-                login_response = await api_client.async_login(user_input[CONF_EMAIL], user_input[CONF_PASSWORD])
+                login_response = await api_client.auth(user_input[CONF_EMAIL], user_input[CONF_PASSWORD])
 
-                user_profile = await api_client.async_get_profile(login_response.auth_token)
+                user_profile = await api_client.get_profile(login_response.token)
 
-                device_ids = await api_client.async_get_devices(login_response.auth_token)
+                LOGGER.info(f"User profile: {user_profile}")
 
                 data = {
                     CONF_EMAIL: user_input[CONF_EMAIL],
                     CONF_PASSWORD: user_input[CONF_PASSWORD],
                     CONF_URL: user_input[CONF_URL],
-                    CONF_SUBSCRIPTION_ID: user_profile.subscription_id,
+                    CONF_SUBSCRIPTION_ID: user_profile.id,
                     CONF_GRID_TYPE: user_profile.grid_type,
-                    CONF_VIRTUAL_DEVICE_ID: device_ids.virtual_device_id,
-                    CONF_VIRTUAL_BATTERY_ID: device_ids.virtual_battery_id,
-                    CONF_MASTER_ID: device_ids.master_id,
-                    CONF_MASTER_REPORT_PERIOD: device_ids.master_report_period,
-                    CONF_MASTER_RELAY_ID: device_ids.master_relay_id,
                 }
 
-                await self.async_set_unique_id(str(user_profile.subscription_id))
+                integration_name = f"{user_profile.address} {user_profile.postal_code} {user_profile.city}"
+
+                if integration_name.strip() == "" or integration_name.strip() is None:
+                    integration_name = f"{user_profile.id} - {user_profile.tenant}"
+
+                LOGGER.info(f"Integration name: {integration_name}")
+
+                await self.async_set_unique_id(str(user_profile.id))
 
                 self._abort_if_unique_id_configured()
 
-            except InvalidCredentialsError as exception:
+            except MyLightSystemsInvalidAuthError as exception:
                 LOGGER.warning(exception)
                 _errors["base"] = "auth"
-            except CommunicationError as exception:
+            except MyLightSystemsConnectionError as exception:
                 LOGGER.error(exception)
                 _errors["base"] = "connection"
             except MyLightSystemsError as exception:
@@ -80,7 +82,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 _errors["base"] = "unknown"
             else:
                 return self.async_create_entry(
-                    title=user_profile.subscription_id,
+                    title=integration_name,
                     data=data,
                 )
 

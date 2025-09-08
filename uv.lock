@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.13.2, <4.0"
 
 [[package]]
@@ -1119,6 +1119,7 @@ dependencies = [
     { name = "async-timeout" },
     { name = "colorlog" },
     { name = "homeassistant" },
+    { name = "mylightsystems" },
     { name = "requests" },
     { name = "yarl" },
 ]
@@ -1127,7 +1128,9 @@ dependencies = [
 dev = [
     { name = "aioresponses" },
     { name = "aresponses" },
+    { name = "coverage" },
     { name = "pytest" },
+    { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "pytest-socket" },
     { name = "ruff" },
@@ -1139,6 +1142,7 @@ requires-dist = [
     { name = "async-timeout", specifier = ">=5.0" },
     { name = "colorlog", specifier = ">=6.7" },
     { name = "homeassistant", specifier = ">=2025.7.0" },
+    { name = "mylightsystems", specifier = ">=0.0.9" },
     { name = "requests", specifier = ">=2.31" },
     { name = "yarl", specifier = ">=1.9" },
 ]
@@ -1147,10 +1151,27 @@ requires-dist = [
 dev = [
     { name = "aioresponses", specifier = ">=0.7.8" },
     { name = "aresponses", specifier = ">=3.0.0" },
+    { name = "coverage", specifier = ">=7.10.0" },
     { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest-asyncio", specifier = ">=1.1.0" },
     { name = "pytest-cov", specifier = ">=6.2.1" },
     { name = "pytest-socket", specifier = ">=0.6" },
     { name = "ruff", specifier = ">=0.4" },
+]
+
+[[package]]
+name = "mylightsystems"
+version = "0.0.9"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "aiohttp" },
+    { name = "mashumaro" },
+    { name = "orjson" },
+    { name = "yarl" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/25/53/96679065d2fc45e3398718da590203271eda3e4d5f385f38af9f3a7d6a23/mylightsystems-0.0.9.tar.gz", hash = "sha256:9ca8e0d0d75bdc9fe19a6730a2ddef0ec576859f8613444e9bd1e17a6167d709", size = 10060, upload-time = "2025-08-09T16:45:31.186Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d7/f9/8d21286f15cb5f57822289f8d1192ab06a3aff96a610ed3601e4fb3a55bb/mylightsystems-0.0.9-py3-none-any.whl", hash = "sha256:45e2d91988ea17a1b8b05807807767c676f99302292ff2620e5fafd7f7ff9281", size = 9338, upload-time = "2025-08-09T16:45:29.711Z" },
 ]
 
 [[package]]

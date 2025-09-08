@@ -14,5 +14,51 @@
             "connection": "Impossible de se connecter au serveur.",
             "unknown": "Une erreur inconnue s'est produite."
         }
+    },
+    "entity": {
+        "sensor": {
+            "power": {
+                "name": "Puissance"
+            },
+            "produced_energy": {
+                "name": "Énergie Produite"
+            },
+            "grid_energy_meter": {
+                "name": "Énergie du Réseau"
+            },
+            "total_energy": {
+                "name": "Énergie Totale"
+            },
+            "green_energy": {
+                "name": "Énergie Verte"
+            },
+            "grid_energy_consumed": {
+                "name": "Énergie Réseau Consommée"
+            },
+            "charge_energy": {
+                "name": "Énergie de Charge"
+            },
+            "discharge_energy": {
+                "name": "Énergie de Décharge"
+            },
+            "loss_energy": {
+                "name": "Énergie Perdue"
+            },
+            "state_of_charge": {
+                "name": "État de Charge"
+            },
+            "autonomy_rate": {
+                "name": "Taux d'Autonomie"
+            },
+            "self_consumption": {
+                "name": "Autoconsommation"
+            },
+            "grid_returned_energy": {
+                "name": "Énergie Retournée au Réseau"
+            },
+            "grid_consumed_without_battery_energy": {
+                "name": "Énergie Réseau Consommée Hors Batterie"
+            }
+        }
     }
 }

@@ -6,3 +6,4 @@ logger:
   default: info
   logs:
     custom_components.mylight_systems: debug
+    #mylightsystems: debug

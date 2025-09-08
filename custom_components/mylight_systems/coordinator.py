@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import NamedTuple
 
 from homeassistant.config_entries import ConfigEntry
@@ -13,20 +13,15 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
-
-from custom_components.mylight_systems.api.models import Measure
-
-from .api.client import MyLightApiClient
-from .api.exceptions import (
-    InvalidCredentialsError,
+from mylightsystems import (
+    MyLightSystemsApiClient,
     MyLightSystemsError,
-    UnauthorizedError,
+    MyLightSystemsInvalidAuthError,
+    MyLightSystemsUnauthorizedError,
 )
+from mylightsystems.models import Device, DeviceState, Measure, VirtualDevice
+
 from .const import (
-    CONF_GRID_TYPE,
-    CONF_MASTER_RELAY_ID,
-    CONF_VIRTUAL_BATTERY_ID,
-    CONF_VIRTUAL_DEVICE_ID,
     DOMAIN,
     LOGGER,
     SCAN_INTERVAL_IN_MINUTES,
@@ -36,16 +31,9 @@ from .const import (
 class MyLightSystemsCoordinatorData(NamedTuple):
     """Data returned by the coordinator."""
 
-    produced_energy: Measure
-    grid_energy: Measure
-    grid_energy_without_battery: Measure
-    autonomy_rate: Measure
-    self_conso: Measure
-    msb_charge: Measure
-    msb_discharge: Measure
-    green_energy: Measure
-    battery_state: Measure
-    master_relay_state: str | None
+    devices: list[Device] = []
+    states: list[DeviceState] = []
+    total_measures: list[Measure] = []
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -59,7 +47,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(
         self,
         hass: HomeAssistant,
-        client: MyLightApiClient,
+        client: MyLightSystemsApiClient,
     ) -> None:
         """Initialize."""
         self.client = client
@@ -67,7 +55,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             hass=hass,
             logger=LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(minutes=SCAN_INTERVAL_IN_MINUTES),
+            update_interval=SCAN_INTERVAL_IN_MINUTES,
         )
 
     async def _async_update_data(self) -> MyLightSystemsCoordinatorData:
@@ -75,40 +63,47 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             email = self.config_entry.data[CONF_EMAIL]
             password = self.config_entry.data[CONF_PASSWORD]
-            grid_type = self.config_entry.data[CONF_GRID_TYPE]
-            device_id = self.config_entry.data[CONF_VIRTUAL_DEVICE_ID]
-            virtual_battery_id = self.config_entry.data[CONF_VIRTUAL_BATTERY_ID]
-            master_relay_id = self.config_entry.data.get(CONF_MASTER_RELAY_ID, None)
 
             await self.authenticate_user(email, password)
 
-            result = await self.client.async_get_measures_total(self.__auth_token, grid_type, device_id)
+            # Fetch devices from the API
+            devices = await self.client.get_devices(self.__auth_token)
 
-            battery_state = await self.client.async_get_battery_state(self.__auth_token, virtual_battery_id)
+            LOGGER.debug("Fetched %d devices from API", len(devices))
 
-            master_relay_state = None
-            if master_relay_id is not None:
-                master_relay_state = await self.client.async_get_relay_state(self.__auth_token, master_relay_id)
+            # Fetch states from the API
+            states = []
+            try:
+                states = await self.client.get_states(self.__auth_token)
+                LOGGER.debug("Fetched %d states from API", len(states) if states else 0)
+            except Exception as exc:
+                LOGGER.warning("Failed to fetch states from API: %s", exc)
+                states = []
 
-            data = MyLightSystemsCoordinatorData(
-                produced_energy=self.find_measure_by_type(result, "produced_energy"),
-                grid_energy=self.find_measure_by_type(result, "grid_energy"),
-                grid_energy_without_battery=self.find_measure_by_type(result, "grid_sans_msb_energy"),
-                autonomy_rate=self.find_measure_by_type(result, "autonomy_rate"),
-                self_conso=self.find_measure_by_type(result, "self_conso"),
-                msb_charge=self.find_measure_by_type(result, "msb_charge"),
-                msb_discharge=self.find_measure_by_type(result, "msb_discharge"),
-                green_energy=self.find_measure_by_type(result, "green_energy"),
-                battery_state=battery_state,
-                master_relay_state=master_relay_state,
-            )
+            # Fetch total measures from the API
+            try:
+                virtual_device = next(device for device in devices if isinstance(device, VirtualDevice))
+                if virtual_device:
+                    LOGGER.debug("Fetching total measures for virtual device %s", virtual_device.id)
+                    total_measures = await self.client.get_measures_total(self.__auth_token, virtual_device.id)
+                    LOGGER.debug("Fetched %d total measures from API", len(total_measures) if total_measures else 0)
+                else:
+                    LOGGER.warning("No virtual device found")
+                    total_measures = []
+            except Exception as exc:
+                LOGGER.warning("Failed to fetch total measures from API: %s", exc)
+                # Log in debug mode the full exception
+                LOGGER.debug("Full exception: %s", exc_info=True)
+                total_measures = []
+
+            data = MyLightSystemsCoordinatorData(devices=devices, states=states, total_measures=total_measures)
 
             self._data = data
 
             return data
         except (
-            UnauthorizedError,
-            InvalidCredentialsError,
+            MyLightSystemsUnauthorizedError,
+            MyLightSystemsInvalidAuthError,
         ) as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except MyLightSystemsError as exception:
@@ -116,26 +111,11 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def authenticate_user(self, email, password):
         """Reauthenticate user if needed."""
-        if self.__auth_token is None or self.__token_expiration is None or self.__token_expiration < datetime.utcnow():
-            result = await self.client.async_login(email, password)
-            self.__auth_token = result.auth_token
-            self.__token_expiration = datetime.utcnow() + timedelta(hours=2)
-
-    async def turn_on_master_relay(self):
-        """Turn on master relay."""
-        await self.client.async_turn_on(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
-
-    async def turn_off_master_relay(self):
-        """Turn off master relay."""
-        await self.client.async_turn_off(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
-
-    def master_relay_is_on(self) -> bool:
-        """Return true if master relay is on."""
-        if self._data is not None and self._data.master_relay_state is not None:
-            return self._data.master_relay_state == "on"
-        return False
-
-    @staticmethod
-    def find_measure_by_type(measures: list[Measure], name: str) -> Measure | None:
-        """Find measure by name."""
-        return next((m for m in measures if m.type == name), None)
+        if (
+            self.__auth_token is None
+            or self.__token_expiration is None
+            or self.__token_expiration < datetime.now(timezone.utc)
+        ):
+            result = await self.client.auth(email, password)
+            self.__auth_token = result.token
+            self.__token_expiration = datetime.now(timezone.utc) + timedelta(hours=2)

@@ -28,13 +28,10 @@ jobs:
           version: 2025.7.27
 
       - name: 📦 Install requirements
-        run: mise project:setup
+        run: mise uv:install
 
-      - name: 🏃 Run tests
-        run: mise project:tests
-
-      - name: 📊 Generate coverage
-        run: mise project:coverage
+      - name: 🏃 Run tests and generate coverage
+        run: mise uv:tests
 
       - name: 📤 Upload coverage to Codecov
         uses: codecov/codecov-action@v5
