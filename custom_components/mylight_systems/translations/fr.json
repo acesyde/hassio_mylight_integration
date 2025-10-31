@@ -7,12 +7,21 @@
                     "email": "Email",
                     "password": "Mot de passe"
                 }
+            },
+            "reconfigure": {
+                "description": "Mettez à jour votre mot de passe.",
+                "data": {
+                    "password": "Nouveau mot de passe"
+                }
             }
         },
         "error": {
             "auth": "Mauvais email ou mot de passe.",
             "connection": "Impossible de se connecter au serveur.",
             "unknown": "Une erreur inconnue s'est produite."
+        },
+        "abort": {
+            "reconfigure_successful": "Mot de passe mis à jour avec succès"
         }
     }
 }

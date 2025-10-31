@@ -106,3 +106,52 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             ),
             errors=_errors,
         )
+
+    async def async_step_reconfigure(
+        self,
+        user_input: dict | None = None,
+    ) -> config_entries.FlowResult:
+        """Handle reconfiguration of an existing entry."""
+        _errors = {}
+        entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+
+        if entry is None:
+            return self.async_abort(reason="not_found")
+
+        if user_input is not None:
+            try:
+                api_client = MyLightApiClient(
+                    base_url=entry.data[CONF_URL],
+                    session=async_create_clientsession(self.hass),
+                )
+
+                # Validate the new password by attempting to login with existing email
+                await api_client.async_login(entry.data[CONF_EMAIL], user_input[CONF_PASSWORD])
+
+                # Update only the password in the config entry
+                new_data = entry.data.copy()
+                new_data[CONF_PASSWORD] = user_input[CONF_PASSWORD]
+
+                return self.async_update_reload_and_abort(entry, data=new_data)
+
+            except InvalidCredentialsError as exception:
+                LOGGER.warning(exception)
+                _errors["base"] = "auth"
+            except CommunicationError as exception:
+                LOGGER.error(exception)
+                _errors["base"] = "connection"
+            except MyLightSystemsError as exception:
+                LOGGER.exception(exception)
+                _errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_PASSWORD): selector.TextSelector(
+                        selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD),
+                    ),
+                }
+            ),
+            errors=_errors,
+        )
