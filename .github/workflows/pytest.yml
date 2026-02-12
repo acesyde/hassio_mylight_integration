@@ -18,14 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout the repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - uses: jdx/mise-action@v3
         name: 🤖 Mise action
         with:
-          version: 2025.7.27
+          version: 2026.2.10
 
       - name: 📦 Install requirements
         run: mise project:setup
