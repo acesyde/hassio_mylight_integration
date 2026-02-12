@@ -1,27 +1,27 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "description": "Caso precise de ajuda na configuração consulte o site: https://github.com/acesyde/hassio_mylight_integration",
-                "data": {
-                    "email": "Email",
-                    "password": "Senha"
-                }
-            },
-            "reconfigure": {
-                "description": "Atualize sua senha.",
-                "data": {
-                    "password": "Nova Senha"
-                }
-            }
-        },
-        "error": {
-            "auth": "Email ou senha errada.",
-            "connection": "Erro na ligação ao servidor.",
-            "unknown": "Erro desconhecido."
-        },
-        "abort": {
-            "reconfigure_successful": "Senha atualizada com sucesso"
+  "config": {
+    "step": {
+      "user": {
+        "description": "Conecte-se à sua conta MyLight Systems",
+        "data": {
+          "email": "Email",
+          "password": "Senha"
         }
+      },
+      "reconfigure": {
+        "description": "Atualize sua senha.",
+        "data": {
+          "password": "Nova Senha"
+        }
+      }
+    },
+    "error": {
+      "auth": "Email ou senha errada.",
+      "connection": "Erro na ligação ao servidor.",
+      "unknown": "Erro desconhecido."
+    },
+    "abort": {
+      "reconfigure_successful": "Senha atualizada com sucesso"
     }
+  }
 }

@@ -1,14 +1,12 @@
 [tools]
-pre-commit = "4.3"
-python = "3.13.9"
-uv = "0.9.7"
+pre-commit = "4.5"
+python = "3.13.12"
+uv = "0.10.2"
 
 [settings]
 experimental = true
 auto_install = false
-
-[env]
-_.python.venv = { path = ".venv", create = true }
+python.uv_venv_auto = "source"
 
 [tasks."project:setup"]
 description = "Setup the project"

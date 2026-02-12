@@ -1,27 +1,27 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "description": "Si vous avez besoin d'aide pour la configuration, regardez ici : https://github.com/acesyde/hassio_mylight_integration",
-                "data": {
-                    "email": "Email",
-                    "password": "Mot de passe"
-                }
-            },
-            "reconfigure": {
-                "description": "Mettez à jour votre mot de passe.",
-                "data": {
-                    "password": "Nouveau mot de passe"
-                }
-            }
-        },
-        "error": {
-            "auth": "Mauvais email ou mot de passe.",
-            "connection": "Impossible de se connecter au serveur.",
-            "unknown": "Une erreur inconnue s'est produite."
-        },
-        "abort": {
-            "reconfigure_successful": "Mot de passe mis à jour avec succès"
+  "config": {
+    "step": {
+      "user": {
+        "description": "Connectez-vous à votre compte MyLight Systems",
+        "data": {
+          "email": "Email",
+          "password": "Mot de passe"
         }
+      },
+      "reconfigure": {
+        "description": "Mettez à jour votre mot de passe.",
+        "data": {
+          "password": "Nouveau mot de passe"
+        }
+      }
+    },
+    "error": {
+      "auth": "Mauvais email ou mot de passe.",
+      "connection": "Impossible de se connecter au serveur.",
+      "unknown": "Une erreur inconnue s'est produite."
+    },
+    "abort": {
+      "reconfigure_successful": "Mot de passe mis à jour avec succès"
     }
+  }
 }
