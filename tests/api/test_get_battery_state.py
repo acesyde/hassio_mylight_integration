@@ -80,9 +80,7 @@ async def test_get_battery_state__should_raise_unauthorized_exception_when_inval
 
 
 @pytest.mark.asyncio
-async def test_get_battery_state__should_return_measure_when_battery_found(
-    api_client, valid_battery_response_fixture
-):
+async def test_get_battery_state__should_return_measure_when_battery_found(api_client, valid_battery_response_fixture):
     """Test with valid token should return battery SOC measure."""
     # Given
     token = "abcdef"  # noqa: S105

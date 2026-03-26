@@ -30,7 +30,9 @@ master_relay_switch = MyLightSystemsSwitchEntityDescription(
 )
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: MyLightConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: MyLightConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     """Configure switch platform."""
     coordinator = entry.runtime_data
 
