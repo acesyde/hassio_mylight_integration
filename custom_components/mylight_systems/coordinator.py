@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import NamedTuple
 
 from homeassistant.config_entries import ConfigEntry
@@ -118,10 +118,10 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def authenticate_user(self, email, password):
         """Reauthenticate user if needed."""
-        if self.__auth_token is None or self.__token_expiration is None or self.__token_expiration < datetime.utcnow():
+        if self.__auth_token is None or self.__token_expiration is None or self.__token_expiration < datetime.now(UTC):
             result = await self.client.async_login(email, password)
             self.__auth_token = result.auth_token
-            self.__token_expiration = datetime.utcnow() + timedelta(hours=2)
+            self.__token_expiration = datetime.now(UTC) + timedelta(hours=2)
 
     async def turn_on_master_relay(self):
         """Turn on master relay."""
