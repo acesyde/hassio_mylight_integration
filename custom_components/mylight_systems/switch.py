@@ -7,7 +7,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import MyLightConfigEntry
 from .api.exceptions import MyLightSystemsError
-from .const import CONF_MASTER_RELAY_ID, LOGGER
+from .const import CONF_MASTER_RELAY_ID, DOMAIN, LOGGER
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 from .entity import IntegrationMyLightSystemsEntity
 
