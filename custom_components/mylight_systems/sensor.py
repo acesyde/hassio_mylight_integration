@@ -46,6 +46,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.produced_energy.value / 36e2, 2) if data.produced_energy is not None else 0,
     ),
     MyLightSensorEntityDescription(
@@ -54,6 +55,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.grid_energy.value / 36e2, 2) if data.grid_energy is not None else 0,
     ),
     MyLightSensorEntityDescription(
@@ -62,6 +64,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.grid_energy_without_battery.value / 36e2, 2)
         if data.grid_energy_without_battery is not None
         else 0,
@@ -71,6 +74,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         name="Total autonomy rate",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.autonomy_rate.value, 2) if data.autonomy_rate is not None else 0,
     ),
     MyLightSensorEntityDescription(
@@ -78,6 +82,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         name="Total self consumption",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.self_conso.value, 2) if data.self_conso is not None else 0,
     ),
     MyLightSensorEntityDescription(
@@ -86,6 +91,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.msb_charge.value / 36e2, 2) if data.msb_charge is not None else 0,
     ),
     MyLightSensorEntityDescription(
@@ -94,6 +100,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.msb_discharge.value / 36e2, 2) if data.msb_discharge is not None else 0,
     ),
     MyLightSensorEntityDescription(
@@ -102,6 +109,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.green_energy.value / 36e2, 2) if data.green_energy is not None else 0,
     ),
     MyLightSensorEntityDescription(
@@ -109,6 +117,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         name="Battery state",
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=2,
         value_fn=lambda data: round(data.battery_state.value / 36e2 / 1e3, 2) if data.battery_state is not None else 0,
     ),
     MyLightSensorEntityDescription(
@@ -117,6 +126,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
+        suggested_display_precision=2,
         value_fn=lambda data: _calculate_grid_returned_energy(data),
     ),
 )
