@@ -11,12 +11,11 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, UnitOfEnergy, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DATA_COORDINATOR, DOMAIN
+from . import MyLightConfigEntry
 from .coordinator import (
     MyLightSystemsCoordinatorData,
     MyLightSystemsDataUpdateCoordinator,
@@ -163,9 +162,9 @@ def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> floa
         return 0
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_devices: AddEntitiesCallback) -> None:
+async def async_setup_entry(hass: HomeAssistant, entry: MyLightConfigEntry, async_add_devices: AddEntitiesCallback) -> None:
     """Configure sensor platform."""
-    coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
+    coordinator = entry.runtime_data
     async_add_devices(
         MyLightSystemsSensor(
             entry_id=entry.entry_id,

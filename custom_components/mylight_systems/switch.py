@@ -2,13 +2,12 @@ from dataclasses import dataclass
 from typing import Any, Callable, Coroutine
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import DOMAIN
+from . import MyLightConfigEntry
 from .api.exceptions import MyLightSystemsError
-from .const import CONF_MASTER_RELAY_ID, DATA_COORDINATOR, LOGGER
+from .const import CONF_MASTER_RELAY_ID, LOGGER
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 from .entity import IntegrationMyLightSystemsEntity
 
@@ -31,9 +30,9 @@ master_relay_switch = MyLightSystemsSwitchEntityDescription(
 )
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(hass: HomeAssistant, entry: MyLightConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Configure switch platform."""
-    coordinator: MyLightSystemsDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
+    coordinator = entry.runtime_data
 
     switches: list[MyLightSystemsSwitchEntityDescription] = []
 
