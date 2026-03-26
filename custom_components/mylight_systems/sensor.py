@@ -139,9 +139,9 @@ def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> floa
     ):
         return None
 
-    produced_energy = round(data.produced_energy.value / WS_TO_WH, 2)
-    green_energy = round(data.green_energy.value / WS_TO_WH, 2)
-    msb_charge = round(data.msb_charge.value / WS_TO_WH, 2)
+    produced_energy = data.produced_energy.value / WS_TO_WH
+    green_energy = data.green_energy.value / WS_TO_WH
+    msb_charge = data.msb_charge.value / WS_TO_WH
 
     result = round(produced_energy - green_energy - msb_charge, 2)
     return result if result > 0 else 0
@@ -163,6 +163,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: MyLightConfigEntry, asyn
 class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
     """MyLightSystems Sensor class."""
 
+    entity_description: MyLightSensorEntityDescription
+
     def __init__(
         self,
         entry_id: str,
@@ -174,11 +176,27 @@ class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
         self.entity_id = f"{DOMAIN}.{entity_description.key}"
         self._attr_unique_id = f"{entry_id}_{entity_description.key}"
         self.entity_description = entity_description
+        self._last_total_increasing_value: float | None = None
 
     @property
-    def native_value(self) -> int | float | str:
+    def native_value(self) -> int | float | str | None:
         """Return the state."""
-        return self.entity_description.value_fn(self.coordinator.data)
+        value = self.entity_description.value_fn(self.coordinator.data)
+
+        # For total_increasing sensors, ensure value never decreases
+        # to avoid HA recorder warnings from API rounding fluctuations
+        if (
+            self.entity_description.state_class == SensorStateClass.TOTAL_INCREASING
+            and isinstance(value, (int, float))
+        ):
+            if (
+                self._last_total_increasing_value is not None
+                and value < self._last_total_increasing_value
+            ):
+                return self._last_total_increasing_value
+            self._last_total_increasing_value = value
+
+        return value
 
     @property
     def available(self) -> bool:

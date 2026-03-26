@@ -49,7 +49,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
-class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
+class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCoordinatorData]):
     """Class to manage fetching data from the API."""
 
     config_entry: ConfigEntry
