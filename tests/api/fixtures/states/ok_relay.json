@@ -1,0 +1,13 @@
+{
+    "status": "ok",
+    "deviceStates": [
+        {
+            "deviceId": "relay-001",
+            "state": "on"
+        },
+        {
+            "deviceId": "relay-002",
+            "state": "off"
+        }
+    ]
+}

@@ -1,0 +1,10 @@
+{
+    "status": "ok",
+    "deviceStates": [
+        {
+            "deviceId": "other-device",
+            "state": "active",
+            "sensorStates": []
+        }
+    ]
+}
