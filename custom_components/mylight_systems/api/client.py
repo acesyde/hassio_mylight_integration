@@ -1,10 +1,11 @@
-"""WeatherFlow Data Wrapper."""
+"""MyLight Systems API client."""
 
 from __future__ import annotations
 
 import asyncio
 import logging
 import socket
+from typing import Any
 
 import aiohttp
 import async_timeout
@@ -46,7 +47,7 @@ class MyLightApiClient:
         path: str,
         params: dict | None = None,
         headers: dict | None = None,
-    ) -> any:
+    ) -> Any:
         """Execute request."""
         try:
             async with async_timeout.timeout(DEFAULT_TIMEOUT_IN_SECONDS):
