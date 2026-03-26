@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Connect to your MyLight Systems account",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "description": "Update your password.",
+        "data": {
+          "password": "New Password"
+        }
+      }
+    },
+    "error": {
+      "auth": "Email/Password is wrong.",
+      "connection": "Unable to connect to the server.",
+      "unknown": "Unknown error occurred."
+    },
+    "abort": {
+      "reconfigure_successful": "Password updated successfully"
+    }
+  }
+}
