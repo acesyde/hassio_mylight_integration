@@ -28,19 +28,11 @@ WS_TO_WH = 3600  # Watt-seconds to Watt-hours
 W_TO_KW = 1000  # Watts to Kilowatts
 
 
-@dataclass
-class MyLightSensorRequiredKeysMixin:
-    """Mixin for required keys."""
+@dataclass(frozen=True, kw_only=True)
+class MyLightSensorEntityDescription(SensorEntityDescription):
+    """Describes a sensor entity."""
 
     value_fn: Callable[[MyLightSystemsCoordinatorData], int | float | str | None]
-
-
-@dataclass
-class MyLightSensorEntityDescription(
-    SensorEntityDescription,
-    MyLightSensorRequiredKeysMixin,
-):
-    """Describes a sensor entity."""
 
 
 MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
