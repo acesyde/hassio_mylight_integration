@@ -1,0 +1,27 @@
+{
+    "status": "ok",
+    "deviceStates": [
+        {
+            "deviceId": "bat-001",
+            "state": "active",
+            "sensorStates": [
+                {
+                    "sensorId": "bat-001-soc",
+                    "measure": {
+                        "type": "battery_soc",
+                        "value": 75.5,
+                        "unit": "%"
+                    }
+                },
+                {
+                    "sensorId": "bat-001-power",
+                    "measure": {
+                        "type": "battery_power",
+                        "value": 1500.0,
+                        "unit": "W"
+                    }
+                }
+            ]
+        }
+    ]
+}
