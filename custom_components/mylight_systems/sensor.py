@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, UnitOfEnergy, UnitOfPower
+from homeassistant.const import PERCENTAGE, UnitOfEnergy
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -38,87 +38,88 @@ class MyLightSensorEntityDescription(SensorEntityDescription):
 MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_solar_production",
-        name="Solar power production",
+        name="Total solar production",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.produced_energy.value / WS_TO_WH, 2) if data.produced_energy is not None else 0,
+        value_fn=lambda data: round(data.produced_energy.value / WS_TO_WH, 2) if data.produced_energy is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_grid_consumption",
-        name="Total power consumption from the grid with virtual battery",
+        name="Total grid consumption (with virtual battery)",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.grid_energy.value / WS_TO_WH, 2) if data.grid_energy is not None else 0,
+        value_fn=lambda data: round(data.grid_energy.value / WS_TO_WH, 2) if data.grid_energy is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_grid_without_battery_consumption",
-        name="Grid power consumption",
+        name="Total grid consumption (without virtual battery)",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
         value_fn=lambda data: round(data.grid_energy_without_battery.value / WS_TO_WH, 2)
         if data.grid_energy_without_battery is not None
-        else 0,
+        else None,
     ),
     MyLightSensorEntityDescription(
         key="total_autonomy_rate",
-        name="Total autonomy rate",
+        name="Autonomy rate",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.autonomy_rate.value, 2) if data.autonomy_rate is not None else 0,
+        value_fn=lambda data: round(data.autonomy_rate.value, 2) if data.autonomy_rate is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_self_conso",
-        name="Total self consumption",
+        name="Self-consumption rate",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.self_conso.value, 2) if data.self_conso is not None else 0,
+        value_fn=lambda data: round(data.self_conso.value, 2) if data.self_conso is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_msb_charge",
-        name="Battery Charge",
+        name="Total battery charge",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.msb_charge.value / WS_TO_WH, 2) if data.msb_charge is not None else 0,
+        value_fn=lambda data: round(data.msb_charge.value / WS_TO_WH, 2) if data.msb_charge is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_msb_discharge",
-        name="Battery Discharge",
+        name="Total battery discharge",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.msb_discharge.value / WS_TO_WH, 2) if data.msb_discharge is not None else 0,
+        value_fn=lambda data: round(data.msb_discharge.value / WS_TO_WH, 2) if data.msb_discharge is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_green_energy",
-        name="Green energy",
+        name="Total green energy (direct solar)",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.green_energy.value / WS_TO_WH, 2) if data.green_energy is not None else 0,
+        value_fn=lambda data: round(data.green_energy.value / WS_TO_WH, 2) if data.green_energy is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="battery_state",
-        name="Battery state",
-        native_unit_of_measurement=UnitOfPower.KILO_WATT,
+        name="Battery energy stored",
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.ENERGY_STORAGE,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.battery_state.value / WS_TO_WH / W_TO_KW, 2) if data.battery_state is not None else 0,
+        value_fn=lambda data: round(data.battery_state.value / WS_TO_WH / W_TO_KW, 2) if data.battery_state is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="grid_returned_energy",
-        name="Grid returned energy",
+        name="Total grid returned energy",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -128,35 +129,22 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
 )
 
 
-def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> float:
+def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> float | None:
     """Calculate grid returned energy."""
-    if data is None:
-        return 0
+    if (
+        data is None
+        or data.produced_energy is None
+        or data.green_energy is None
+        or data.msb_charge is None
+    ):
+        return None
 
-    # Energy produced by the solar panels
-    produced_energy = 0
-
-    if data.produced_energy is not None and data.produced_energy.value is not None:
-        produced_energy = round(data.produced_energy.value / WS_TO_WH, 2)
-
-    # Energy consumed from the solar panels
-    green_energy = 0
-
-    if data.green_energy is not None and data.green_energy.value is not None:
-        green_energy = round(data.green_energy.value / WS_TO_WH, 2)
-
-    msb_charge = 0
-
-    # Virtual battery charge
-    if data.msb_charge is not None and data.msb_charge.value is not None:
-        msb_charge = round(data.msb_charge.value / WS_TO_WH, 2)
+    produced_energy = round(data.produced_energy.value / WS_TO_WH, 2)
+    green_energy = round(data.green_energy.value / WS_TO_WH, 2)
+    msb_charge = round(data.msb_charge.value / WS_TO_WH, 2)
 
     result = round(produced_energy - green_energy - msb_charge, 2)
-
-    if result > 0:
-        return result
-    else:
-        return 0
+    return result if result > 0 else 0
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: MyLightConfigEntry, async_add_devices: AddEntitiesCallback) -> None:

@@ -92,8 +92,8 @@ def all_energy_sources_data():
     )
 
 
-def test_calculate_grid_returned_energy__should_return_zero_when_all_data_is_none(none_data):
-    """Test with None data should return 0."""
+def test_calculate_grid_returned_energy__should_return_none_when_all_data_is_none(none_data):
+    """Test with None data should return None."""
     # Given
     data = none_data
 
@@ -101,11 +101,11 @@ def test_calculate_grid_returned_energy__should_return_zero_when_all_data_is_non
     result = _calculate_grid_returned_energy(data)
 
     # Then
-    assert 0 == result
+    assert result is None
 
 
-def test_calculate_grid_returned_energy__should_return_full_energy_when_only_produced_energy(produced_energy_only_data):
-    """Test with only produced energy should return full produced energy value."""
+def test_calculate_grid_returned_energy__should_return_none_when_green_energy_is_none(produced_energy_only_data):
+    """Test with missing green_energy or msb_charge should return None."""
     # Given
     data = produced_energy_only_data
 
@@ -113,13 +113,13 @@ def test_calculate_grid_returned_energy__should_return_full_energy_when_only_pro
     result = _calculate_grid_returned_energy(data)
 
     # Then
-    assert 1.0 == result
+    assert result is None
 
 
-def test_calculate_grid_returned_energy__should_return_half_energy_when_produced_and_green_energy(
+def test_calculate_grid_returned_energy__should_return_none_when_msb_charge_is_none(
     produced_and_green_energy_data,
 ):
-    """Test with produced and green energy should return remaining energy."""
+    """Test with missing msb_charge should return None."""
     # Given
     data = produced_and_green_energy_data
 
@@ -127,21 +127,21 @@ def test_calculate_grid_returned_energy__should_return_half_energy_when_produced
     result = _calculate_grid_returned_energy(data)
 
     # Then
-    assert 0.5 == result
+    assert result is None
 
 
-def test_calculate_grid_returned_energy__should_return_half_energy_when_produced_and_msb_charge(
+def test_calculate_grid_returned_energy__should_return_none_when_produced_energy_is_none(
     produced_and_msb_charge_data,
 ):
-    """Test with produced energy and MSB charge should return remaining energy."""
-    # Given
+    """Test with missing green_energy should return None."""
+    # Given - produced_and_msb_charge_data has green_energy=None
     data = produced_and_msb_charge_data
 
     # When
     result = _calculate_grid_returned_energy(data)
 
     # Then
-    assert 0.5 == result
+    assert result is None
 
 
 def test_calculate_grid_returned_energy__should_return_calculated_energy_when_all_sources(all_energy_sources_data):
