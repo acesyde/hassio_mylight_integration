@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import voluptuous as vol
-from homeassistant import config_entries
+from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
@@ -27,7 +27,7 @@ from .const import (
 )
 
 
-class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+class MyLightSystemsFlowHandler(ConfigFlow, domain=DOMAIN):
     """Config flow for MyLightSystems."""
 
     VERSION = 1
@@ -35,7 +35,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self,
         user_input: dict | None = None,
-    ) -> config_entries.FlowResult:
+    ) -> ConfigFlowResult:
         """Handle a flow initialized by the user."""
         _errors = {}
         if user_input is not None:
@@ -109,7 +109,7 @@ class MyLightSystemsFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_reconfigure(
         self,
         user_input: dict | None = None,
-    ) -> config_entries.FlowResult:
+    ) -> ConfigFlowResult:
         """Handle reconfiguration of an existing entry."""
         _errors = {}
         entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
