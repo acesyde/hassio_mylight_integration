@@ -135,7 +135,6 @@ class MyLightApiClient:
                 model.virtual_device_id = device["id"]
             if device["type"] == "bat":
                 model.virtual_battery_id = device["id"]
-                model.virtual_battery_capacity = device["batteryCapacity"]
             if device["type"] == "mst":
                 model.master_id = device["id"]
                 model.master_report_period = device["reportPeriod"]
