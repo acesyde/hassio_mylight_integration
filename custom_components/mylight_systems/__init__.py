@@ -23,7 +23,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MyLightConfigEntry) -> b
         base_url=entry.data.get(CONF_URL, DEFAULT_BASE_URL),
         session=session,
     )
-    coordinator = MyLightSystemsDataUpdateCoordinator(hass=hass, client=client)
+    coordinator = MyLightSystemsDataUpdateCoordinator(hass=hass, client=client, config_entry=entry)
 
     # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
     await coordinator.async_config_entry_first_refresh()
