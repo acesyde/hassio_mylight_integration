@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api.client import DEFAULT_BASE_URL, MyLightApiClient
-from .const import PLATFORMS
+from .const import LOGGER, PLATFORMS
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 type MyLightConfigEntry = ConfigEntry[MyLightSystemsDataUpdateCoordinator]
@@ -45,3 +45,14 @@ async def async_reload_entry(hass: HomeAssistant, entry: MyLightConfigEntry) -> 
     """Reload config entry."""
     await async_unload_entry(hass, entry)
     await async_setup_entry(hass, entry)
+
+
+async def async_migrate_entry(hass: HomeAssistant, entry: MyLightConfigEntry) -> bool:
+    """Migrate old entry data to the current version."""
+    LOGGER.debug("Migrating from version %s", entry.version)
+
+    if entry.version > 1:
+        return False
+
+    LOGGER.debug("Migration to version %s successful", entry.version)
+    return True
