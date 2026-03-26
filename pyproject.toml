@@ -19,12 +19,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  "pytest >= 8.4.1",
-  "pytest-cov >= 6.2.1",
+  "pytest >= 9.0.2",
+  "pytest-cov >= 7.1.0",
   "pytest-socket >= 0.6",
   "ruff >= 0.4",
   "aresponses >= 3.0.0",
   "aioresponses>=0.7.8",
+  "ty>=0.0.25",
 ]
 
 [tool.ruff]

@@ -36,15 +36,15 @@ from .const import (
 class MyLightSystemsCoordinatorData(NamedTuple):
     """Data returned by the coordinator."""
 
-    produced_energy: Measure
-    grid_energy: Measure
-    grid_energy_without_battery: Measure
-    autonomy_rate: Measure
-    self_conso: Measure
-    msb_charge: Measure
-    msb_discharge: Measure
-    green_energy: Measure
-    battery_state: Measure
+    produced_energy: Measure | None
+    grid_energy: Measure | None
+    grid_energy_without_battery: Measure | None
+    autonomy_rate: Measure | None
+    self_conso: Measure | None
+    msb_charge: Measure | None
+    msb_discharge: Measure | None
+    green_energy: Measure | None
+    battery_state: Measure | None
     master_relay_state: str | None
 
 

@@ -34,7 +34,7 @@ master_relay_switch = MyLightSystemsSwitchEntityDescription(
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     """Configure switch platform."""
-    coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
+    coordinator: MyLightSystemsDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
 
     switches: list[MyLightSystemsSwitchEntityDescription] = []
 
@@ -60,7 +60,7 @@ class MyLightSystemsSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
         super().__init__(coordinator)
         self.entity_id = f"{DOMAIN}.{entity_description.key}"
         self._attr_unique_id = f"{entry_id}_{entity_description.key}"
-        self.entity_description = entity_description
+        self.entity_description: MyLightSystemsSwitchEntityDescription = entity_description
 
     @property
     def is_on(self):
