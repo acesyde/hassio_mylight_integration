@@ -1,4 +1,4 @@
-"""Sensor platform for integration_blueprint."""
+"""Sensor platform for MyLight Systems."""
 
 from __future__ import annotations
 

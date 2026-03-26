@@ -1,4 +1,4 @@
-"""BlueprintEntity class."""
+"""MyLight Systems base entity."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from .coordinator import MyLightSystemsDataUpdateCoordinator
 
 
 class IntegrationMyLightSystemsEntity(CoordinatorEntity):
-    """BlueprintEntity class."""
+    """Base class for MyLight Systems entities."""
 
     _attr_attribution = ATTRIBUTION
 
