@@ -66,10 +66,8 @@ async def test_get_relay_state__should_raise_unauthorized_exception_when_invalid
             payload=unauthorized_response_fixture,
         )
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(UnauthorizedError):
             await api_client.async_get_relay_state(token, relay_id)
-
-    assert UnauthorizedError == exc_info.type
 
 
 @pytest.mark.asyncio
