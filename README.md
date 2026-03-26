@@ -9,6 +9,10 @@
 
 _Integration to integrate with [MyLight Systems][mylight_systems]._
 
+> [!Warning]
+> 
+> This integration currently only supports the **MyHome** customer area. The **MyLight150** customer area is not yet supported.
+
 **This integration will set up the following platforms.**
 
 | Platform                                        | Description                                                    | Unit | Implemented        |
