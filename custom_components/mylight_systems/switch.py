@@ -24,7 +24,7 @@ class MyLightSystemsSwitchEntityDescription(SwitchEntityDescription):
 master_relay_switch = MyLightSystemsSwitchEntityDescription(
     key="master_relay",
     name="Master relay",
-    is_on_fn=lambda coordinator: coordinator.master_relay_is_on,
+    is_on_fn=lambda coordinator: coordinator.master_relay_is_on(),
     turn_on_fn=lambda coordinator: coordinator.turn_on_master_relay,
     turn_off_fn=lambda coordinator: coordinator.turn_off_master_relay,
 )
@@ -63,13 +63,14 @@ class MyLightSystemsSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
     @property
     def is_on(self):
         """Return true if it is on."""
-        return self.entity_description.is_on_fn(self.coordinator)()
+        return self.entity_description.is_on_fn(self.coordinator)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn off the switch."""
         try:
             await self.entity_description.turn_off_fn(self.coordinator)()
             await self.coordinator.async_request_refresh()
+            self._attr_available = True
         except MyLightSystemsError:
             LOGGER.error("An error occurred while turning off MyLight Systems switch")
             self._attr_available = False
@@ -79,6 +80,7 @@ class MyLightSystemsSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
         try:
             await self.entity_description.turn_on_fn(self.coordinator)()
             await self.coordinator.async_request_refresh()
+            self._attr_available = True
         except MyLightSystemsError:
             LOGGER.error("An error occurred while turning on MyLight Systems switch")
             self._attr_available = False
