@@ -43,7 +43,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_solar_production",
         name="Solar power production",
-        icon="mdi:solar-panel",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -52,7 +51,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_grid_consumption",
         name="Total power consumption from the grid with virtual battery",
-        icon="mdi:transmission-tower-import",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -61,7 +59,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_grid_without_battery_consumption",
         name="Grid power consumption",
-        icon="mdi:transmission-tower-import",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -72,7 +69,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_autonomy_rate",
         name="Total autonomy rate",
-        icon="mdi:percent-box",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data: round(data.autonomy_rate.value, 2) if data.autonomy_rate is not None else 0,
@@ -80,7 +76,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_self_conso",
         name="Total self consumption",
-        icon="mdi:percent-box",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data: round(data.self_conso.value, 2) if data.self_conso is not None else 0,
@@ -88,7 +83,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_msb_charge",
         name="Battery Charge",
-        icon="mdi:battery-high",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -97,7 +91,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_msb_discharge",
         name="Battery Discharge",
-        icon="mdi:battery-low",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -106,7 +99,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_green_energy",
         name="Green energy",
-        icon="mdi:solar-panel",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -115,7 +107,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="battery_state",
         name="Battery state",
-        icon="mdi:battery",
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data: round(data.battery_state.value / 36e2 / 1e3, 2) if data.battery_state is not None else 0,
@@ -123,7 +114,6 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="grid_returned_energy",
         name="Grid returned energy",
-        icon="mdi:transmission-tower-export",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
