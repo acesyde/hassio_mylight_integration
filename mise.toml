@@ -1,13 +1,13 @@
 [tools]
-actionlint = "1.7.10"
+actionlint = "1.7.11"
 pre-commit = "4.5"
 python = "3.13.12"
-uv = "0.10.2"
+uv = "0.11.1"
 
 [settings]
 experimental = true
 auto_install = false
-python.uv_venv_auto = "source"
+python.uv_venv_auto = "create|source"
 
 [tasks."project:setup"]
 description = "Setup the project"
