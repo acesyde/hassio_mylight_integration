@@ -8,6 +8,12 @@
           "password": "Senha"
         }
       },
+      "reauth_confirm": {
+        "description": "As suas credenciais expiraram. Por favor, introduza a sua nova senha.",
+        "data": {
+          "password": "Senha"
+        }
+      },
       "reconfigure": {
         "description": "Atualize sua senha.",
         "data": {
@@ -21,6 +27,7 @@
       "unknown": "Erro desconhecido."
     },
     "abort": {
+      "reauth_successful": "Reautenticação bem-sucedida",
       "reconfigure_successful": "Senha atualizada com sucesso"
     }
   }

@@ -8,6 +8,12 @@
           "password": "Password"
         }
       },
+      "reauth_confirm": {
+        "description": "Your credentials have expired. Please enter your new password.",
+        "data": {
+          "password": "Password"
+        }
+      },
       "reconfigure": {
         "description": "Update your password.",
         "data": {
@@ -21,6 +27,7 @@
       "unknown": "Unknown error occurred."
     },
     "abort": {
+      "reauth_successful": "Reauthentication successful",
       "reconfigure_successful": "Password updated successfully"
     }
   }

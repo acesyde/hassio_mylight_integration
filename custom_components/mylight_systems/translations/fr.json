@@ -8,6 +8,12 @@
           "password": "Mot de passe"
         }
       },
+      "reauth_confirm": {
+        "description": "Vos identifiants ont expiré. Veuillez entrer votre nouveau mot de passe.",
+        "data": {
+          "password": "Mot de passe"
+        }
+      },
       "reconfigure": {
         "description": "Mettez à jour votre mot de passe.",
         "data": {
@@ -21,6 +27,7 @@
       "unknown": "Une erreur inconnue s'est produite."
     },
     "abort": {
+      "reauth_successful": "Réauthentification réussie",
       "reconfigure_successful": "Mot de passe mis à jour avec succès"
     }
   }
