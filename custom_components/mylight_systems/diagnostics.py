@@ -36,7 +36,8 @@ async def async_get_config_entry_diagnostics(
         },
         "config_entry_data": async_redact_data(dict(entry.data), TO_REDACT),
         "coordinator_data": {
-            k: asdict(v) if hasattr(v, "__dataclass_fields__") else v
-            for k, v in coordinator.data._asdict().items()
-        } if coordinator.data else None,
+            k: asdict(v) if hasattr(v, "__dataclass_fields__") else v for k, v in coordinator.data._asdict().items()
+        }
+        if coordinator.data
+        else None,
     }

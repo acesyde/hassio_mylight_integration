@@ -71,9 +71,7 @@ async def test_get_relay_state__should_raise_unauthorized_exception_when_invalid
 
 
 @pytest.mark.asyncio
-async def test_get_relay_state__should_return_state_when_relay_found(
-    api_client, valid_relay_response_fixture
-):
+async def test_get_relay_state__should_return_state_when_relay_found(api_client, valid_relay_response_fixture):
     """Test with valid token should return relay state."""
     # Given
     token = "abcdef"  # noqa: S105
@@ -95,9 +93,7 @@ async def test_get_relay_state__should_return_state_when_relay_found(
 
 
 @pytest.mark.asyncio
-async def test_get_relay_state__should_return_none_when_relay_not_found(
-    api_client, valid_relay_response_fixture
-):
+async def test_get_relay_state__should_return_none_when_relay_not_found(api_client, valid_relay_response_fixture):
     """Test should return None when relay device is not in response."""
     # Given
     token = "abcdef"  # noqa: S105
