@@ -60,6 +60,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
         self,
         hass: HomeAssistant,
         client: MyLightApiClient,
+        config_entry: ConfigEntry,
     ) -> None:
         """Initialize."""
         self.client = client
@@ -68,6 +69,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator):
             logger=LOGGER,
             name=DOMAIN,
             update_interval=timedelta(minutes=SCAN_INTERVAL_IN_MINUTES),
+            config_entry=config_entry,
         )
 
     async def _async_update_data(self) -> MyLightSystemsCoordinatorData:
