@@ -16,6 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import MyLightConfigEntry
+from .const import DOMAIN
 from .coordinator import (
     MyLightSystemsCoordinatorData,
     MyLightSystemsDataUpdateCoordinator,
