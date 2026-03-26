@@ -25,7 +25,6 @@ class MyLightSystemsSwitchEntityDescription(SwitchEntityDescription):
 master_relay_switch = MyLightSystemsSwitchEntityDescription(
     key="master_relay",
     name="Master relay",
-    icon="mdi:light-switch",
     is_on_fn=lambda coordinator: coordinator.master_relay_is_on,
     turn_on_fn=lambda coordinator: coordinator.turn_on_master_relay,
     turn_off_fn=lambda coordinator: coordinator.turn_off_master_relay,

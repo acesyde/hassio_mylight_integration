@@ -1,0 +1,41 @@
+{
+  "entity": {
+    "sensor": {
+      "total_solar_production": {
+        "default": "mdi:solar-panel"
+      },
+      "total_grid_consumption": {
+        "default": "mdi:transmission-tower-import"
+      },
+      "total_grid_without_battery_consumption": {
+        "default": "mdi:transmission-tower-import"
+      },
+      "total_autonomy_rate": {
+        "default": "mdi:percent-box"
+      },
+      "total_self_conso": {
+        "default": "mdi:percent-box"
+      },
+      "total_msb_charge": {
+        "default": "mdi:battery-high"
+      },
+      "total_msb_discharge": {
+        "default": "mdi:battery-low"
+      },
+      "total_green_energy": {
+        "default": "mdi:solar-panel"
+      },
+      "battery_state": {
+        "default": "mdi:battery"
+      },
+      "grid_returned_energy": {
+        "default": "mdi:transmission-tower-export"
+      }
+    },
+    "switch": {
+      "master_relay": {
+        "default": "mdi:light-switch"
+      }
+    }
+  }
+}
