@@ -153,4 +153,5 @@ def test_calculate_grid_returned_energy__should_return_calculated_energy_when_al
     result = _calculate_grid_returned_energy(data)
 
     # Then
-    assert 0.59 == result
+    # (3600 - 800 - 700) / 3600 = 0.583333... → rounded to 0.58
+    assert 0.58 == result
