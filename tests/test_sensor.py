@@ -30,7 +30,7 @@ def produced_energy_only_data():
     return MyLightSystemsCoordinatorData(
         grid_energy=None,
         green_energy=None,
-        produced_energy=Measure(key="abcd", value=3600, unit="kwh"),
+        produced_energy=Measure(type="abcd", value=3600, unit="kwh"),
         grid_energy_without_battery=None,
         msb_charge=None,
         msb_discharge=None,
@@ -46,8 +46,8 @@ def produced_and_green_energy_data():
     """Create coordinator data with produced and green energy."""
     return MyLightSystemsCoordinatorData(
         grid_energy=None,
-        green_energy=Measure(key="abcd", value=1800, unit="kwh"),
-        produced_energy=Measure(key="abcd", value=3600, unit="kwh"),
+        green_energy=Measure(type="abcd", value=1800, unit="kwh"),
+        produced_energy=Measure(type="abcd", value=3600, unit="kwh"),
         grid_energy_without_battery=None,
         msb_charge=None,
         msb_discharge=None,
@@ -64,9 +64,9 @@ def produced_and_msb_charge_data():
     return MyLightSystemsCoordinatorData(
         grid_energy=None,
         green_energy=None,
-        produced_energy=Measure(key="abcd", value=3600, unit="kwh"),
+        produced_energy=Measure(type="abcd", value=3600, unit="kwh"),
         grid_energy_without_battery=None,
-        msb_charge=Measure(key="abcd", value=1800, unit="kwh"),
+        msb_charge=Measure(type="abcd", value=1800, unit="kwh"),
         msb_discharge=None,
         self_conso=None,
         autonomy_rate=None,
@@ -80,10 +80,10 @@ def all_energy_sources_data():
     """Create coordinator data with all energy sources."""
     return MyLightSystemsCoordinatorData(
         grid_energy=None,
-        green_energy=Measure(key="abcd", value=800, unit="kwh"),
-        produced_energy=Measure(key="abcd", value=3600, unit="kwh"),
+        green_energy=Measure(type="abcd", value=800, unit="kwh"),
+        produced_energy=Measure(type="abcd", value=3600, unit="kwh"),
         grid_energy_without_battery=None,
-        msb_charge=Measure(key="abcd", value=700, unit="kwh"),
+        msb_charge=Measure(type="abcd", value=700, unit="kwh"),
         msb_discharge=None,
         self_conso=None,
         autonomy_rate=None,
