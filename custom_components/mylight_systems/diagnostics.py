@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Any
 
 from homeassistant.components.diagnostics import async_redact_data
@@ -34,5 +35,8 @@ async def async_get_config_entry_diagnostics(
             "version": integration.version,
         },
         "config_entry_data": async_redact_data(dict(entry.data), TO_REDACT),
-        "coordinator_data": coordinator.data._asdict() if coordinator.data else None,
+        "coordinator_data": {
+            k: asdict(v) if hasattr(v, "__dataclass_fields__") else v
+            for k, v in coordinator.data._asdict().items()
+        } if coordinator.data else None,
     }

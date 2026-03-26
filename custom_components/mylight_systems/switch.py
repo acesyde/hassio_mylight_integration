@@ -50,7 +50,7 @@ class MyLightSystemsSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
 
     def __init__(
         self,
-        entry_id: ConfigEntry,
+        entry_id: str,
         coordinator: MyLightSystemsDataUpdateCoordinator,
         entity_description: MyLightSystemsSwitchEntityDescription,
     ) -> None:
