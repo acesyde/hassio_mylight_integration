@@ -1,0 +1,54 @@
+{
+    "status": "ok",
+    "measures": [
+        {
+            "values": [
+                {
+                    "type": "energy",
+                    "value": 5.4E7,
+                    "unit": "Ws"
+                },
+                {
+                    "type": "produced_energy",
+                    "value": 4.6154430E7,
+                    "unit": "Ws"
+                },
+                {
+                    "type": "electricity_meter_energy",
+                    "value": 7.845570E6,
+                    "unit": "Ws"
+                },
+                {
+                    "type": "green_energy",
+                    "value": 2.8E7,
+                    "unit": "Ws"
+                },
+                {
+                    "type": "grid_energy",
+                    "value": 2.6E7,
+                    "unit": "Ws"
+                },
+                {
+                    "type": "msb_charge",
+                    "value": 0.0,
+                    "unit": "Ws"
+                },
+                {
+                    "type": "msb_discharge",
+                    "value": 0.0,
+                    "unit": "Ws"
+                },
+                {
+                    "type": "msb_loss",
+                    "value": 0.0,
+                    "unit": "Ws"
+                },
+                {
+                    "type": "grid_sans_msb_energy",
+                    "value": 2.6E7,
+                    "unit": "Ws"
+                }
+            ]
+        }
+    ]
+}
