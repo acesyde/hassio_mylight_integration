@@ -16,6 +16,7 @@ from .const import (
     DEFAULT_BASE_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
     DEVICES_URL,
+    MEASURES_GROUPING_URL,
     MEASURES_TOTAL_URL,
     PROFILE_URL,
     STATES_URL,
@@ -163,6 +164,41 @@ class MyLightApiClient:
 
         for value in response["measure"]["values"]:
             measures.append(Measure(value["type"], value["value"], value["unit"]))
+
+        return measures
+
+    async def async_get_measures_grouping(
+        self,
+        auth_token: str,
+        phase: str,
+        device_id: str,
+        from_date: str,
+        to_date: str,
+        group_type: str = "day",
+    ) -> list[Measure]:
+        """Get device measures using the grouping endpoint."""
+        response = await self._execute_request(
+            "get",
+            MEASURES_GROUPING_URL,
+            params={
+                "authToken": auth_token,
+                "groupType": group_type,
+                "fromDate": from_date,
+                "toDate": to_date,
+                "measureType": phase,
+                "deviceId": device_id,
+            },
+        )
+
+        if response["status"] == "error":
+            if response["error"] == "not.authorized":
+                raise UnauthorizedError()
+
+        measures: list[Measure] = []
+
+        if response["measures"]:
+            for value in response["measures"][0]["values"]:
+                measures.append(Measure(value["type"], value["value"], value["unit"]))
 
         return measures
 

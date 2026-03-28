@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import NamedTuple
 
 from homeassistant.config_entries import ConfigEntry
@@ -84,7 +84,16 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
 
             await self.authenticate_user(email, password)
 
-            result = await self.client.async_get_measures_total(self.__auth_token, grid_type, device_id)
+            today = date.today().isoformat()
+            tomorrow = (date.today() + timedelta(days=1)).isoformat()
+
+            # Energy data from grouping endpoint (daily values)
+            energy_result = await self.client.async_get_measures_grouping(
+                self.__auth_token, grid_type, device_id, from_date=today, to_date=tomorrow
+            )
+
+            # Percentage data from total endpoint (autonomy_rate, self_conso)
+            total_result = await self.client.async_get_measures_total(self.__auth_token, grid_type, device_id)
 
             battery_state = await self.client.async_get_battery_state(self.__auth_token, virtual_battery_id)
 
@@ -93,14 +102,14 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 master_relay_state = await self.client.async_get_relay_state(self.__auth_token, master_relay_id)
 
             data = MyLightSystemsCoordinatorData(
-                produced_energy=self.find_measure_by_type(result, "produced_energy"),
-                grid_energy=self.find_measure_by_type(result, "grid_energy"),
-                grid_energy_without_battery=self.find_measure_by_type(result, "grid_sans_msb_energy"),
-                autonomy_rate=self.find_measure_by_type(result, "autonomy_rate"),
-                self_conso=self.find_measure_by_type(result, "self_conso"),
-                msb_charge=self.find_measure_by_type(result, "msb_charge"),
-                msb_discharge=self.find_measure_by_type(result, "msb_discharge"),
-                green_energy=self.find_measure_by_type(result, "green_energy"),
+                produced_energy=self.find_measure_by_type(energy_result, "produced_energy"),
+                grid_energy=self.find_measure_by_type(energy_result, "grid_energy"),
+                grid_energy_without_battery=self.find_measure_by_type(energy_result, "grid_sans_msb_energy"),
+                autonomy_rate=self.find_measure_by_type(total_result, "autonomy_rate"),
+                self_conso=self.find_measure_by_type(total_result, "self_conso"),
+                msb_charge=self.find_measure_by_type(energy_result, "msb_charge"),
+                msb_discharge=self.find_measure_by_type(energy_result, "msb_discharge"),
+                green_energy=self.find_measure_by_type(energy_result, "green_energy"),
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
             )
