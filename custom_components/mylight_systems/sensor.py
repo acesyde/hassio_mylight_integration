@@ -179,21 +179,11 @@ class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
         self.entity_id = f"{DOMAIN}.{entity_description.key}"
         self._attr_unique_id = f"{entry_id}_{entity_description.key}"
         self.entity_description = entity_description
-        self._last_total_increasing_value: float | None = None
 
     @property
     def native_value(self) -> int | float | str | None:
         """Return the state."""
-        value = self.entity_description.value_fn(self.coordinator.data)
-
-        # For total_increasing sensors, ensure value never decreases
-        # to avoid HA recorder warnings from API rounding fluctuations
-        if self.entity_description.state_class == SensorStateClass.TOTAL_INCREASING and isinstance(value, (int, float)):
-            if self._last_total_increasing_value is not None and value < self._last_total_increasing_value:
-                return self._last_total_increasing_value
-            self._last_total_increasing_value = value
-
-        return value
+        return self.entity_description.value_fn(self.coordinator.data)
 
     @property
     def available(self) -> bool:
