@@ -13,7 +13,7 @@ from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
     MyLightApiClient,
 )
-from custom_components.mylight_systems.api.exceptions import InvalidCredentialsError
+from custom_components.mylight_systems.api.exceptions import InvalidCredentialsError, MyLightSystemsError
 
 
 @pytest_asyncio.fixture
@@ -136,6 +136,29 @@ async def test_login__should_raise_invalid_credentials_exception_when_wrong_cred
             await api_client.async_login(email=email, password=password)
 
     assert InvalidCredentialsError == exc_info.type
+
+
+@pytest.mark.asyncio
+async def test_login__should_raise_mylight_error_when_unknown_error_code(api_client):
+    """Test with unknown API error code should raise MyLightSystemsError."""
+    # Given
+    email = "test@test.com"
+    password = "test"  # noqa: S105
+    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test%2540test.com&password=test"
+
+    # When / Then
+    with aioresponses() as session_mock:
+        session_mock.get(
+            url,
+            status=200,
+            payload={"status": "error", "error": "some.unknown.error"},
+        )
+
+        with pytest.raises(Exception) as exc_info:
+            await api_client.async_login(email=email, password=password)
+
+    assert MyLightSystemsError == exc_info.type
+    assert "some.unknown.error" == exc_info.value.msg
 
 
 @pytest.mark.asyncio
