@@ -13,7 +13,7 @@ from custom_components.mylight_systems.api.client import (
     DEVICES_URL,
     MyLightApiClient,
 )
-from custom_components.mylight_systems.api.exceptions import UnauthorizedError
+from custom_components.mylight_systems.api.exceptions import MyLightSystemsError, UnauthorizedError
 
 
 @pytest_asyncio.fixture
@@ -69,6 +69,27 @@ async def test_get_devices__should_raise_unauthorized_exception_when_invalid_tok
             await api_client.async_get_devices(token)
 
     assert UnauthorizedError == exc_info.type
+
+
+@pytest.mark.asyncio
+async def test_get_devices__should_raise_mylight_error_when_devices_key_missing(api_client):
+    """Test with response missing 'devices' key should raise MyLightSystemsError."""
+    # Given
+    token = "abcdef"  # noqa: S105
+    url = DEFAULT_BASE_URL + DEVICES_URL + f"?authToken={token}"
+
+    # When / Then
+    with aioresponses() as session_mock:
+        session_mock.get(
+            url,
+            status=200,
+            payload={"status": "ok"},
+        )
+
+        with pytest.raises(Exception) as exc_info:
+            await api_client.async_get_devices(token)
+
+    assert MyLightSystemsError == exc_info.type
 
 
 @pytest.mark.asyncio

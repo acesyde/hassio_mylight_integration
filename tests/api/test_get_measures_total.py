@@ -13,7 +13,7 @@ from custom_components.mylight_systems.api.client import (
     MEASURES_TOTAL_URL,
     MyLightApiClient,
 )
-from custom_components.mylight_systems.api.exceptions import UnauthorizedError
+from custom_components.mylight_systems.api.exceptions import MyLightSystemsError, UnauthorizedError
 
 
 @pytest_asyncio.fixture
@@ -72,6 +72,29 @@ async def test_async_get_measures_total__should_raise_unauthorized_exception_whe
 
     # Then
     assert UnauthorizedError == exc_info.type
+
+
+@pytest.mark.asyncio
+async def test_async_get_measures_total__should_raise_mylight_error_when_measure_key_missing(api_client):
+    """Test with response missing 'measure' key should raise MyLightSystemsError."""
+    # Given
+    token = "abcdef"  # noqa: S105
+    measure_type = "one_phase"
+    device_id = "qVGSJ45vkeqvrHy6g"
+    url = DEFAULT_BASE_URL + MEASURES_TOTAL_URL + f"?authToken={token}&measureType={measure_type}&deviceId={device_id}"
+
+    # When / Then
+    with aioresponses() as session_mock:
+        session_mock.get(
+            url,
+            status=200,
+            payload={"status": "ok"},
+        )
+
+        with pytest.raises(Exception) as exc_info:
+            await api_client.async_get_measures_total(token, measure_type, device_id)
+
+    assert MyLightSystemsError == exc_info.type
 
 
 @pytest.mark.asyncio
