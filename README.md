@@ -15,19 +15,28 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 
 **This integration will set up the following platforms.**
 
-| Platform                                        | Description                                                    | Unit | Implemented        |
-|-------------------------------------------------|----------------------------------------------------------------|------|--------------------|
-| `sensor.total_solar_production`                 | Total solar power production.                                  | W/h  | :white_check_mark: |
-| `sensor.total_grid_with_battery_consumption`    | Total power consumption from the grid with virtual battery.    | W/h  | :white_check_mark: |
-| `sensor.total_grid_without_battery_consumption` | Total power consumption from the grid without virtual battery. | W/h  | :white_check_mark: |
-| `sensor.total_autonomy_rate`                    | Autonomy rate.                                                 | %    | :white_check_mark: |
-| `sensor.total_self_conso`                       | Self consumption.                                              | %    | :white_check_mark: |
-| `sensor.total_msb_charge`                       | My Smart Battery Charge.                                       | W/h  | :white_check_mark: |
-| `sensor.total_msb_discharge`                    | My Smart Battery Discharge.                                    | W/h  | :white_check_mark: |
-| `sensor.battery_state`                          | Current battery state.                                         | kW   | :white_check_mark: |
-| `sensor.total_green_energy`                     | Total power consumned (from the production) by you home.       | W/h  | :white_check_mark: |
-| `sensor.grid_returned_energy`                   | Total power returned to the grid.                              | W/h  | :white_check_mark: |
-| `switch.master_relay`                           | Master relay switch.                                           | N/A  | :white_check_mark: |
+## Provided Entities
+
+### Sensors
+
+| Entity ID | Name | Description | Unit | State Class |
+|-----------|------|-------------|------|-------------|
+| `sensor.total_solar_production` | Total solar production | Cumulative energy produced by your solar panels | Wh | `total_increasing` |
+| `sensor.total_grid_consumption` | Total grid consumption (with virtual battery) | Cumulative energy drawn from the grid, accounting for the virtual battery | Wh | `total_increasing` |
+| `sensor.total_grid_without_battery_consumption` | Total grid consumption (without virtual battery) | Cumulative energy drawn from the grid, excluding virtual battery contribution | Wh | `total_increasing` |
+| `sensor.total_autonomy_rate` | Autonomy rate | Percentage of your consumption covered by solar + battery (self-sufficiency) | % | `measurement` |
+| `sensor.total_self_conso` | Self-consumption rate | Percentage of your solar production consumed locally (not exported) | % | `measurement` |
+| `sensor.total_msb_charge` | Total battery charge | Cumulative energy charged into the My Smart Battery | Wh | `total_increasing` |
+| `sensor.total_msb_discharge` | Total battery discharge | Cumulative energy discharged from the My Smart Battery | Wh | `total_increasing` |
+| `sensor.total_green_energy` | Total green energy (direct solar) | Cumulative solar energy consumed directly by your home (not via battery) | Wh | `total_increasing` |
+| `sensor.battery_state` | Battery energy stored | Current energy level stored in the My Smart Battery | kWh | `measurement` |
+| `sensor.grid_returned_energy` | Total grid returned energy | Cumulative solar energy exported back to the grid (production − direct use − battery charge) | Wh | `total_increasing` |
+
+### Switches
+
+| Entity ID | Name | Description | Notes |
+|-----------|------|-------------|-------|
+| `switch.master_relay` | Master relay | Controls the master relay switch on your installation | Only available when a relay device is paired |
 
 ## Installation
 
@@ -46,6 +55,60 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 6. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "MyLight Systems"
 
 ## Configuration is done in the UI
+
+## Architecture
+
+The integration follows the standard Home Assistant coordinator pattern:
+
+```mermaid
+flowchart TD
+    CF["Config Flow\nconfig_flow.py\n(credentials + device discovery)"]
+    INIT["Entry Setup\n__init__.py\n(async_setup_entry)"]
+    COORD["Coordinator\ncoordinator.py\n(polls every 15 min)"]
+    CLIENT["API Client\napi/client.py\n(aiohttp)"]
+    API["MyLight Systems\nCloud API"]
+    SENSOR["Sensor Entities\nsensor.py\n(10 sensors)"]
+    SWITCH["Switch Entity\nswitch.py\n(master relay)"]
+
+    CF -->|"creates"| INIT
+    INIT -->|"creates"| COORD
+    INIT -->|"creates"| CLIENT
+    COORD -->|"uses"| CLIENT
+    CLIENT -->|"HTTPS"| API
+    COORD -->|"pushes data"| SENSOR
+    COORD -->|"pushes data"| SWITCH
+```
+
+**Data flow per update cycle:**
+1. Coordinator calls `async_get_measures_grouping` (daily energy values) and `async_get_measures_total` (rates) sequentially
+2. Optionally fetches battery state and relay state if devices are paired
+3. Aggregated data is pushed to all sensor and switch entities
+
+## Troubleshooting
+
+### "Relay switch is missing"
+
+The `switch.master_relay` entity is only created when a relay device (`sw` type) is paired to your installation. If you do not have a relay, this entity will not appear.
+
+### "Sensor values are stuck / not updating"
+
+The coordinator polls the API every 15 minutes. If values stop updating:
+1. Open **Settings → Devices & Services → MyLight Systems** and check for an error banner.
+2. Enable debug logging and check the Home Assistant logs:
+
+```yaml
+# configuration.yaml
+logger:
+  default: warning
+  logs:
+    custom_components.mylight_systems: debug
+```
+
+3. Look for `CommunicationError` or `UpdateFailed` entries — these indicate a network issue or an API change.
+
+### "Authentication failed" after a password change
+
+If you change your MyLight password externally, the integration will show an authentication error. Go to **Settings → Devices & Services → MyLight Systems** and use the **Re-authenticate** option to enter your new credentials.
 
 ## Contributions are welcome!
 
