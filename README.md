@@ -19,24 +19,24 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 
 ### Sensors
 
-| Entity ID | Name | Description | Unit | State Class |
-|-----------|------|-------------|------|-------------|
-| `sensor.total_solar_production` | Total solar production | Cumulative energy produced by your solar panels | Wh | `total_increasing` |
-| `sensor.total_grid_consumption` | Total grid consumption (with virtual battery) | Cumulative energy drawn from the grid, accounting for the virtual battery | Wh | `total_increasing` |
-| `sensor.total_grid_without_battery_consumption` | Total grid consumption (without virtual battery) | Cumulative energy drawn from the grid, excluding virtual battery contribution | Wh | `total_increasing` |
-| `sensor.total_autonomy_rate` | Autonomy rate | Percentage of your consumption covered by solar + battery (self-sufficiency) | % | `measurement` |
-| `sensor.total_self_conso` | Self-consumption rate | Percentage of your solar production consumed locally (not exported) | % | `measurement` |
-| `sensor.total_msb_charge` | Total battery charge | Cumulative energy charged into the My Smart Battery | Wh | `total_increasing` |
-| `sensor.total_msb_discharge` | Total battery discharge | Cumulative energy discharged from the My Smart Battery | Wh | `total_increasing` |
-| `sensor.total_green_energy` | Total green energy (direct solar) | Cumulative solar energy consumed directly by your home (not via battery) | Wh | `total_increasing` |
-| `sensor.battery_state` | Battery energy stored | Current energy level stored in the My Smart Battery | kWh | `measurement` |
-| `sensor.grid_returned_energy` | Total grid returned energy | Cumulative solar energy exported back to the grid (production − direct use − battery charge) | Wh | `total_increasing` |
+| Entity ID | Description | Unit | State Class |
+|-----------|-------------|------|-------------|
+| `sensor.total_solar_production` | Cumulative energy produced by solar panels | Wh | `total_increasing` |
+| `sensor.total_grid_consumption` | Grid energy drawn (accounting for virtual battery) | Wh | `total_increasing` |
+| `sensor.total_grid_without_battery_consumption` | Grid energy drawn (excluding virtual battery) | Wh | `total_increasing` |
+| `sensor.total_autonomy_rate` | % of consumption covered by solar + battery | % | `measurement` |
+| `sensor.total_self_conso` | % of solar production consumed locally | % | `measurement` |
+| `sensor.total_msb_charge` | Cumulative energy charged into the Smart Battery | Wh | `total_increasing` |
+| `sensor.total_msb_discharge` | Cumulative energy discharged from the Smart Battery | Wh | `total_increasing` |
+| `sensor.total_green_energy` | Solar energy consumed directly by your home | Wh | `total_increasing` |
+| `sensor.battery_state` | Current energy stored in the Smart Battery | kWh | `measurement` |
+| `sensor.grid_returned_energy` | Solar energy exported back to the grid | Wh | `total_increasing` |
 
 ### Switches
 
-| Entity ID | Name | Description | Notes |
-|-----------|------|-------------|-------|
-| `switch.master_relay` | Master relay | Controls the master relay switch on your installation | Only available when a relay device is paired |
+| Entity ID | Description | Notes |
+|-----------|-------------|-------|
+| `switch.master_relay` | Controls the master relay on your installation | Only available when a relay device is paired |
 
 ## Installation
 
