@@ -20,7 +20,7 @@ class CommunicationError(MyLightSystemsError):
 
     def __init__(self) -> None:
         """Initialize."""
-        super().__init__("A communication error occured")
+        super().__init__("A communication error occurred")
 
 
 class InvalidCredentialsError(MyLightSystemsError):

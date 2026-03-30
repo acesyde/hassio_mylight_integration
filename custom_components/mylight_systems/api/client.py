@@ -25,6 +25,7 @@ from .const import (
 from .exceptions import (
     CommunicationError,
     InvalidCredentialsError,
+    MyLightSystemsError,
     UnauthorizedError,
 )
 from .models import InstallationDevices, Login, Measure, UserProfile
@@ -35,11 +36,9 @@ _LOGGER = logging.getLogger(__name__)
 class MyLightApiClient:
     """Main class to perform MyLight Systems API requests."""
 
-    _session: aiohttp.ClientSession = None
-
     def __init__(self, base_url: str, session: aiohttp.ClientSession) -> None:
         """Initialize."""
-        self._session = session
+        self._session: aiohttp.ClientSession = session
         self._base_url = base_url if base_url and not base_url.isspace() else DEFAULT_BASE_URL
 
     async def _execute_request(
@@ -92,6 +91,7 @@ class MyLightApiClient:
                 "undefined.password",
             ):
                 raise InvalidCredentialsError()
+            raise MyLightSystemsError(response.get("error", "unknown error"))
 
         return Login(response["authToken"])
 
@@ -131,7 +131,12 @@ class MyLightApiClient:
 
         model = InstallationDevices()
 
-        for device in response["devices"]:
+        try:
+            devices = response["devices"]
+        except KeyError as err:
+            raise MyLightSystemsError("Missing 'devices' key in response") from err
+
+        for device in devices:
             if device["type"] == "vrt":
                 model.virtual_device_id = device["id"]
             if device["type"] == "bat":
@@ -162,7 +167,12 @@ class MyLightApiClient:
 
         measures: list[Measure] = []
 
-        for value in response["measure"]["values"]:
+        try:
+            values = response["measure"]["values"]
+        except KeyError as err:
+            raise MyLightSystemsError("Missing 'measure' key in response") from err
+
+        for value in values:
             measures.append(Measure(value["type"], value["value"], value["unit"]))
 
         return measures
@@ -196,8 +206,13 @@ class MyLightApiClient:
 
         measures: list[Measure] = []
 
-        if response["measures"]:
-            for value in response["measures"][0]["values"]:
+        try:
+            measure_groups = response["measures"]
+        except KeyError as err:
+            raise MyLightSystemsError("Missing 'measures' key in response") from err
+
+        if measure_groups:
+            for value in measure_groups[0]["values"]:
                 measures.append(Measure(value["type"], value["value"], value["unit"]))
 
         return measures
