@@ -10,7 +10,7 @@ LOGGER: Logger = getLogger(__package__)
 NAME = "MyLight Systems"
 DOMAIN = "mylight_systems"
 PLATFORMS = [Platform.SENSOR, Platform.SWITCH]
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 ATTRIBUTION = "Data provided by https://www.mylight-systems.com/"
 SCAN_INTERVAL_IN_MINUTES = 15
 
