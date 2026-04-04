@@ -31,6 +31,20 @@
       "reconfigure_successful": "Senha atualizada com sucesso"
     }
   },
+  "issues": {
+    "auth_failed": {
+      "title": "Falha de autenticação para {entry_title}",
+      "description": "As credenciais do MyLight Systems já não são válidas. Clique em Corrigir para iniciar o fluxo de reautenticação.",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Reautenticar {entry_title}",
+            "description": "Confirme para abrir o fluxo de reautenticação desta entrada MyLight Systems."
+          }
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {

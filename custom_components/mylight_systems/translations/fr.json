@@ -31,6 +31,20 @@
       "reconfigure_successful": "Mot de passe mis à jour avec succès"
     }
   },
+  "issues": {
+    "auth_failed": {
+      "title": "Échec d'authentification pour {entry_title}",
+      "description": "Les identifiants MyLight Systems ne sont plus valides. Cliquez sur Corriger pour lancer le flux de réauthentification.",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Réauthentifier {entry_title}",
+            "description": "Confirmez pour ouvrir le flux de réauthentification de cette entrée MyLight Systems."
+          }
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {

@@ -153,5 +153,5 @@ def test_calculate_grid_returned_energy__should_return_calculated_energy_when_al
     result = _calculate_grid_returned_energy(data)
 
     # Then
-    # (3600 - 800 - 700) / 3600 = 0.583333... → rounded to 0.58
-    assert 0.58 == result
+    # (3600 - 800 - 700) / 3600 = 0.5833... — raw value, display precision handled by suggested_display_precision=2
+    assert pytest.approx(2100 / 3600) == result
