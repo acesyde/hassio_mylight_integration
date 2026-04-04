@@ -34,7 +34,6 @@
   "issues": {
     "auth_failed": {
       "title": "Authentication failed for {entry_title}",
-      "description": "MyLight Systems credentials are no longer valid. Click Fix to start the re-authentication flow.",
       "fix_flow": {
         "step": {
           "confirm": {
