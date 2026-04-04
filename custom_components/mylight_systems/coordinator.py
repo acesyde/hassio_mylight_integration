@@ -49,6 +49,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     green_energy: Measure | None
     battery_state: Measure | None
     master_relay_state: str | None
+    water_heater_energy: Measure | None
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -119,6 +120,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 green_energy=self.find_measure_by_type(energy_result, "green_energy"),
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
+                water_heater_energy=self.find_measure_by_type(energy_result, "water_heater_energy"),
             )
 
             self._data = data

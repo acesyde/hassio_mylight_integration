@@ -30,6 +30,9 @@
       },
       "grid_returned_energy": {
         "default": "mdi:transmission-tower-export"
+      },
+      "water_heater_energy": {
+        "default": "mdi:water-boiler"
       }
     },
     "switch": {

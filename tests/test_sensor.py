@@ -4,7 +4,7 @@ import pytest
 
 from custom_components.mylight_systems.api.models import Measure
 from custom_components.mylight_systems.coordinator import MyLightSystemsCoordinatorData
-from custom_components.mylight_systems.sensor import _calculate_grid_returned_energy
+from custom_components.mylight_systems.sensor import MYLIGHT_SENSORS, _calculate_grid_returned_energy
 
 
 @pytest.fixture
@@ -21,6 +21,7 @@ def none_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_energy=None,
     )
 
 
@@ -38,6 +39,7 @@ def produced_energy_only_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_energy=None,
     )
 
 
@@ -55,6 +57,7 @@ def produced_and_green_energy_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_energy=None,
     )
 
 
@@ -72,6 +75,7 @@ def produced_and_msb_charge_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_energy=None,
     )
 
 
@@ -89,6 +93,7 @@ def all_energy_sources_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_energy=None,
     )
 
 
@@ -156,3 +161,25 @@ def test_calculate_grid_returned_energy__should_return_calculated_energy_when_al
     # Then
     # (3600 - 800 - 700) / 3600 = 0.5833... — raw value, display precision handled by suggested_display_precision=2
     assert pytest.approx(2100 / 3600) == result
+
+
+def _water_heater_value_fn(data):
+    """Return the value_fn for the water_heater_energy sensor."""
+    return next(s for s in MYLIGHT_SENSORS if s.key == "water_heater_energy").value_fn(data)
+
+
+def test_water_heater_energy__should_return_none_when_measure_is_absent(none_data):
+    """Test that value_fn returns None when water_heater_energy is not in the API response."""
+    assert _water_heater_value_fn(none_data) is None
+
+
+def test_water_heater_energy__should_return_wh_value_when_measure_is_present(none_data):
+    """Test that value_fn converts Ws to Wh correctly."""
+    # Given
+    data = none_data._replace(water_heater_energy=Measure(type="water_heater_energy", value=3600, unit="Ws"))
+
+    # When
+    result = _water_heater_value_fn(data)
+
+    # Then — 3600 Ws / 3600 = 1.0 Wh
+    assert pytest.approx(1.0) == result
