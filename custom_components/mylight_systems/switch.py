@@ -73,6 +73,7 @@ class MyLightSystemsSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
             await self.entity_description.turn_off_fn(self.coordinator)()
             await self.coordinator.async_request_refresh()
             self._attr_available = True
+            LOGGER.info("Switch %s turned off", self.entity_id)
         except MyLightSystemsError:
             LOGGER.error("An error occurred while turning off MyLight Systems switch")
             self._attr_available = False
@@ -83,6 +84,7 @@ class MyLightSystemsSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
             await self.entity_description.turn_on_fn(self.coordinator)()
             await self.coordinator.async_request_refresh()
             self._attr_available = True
+            LOGGER.info("Switch %s turned on", self.entity_id)
         except MyLightSystemsError:
             LOGGER.error("An error occurred while turning on MyLight Systems switch")
             self._attr_available = False

@@ -16,6 +16,11 @@ from .const import (
     DEFAULT_BASE_URL,
     DEFAULT_TIMEOUT_IN_SECONDS,
     DEVICES_URL,
+    ERR_INVALID_CREDENTIALS,
+    ERR_NOT_AUTHORIZED,
+    ERR_SWITCH_NOT_ALLOWED,
+    ERR_UNDEFINED_EMAIL,
+    ERR_UNDEFINED_PASSWORD,
     MEASURES_GROUPING_URL,
     MEASURES_TOTAL_URL,
     PROFILE_URL,
@@ -71,7 +76,6 @@ class MyLightApiClient:
             asyncio.TimeoutError,
             aiohttp.ClientError,
             socket.gaierror,
-            Exception,
         ) as exception:
             _LOGGER.debug("An error occured : %s", exception, exc_info=True)
             raise CommunicationError() from exception
@@ -86,9 +90,9 @@ class MyLightApiClient:
 
         if response["status"] == "error":
             if response["error"] in (
-                "invalid.credentials",
-                "undefined.email",
-                "undefined.password",
+                ERR_INVALID_CREDENTIALS,
+                ERR_UNDEFINED_EMAIL,
+                ERR_UNDEFINED_PASSWORD,
             ):
                 raise InvalidCredentialsError()
             raise MyLightSystemsError(response.get("error", "unknown error"))
@@ -104,7 +108,7 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == "not.authorized":
+            if response["error"] == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
         match response["gridType"]:
@@ -126,7 +130,7 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == "not.authorized":
+            if response["error"] == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
         model = InstallationDevices()
@@ -162,7 +166,7 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == "not.authorized":
+            if response["error"] == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
         measures: list[Measure] = []
@@ -201,7 +205,7 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == "not.authorized":
+            if response["error"] == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
         measures: list[Measure] = []
@@ -222,7 +226,7 @@ class MyLightApiClient:
         response = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
 
         if response["status"] == "error":
-            if response["error"] == "not.authorized":
+            if response["error"] == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
         measure: Measure | None = None
@@ -253,9 +257,9 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == "switch.not.allowed":
+            if response["error"] == ERR_SWITCH_NOT_ALLOWED:
                 return "off"
-            if response["error"] == "not.authorized":
+            if response["error"] == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
         return response["state"]
@@ -273,9 +277,9 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == "switch.not.allowed":
+            if response["error"] == ERR_SWITCH_NOT_ALLOWED:
                 return "on"
-            if response["error"] == "not.authorized":
+            if response["error"] == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
         return response["state"]
@@ -285,7 +289,7 @@ class MyLightApiClient:
         response = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
 
         if response["status"] == "error":
-            if response["error"] == "not.authorized":
+            if response["error"] == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
         for device in response["deviceStates"]:

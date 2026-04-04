@@ -116,6 +116,14 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
 
             self._data = data
 
+            LOGGER.info(
+                "Coordinator data refreshed: produced=%s, grid=%s, battery=%s, relay=%s",
+                data.produced_energy.value if data.produced_energy else None,
+                data.grid_energy.value if data.grid_energy else None,
+                data.battery_state.value if data.battery_state else None,
+                data.master_relay_state,
+            )
+
             return data
         except (
             UnauthorizedError,
@@ -131,6 +139,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             result = await self.client.async_login(email, password)
             self.__auth_token = result.auth_token
             self.__token_expiration = datetime.now(UTC) + timedelta(hours=2)
+            LOGGER.info("Authentication successful, token expires at %s", self.__token_expiration.isoformat())
 
     async def turn_on_master_relay(self):
         """Turn on master relay."""
