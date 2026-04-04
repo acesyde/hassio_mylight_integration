@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, date, datetime, timedelta
 from typing import NamedTuple
 
@@ -53,8 +54,6 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
     """Class to manage fetching data from the API."""
 
     config_entry: ConfigEntry
-    __auth_token: str | None = None
-    __token_expiration: datetime | None = None
 
     def __init__(
         self,
@@ -64,6 +63,9 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
     ) -> None:
         """Initialize."""
         self.client = client
+        self.__auth_token: str | None = None
+        self.__token_expiration: datetime | None = None
+        self._auth_lock = asyncio.Lock()
         super().__init__(
             hass=hass,
             logger=LOGGER,
@@ -87,19 +89,21 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             today = date.today().isoformat()
             tomorrow = (date.today() + timedelta(days=1)).isoformat()
 
-            # Energy data from grouping endpoint (daily values)
-            energy_result = await self.client.async_get_measures_grouping(
-                self.__auth_token, grid_type, device_id, from_date=today, to_date=tomorrow
-            )
-
-            # Percentage data from total endpoint (autonomy_rate, self_conso)
-            total_result = await self.client.async_get_measures_total(self.__auth_token, grid_type, device_id)
-
-            battery_state = await self.client.async_get_battery_state(self.__auth_token, virtual_battery_id)
-
-            master_relay_state = None
+            coroutines = [
+                self.client.async_get_measures_grouping(
+                    self.__auth_token, grid_type, device_id, from_date=today, to_date=tomorrow
+                ),
+                self.client.async_get_measures_total(self.__auth_token, grid_type, device_id),
+                self.client.async_get_battery_state(self.__auth_token, virtual_battery_id),
+            ]
             if master_relay_id is not None:
-                master_relay_state = await self.client.async_get_relay_state(self.__auth_token, master_relay_id)
+                coroutines.append(self.client.async_get_relay_state(self.__auth_token, master_relay_id))
+
+            results = await asyncio.gather(*coroutines)
+            energy_result = results[0]
+            total_result = results[1]
+            battery_state = results[2]
+            master_relay_state = results[3] if master_relay_id is not None else None
 
             data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(energy_result, "produced_energy"),
@@ -133,9 +137,19 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         except MyLightSystemsError as exception:
             raise UpdateFailed(exception) from exception
 
+    def _token_needs_refresh(self) -> bool:
+        """Return True if the auth token is missing or expires within 60 seconds."""
+        if self.__auth_token is None or self.__token_expiration is None:
+            return True
+        return self.__token_expiration - timedelta(seconds=60) < datetime.now(UTC)
+
     async def authenticate_user(self, email, password):
-        """Reauthenticate user if needed."""
-        if self.__auth_token is None or self.__token_expiration is None or self.__token_expiration < datetime.now(UTC):
+        """Reauthenticate user if needed, serialising refresh with a lock."""
+        if not self._token_needs_refresh():
+            return
+        async with self._auth_lock:
+            if not self._token_needs_refresh():
+                return
             result = await self.client.async_login(email, password)
             self.__auth_token = result.auth_token
             self.__token_expiration = datetime.now(UTC) + timedelta(hours=2)
