@@ -15,9 +15,77 @@ Pull requests are the best way to propose changes to the codebase.
 
 1. Fork the repo and create your branch from `main`.
 2. If you've changed something, update the documentation.
-3. Make sure your code lints (using black).
-4. Test you contribution.
-5. Issue that pull request!
+3. Make sure your code passes linting and tests (see below).
+4. Issue that pull request!
+
+## Commit message convention
+
+Commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) format.
+Allowed types: `fix`, `feat`, `test`, `ci`, `chore`.
+
+This is enforced by a pre-commit hook via `conventional-pre-commit`.
+
+## Prerequisites
+
+This project uses [mise](https://mise.jdx.dev/) to manage tool versions. Install it, then run:
+
+```bash
+mise install
+```
+
+This will install the required versions of Python, uv, pre-commit, and actionlint.
+
+## Setup
+
+```bash
+mise run project:setup
+```
+
+This runs `uv sync --dev` to create the virtual environment and install all dependencies.
+
+## Install pre-commit hooks
+
+```bash
+mise run precommit:install
+```
+
+This installs hooks for commit messages, linting, and tests.
+
+## Linting
+
+The project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting.
+
+```bash
+# Check
+mise run project:lint
+
+# Auto-fix
+mise run project:lint-fix
+```
+
+## Running tests
+
+```bash
+mise run project:tests
+```
+
+## Coverage report
+
+```bash
+mise run project:coverage
+```
+
+## Local Home Assistant instance
+
+A Docker Compose setup is available for local development:
+
+```bash
+# Start
+mise run hassio:start
+
+# Stop
+mise run hassio:stop
+```
 
 ## Any contributions you make will be under the MIT Software License
 
@@ -39,22 +107,6 @@ Report a bug by [opening a new issue](../../issues/new/choose); it's that easy!
 - What you expected would happen
 - What actually happens
 - Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
-
-People *love* thorough bug reports. I'm not even kidding.
-
-## Use a Consistent Coding Style
-
-Use [black](https://github.com/ambv/black) to make sure the code follows the style.
-
-## Test your code modification
-
-This custom component is based on [integration_blueprint template](https://github.com/ludeeus/integration_blueprint).
-
-It comes with development environment in a container, easy to launch
-if you use Visual Studio Code. With this container you will have a stand alone
-Home Assistant instance running and already configured with the included
-[`configuration.yaml`](hassio_dev/configuration.yaml)
-file.
 
 ## License
 
