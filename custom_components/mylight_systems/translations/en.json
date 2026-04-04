@@ -31,6 +31,20 @@
       "reconfigure_successful": "Password updated successfully"
     }
   },
+  "issues": {
+    "auth_failed": {
+      "title": "Authentication failed for {entry_title}",
+      "description": "MyLight Systems credentials are no longer valid. Click Fix to start the re-authentication flow.",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Re-authenticate {entry_title}",
+            "description": "Confirm to open the re-authentication flow for this MyLight Systems entry."
+          }
+        }
+      }
+    }
+  },
   "options": {
     "step": {
       "init": {

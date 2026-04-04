@@ -10,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
@@ -135,6 +136,16 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             UnauthorizedError,
             InvalidCredentialsError,
         ) as exception:
+            ir.async_create_issue(
+                self.hass,
+                DOMAIN,
+                "auth_failed",
+                is_fixable=True,
+                severity=ir.IssueSeverity.ERROR,
+                translation_key="auth_failed",
+                translation_placeholders={"entry_title": self.config_entry.title},
+                data={"entry_id": self.config_entry.entry_id},
+            )
             raise ConfigEntryAuthFailed(exception) from exception
         except MyLightSystemsError as exception:
             raise UpdateFailed(exception) from exception
@@ -155,6 +166,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             result = await self.client.async_login(email, password)
             self.__auth_token = result.auth_token
             self.__token_expiration = datetime.now(UTC) + timedelta(hours=2)
+            ir.async_delete_issue(self.hass, DOMAIN, "auth_failed")
             LOGGER.info("Authentication successful, token expires at %s", self.__token_expiration.isoformat())
 
     async def turn_on_master_relay(self):
