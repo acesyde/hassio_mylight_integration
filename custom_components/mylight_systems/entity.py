@@ -13,6 +13,7 @@ class IntegrationMyLightSystemsEntity(CoordinatorEntity):
     """Base class for MyLight Systems entities."""
 
     _attr_attribution = ATTRIBUTION
+    _attr_has_entity_name = True
 
     def __init__(self, coordinator: MyLightSystemsDataUpdateCoordinator) -> None:
         """Initialize."""
