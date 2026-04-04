@@ -58,7 +58,6 @@ class MyLightSystemsSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
     ) -> None:
         """Initialize MyLight Systems switch."""
         super().__init__(coordinator)
-        self.entity_id = f"{DOMAIN}.{entity_description.key}"
         self._attr_unique_id = f"{entry_id}_{entity_description.key}"
         self.entity_description: MyLightSystemsSwitchEntityDescription = entity_description
 
