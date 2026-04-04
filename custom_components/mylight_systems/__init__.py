@@ -51,8 +51,13 @@ async def async_migrate_entry(hass: HomeAssistant, entry: MyLightConfigEntry) ->
     """Migrate old entry data to the current version."""
     LOGGER.debug("Migrating from version %s", entry.version)
 
-    if entry.version > 1:
-        return False
+    if entry.version == 1:
+        LOGGER.debug("Migration to version %s successful", entry.version)
+        return True
 
-    LOGGER.debug("Migration to version %s successful", entry.version)
-    return True
+    LOGGER.error(
+        "Cannot migrate config entry from version %s: unknown version. "
+        "Please remove and re-add the integration.",
+        entry.version,
+    )
+    return False
