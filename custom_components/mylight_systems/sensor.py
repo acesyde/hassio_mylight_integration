@@ -135,6 +135,18 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         suggested_display_precision=2,
         value_fn=_calculate_grid_returned_energy,
     ),
+    MyLightSensorEntityDescription(
+        key="water_heater_energy",
+        name="Water heater energy",
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        suggested_display_precision=2,
+        entity_registry_enabled_default=False,
+        value_fn=lambda data: ws_to_wh(data.water_heater_energy.value)
+        if data.water_heater_energy is not None
+        else None,
+    ),
 )
 
 
