@@ -105,7 +105,7 @@ def test_calculate_grid_returned_energy__should_return_none_when_all_data_is_non
 
 
 def test_calculate_grid_returned_energy__should_return_none_when_green_energy_is_none(produced_energy_only_data):
-    """Test with missing green_energy or msb_charge should return None."""
+    """Test with missing green_energy should return None."""
     # Given
     data = produced_energy_only_data
 
@@ -116,10 +116,10 @@ def test_calculate_grid_returned_energy__should_return_none_when_green_energy_is
     assert result is None
 
 
-def test_calculate_grid_returned_energy__should_return_none_when_msb_charge_is_none(
+def test_calculate_grid_returned_energy__should_return_calculated_energy_without_battery(
     produced_and_green_energy_data,
 ):
-    """Test with missing msb_charge should return None."""
+    """Test without a smart battery (msb_charge=None) should treat battery charge as 0."""
     # Given
     data = produced_and_green_energy_data
 
@@ -127,7 +127,8 @@ def test_calculate_grid_returned_energy__should_return_none_when_msb_charge_is_n
     result = _calculate_grid_returned_energy(data)
 
     # Then
-    assert result is None
+    # produced=3600Ws, green=1800Ws, msb_charge=None→0: (3600 - 1800 - 0) / 3600 = 0.5 Wh
+    assert pytest.approx(0.5) == result
 
 
 def test_calculate_grid_returned_energy__should_return_none_when_produced_energy_is_none(

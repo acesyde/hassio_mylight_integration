@@ -34,10 +34,11 @@ class MyLightSensorEntityDescription(SensorEntityDescription):
 
 def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> float | None:
     """Calculate grid returned energy."""
-    if data is None or data.produced_energy is None or data.green_energy is None or data.msb_charge is None:
+    if data is None or data.produced_energy is None or data.green_energy is None:
         return None
 
-    result = ws_to_wh(data.produced_energy.value) - ws_to_wh(data.green_energy.value) - ws_to_wh(data.msb_charge.value)
+    msb_charge_wh = ws_to_wh(data.msb_charge.value) if data.msb_charge is not None else 0
+    result = ws_to_wh(data.produced_energy.value) - ws_to_wh(data.green_energy.value) - msb_charge_wh
     return result if result > 0 else 0
 
 
