@@ -22,10 +22,7 @@ from .coordinator import (
     MyLightSystemsDataUpdateCoordinator,
 )
 from .entity import IntegrationMyLightSystemsEntity
-
-# Unit conversion constants
-WS_TO_WH = 3600  # Watt-seconds to Watt-hours
-W_TO_KW = 1000  # Watts to Kilowatts
+from .util.units import ws_to_kwh, ws_to_wh
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -40,11 +37,7 @@ def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> floa
     if data is None or data.produced_energy is None or data.green_energy is None or data.msb_charge is None:
         return None
 
-    produced_energy = data.produced_energy.value / WS_TO_WH
-    green_energy = data.green_energy.value / WS_TO_WH
-    msb_charge = data.msb_charge.value / WS_TO_WH
-
-    result = round(produced_energy - green_energy - msb_charge, 2)
+    result = round(ws_to_wh(data.produced_energy.value) - ws_to_wh(data.green_energy.value) - ws_to_wh(data.msb_charge.value), 2)
     return result if result > 0 else 0
 
 
@@ -56,9 +49,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: (
-            round(data.produced_energy.value / WS_TO_WH, 2) if data.produced_energy is not None else None
-        ),
+        value_fn=lambda data: round(ws_to_wh(data.produced_energy.value), 2) if data.produced_energy is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_grid_consumption",
@@ -67,7 +58,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.grid_energy.value / WS_TO_WH, 2) if data.grid_energy is not None else None,
+        value_fn=lambda data: round(ws_to_wh(data.grid_energy.value), 2) if data.grid_energy is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_grid_without_battery_consumption",
@@ -76,11 +67,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: (
-            round(data.grid_energy_without_battery.value / WS_TO_WH, 2)
-            if data.grid_energy_without_battery is not None
-            else None
-        ),
+        value_fn=lambda data: round(ws_to_wh(data.grid_energy_without_battery.value), 2) if data.grid_energy_without_battery is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_autonomy_rate",
@@ -105,7 +92,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.msb_charge.value / WS_TO_WH, 2) if data.msb_charge is not None else None,
+        value_fn=lambda data: round(ws_to_wh(data.msb_charge.value), 2) if data.msb_charge is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_msb_discharge",
@@ -114,7 +101,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.msb_discharge.value / WS_TO_WH, 2) if data.msb_discharge is not None else None,
+        value_fn=lambda data: round(ws_to_wh(data.msb_discharge.value), 2) if data.msb_discharge is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="total_green_energy",
@@ -123,7 +110,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: round(data.green_energy.value / WS_TO_WH, 2) if data.green_energy is not None else None,
+        value_fn=lambda data: round(ws_to_wh(data.green_energy.value), 2) if data.green_energy is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="battery_state",
@@ -132,9 +119,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.ENERGY_STORAGE,
         suggested_display_precision=2,
-        value_fn=lambda data: (
-            round(data.battery_state.value / WS_TO_WH / W_TO_KW, 2) if data.battery_state is not None else None
-        ),
+        value_fn=lambda data: round(ws_to_kwh(data.battery_state.value), 2) if data.battery_state is not None else None,
     ),
     MyLightSensorEntityDescription(
         key="grid_returned_energy",

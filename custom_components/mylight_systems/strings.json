@@ -30,5 +30,15 @@
       "reauth_successful": "Reauthentication successful",
       "reconfigure_successful": "Password updated successfully"
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Adjust integration settings.",
+        "data": {
+          "scan_interval": "Update interval (minutes)"
+        }
+      }
+    }
   }
 }
