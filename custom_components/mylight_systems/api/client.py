@@ -34,8 +34,24 @@ from .exceptions import (
     UnauthorizedError,
 )
 from .models import InstallationDevices, Login, Measure, UserProfile
+from .schemas import (
+    DevicesResponseSchema,
+    LoginResponseSchema,
+    MeasuresGroupingResponseSchema,
+    MeasuresTotalResponseSchema,
+    ProfileResponseSchema,
+    StatesResponseSchema,
+    SwitchResponseSchema,
+)
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _validate_response(response: dict[str, Any], *required_keys: str) -> None:
+    """Raise MyLightSystemsError if any required key is absent from the API response."""
+    for key in required_keys:
+        if key not in response:
+            raise MyLightSystemsError(f"Unexpected API response: missing field '{key}'")
 
 
 class MyLightApiClient:
@@ -82,14 +98,14 @@ class MyLightApiClient:
 
     async def async_login(self, email: str, password: str) -> Login:
         """Log user and return the authentication token."""
-        response = await self._execute_request(
+        response: LoginResponseSchema = await self._execute_request(
             "get",
             AUTH_URL,
             params={"email": email, "password": password},
         )
 
         if response["status"] == "error":
-            if response["error"] in (
+            if response.get("error") in (
                 ERR_INVALID_CREDENTIALS,
                 ERR_UNDEFINED_EMAIL,
                 ERR_UNDEFINED_PASSWORD,
@@ -97,20 +113,22 @@ class MyLightApiClient:
                 raise InvalidCredentialsError()
             raise MyLightSystemsError(response.get("error", "unknown error"))
 
+        _validate_response(response, "authToken")
         return Login(response["authToken"])
 
     async def async_get_profile(self, auth_token: str) -> UserProfile:
         """Get user profile."""
-        response = await self._execute_request(
+        response: ProfileResponseSchema = await self._execute_request(
             "get",
             PROFILE_URL,
             params={"authToken": auth_token},
         )
 
         if response["status"] == "error":
-            if response["error"] == ERR_NOT_AUTHORIZED:
+            if response.get("error") == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
+        _validate_response(response, "id", "gridType")
         match response["gridType"]:
             case "1 phase":
                 grid_type = "one_phase"
@@ -123,22 +141,19 @@ class MyLightApiClient:
 
     async def async_get_devices(self, auth_token: str) -> InstallationDevices:
         """Get user devices (virtual and battery)."""
-        response = await self._execute_request(
+        response: DevicesResponseSchema = await self._execute_request(
             "get",
             DEVICES_URL,
             params={"authToken": auth_token},
         )
 
         if response["status"] == "error":
-            if response["error"] == ERR_NOT_AUTHORIZED:
+            if response.get("error") == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
+        _validate_response(response, "devices")
         model = InstallationDevices()
-
-        try:
-            devices = response["devices"]
-        except KeyError as err:
-            raise MyLightSystemsError("Missing 'devices' key in response") from err
+        devices = response["devices"]
 
         for device in devices:
             if device["type"] == "vrt":
@@ -155,7 +170,7 @@ class MyLightApiClient:
 
     async def async_get_measures_total(self, auth_token: str, phase: str, device_id: str) -> list[Measure]:
         """Get device measures total."""
-        response = await self._execute_request(
+        response: MeasuresTotalResponseSchema = await self._execute_request(
             "get",
             MEASURES_TOTAL_URL,
             params={
@@ -166,15 +181,12 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == ERR_NOT_AUTHORIZED:
+            if response.get("error") == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
+        _validate_response(response, "measure")
         measures: list[Measure] = []
-
-        try:
-            values = response["measure"]["values"]
-        except KeyError as err:
-            raise MyLightSystemsError("Missing 'measure' key in response") from err
+        values = response["measure"]["values"]
 
         for value in values:
             measures.append(Measure(value["type"], value["value"], value["unit"]))
@@ -191,7 +203,7 @@ class MyLightApiClient:
         group_type: str = "day",
     ) -> list[Measure]:
         """Get device measures using the grouping endpoint."""
-        response = await self._execute_request(
+        response: MeasuresGroupingResponseSchema = await self._execute_request(
             "get",
             MEASURES_GROUPING_URL,
             params={
@@ -205,15 +217,12 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == ERR_NOT_AUTHORIZED:
+            if response.get("error") == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
+        _validate_response(response, "measures")
         measures: list[Measure] = []
-
-        try:
-            measure_groups = response["measures"]
-        except KeyError as err:
-            raise MyLightSystemsError("Missing 'measures' key in response") from err
+        measure_groups = response["measures"]
 
         if measure_groups:
             for value in measure_groups[0]["values"]:
@@ -223,12 +232,13 @@ class MyLightApiClient:
 
     async def async_get_battery_state(self, auth_token: str, battery_id: str) -> Measure | None:
         """Get battery state."""
-        response = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
+        response: StatesResponseSchema = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
 
         if response["status"] == "error":
-            if response["error"] == ERR_NOT_AUTHORIZED:
+            if response.get("error") == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
+        _validate_response(response, "deviceStates")
         measure: Measure | None = None
 
         for device in response["deviceStates"]:
@@ -246,7 +256,7 @@ class MyLightApiClient:
 
     async def async_turn_off(self, auth_token: str, relay_id: str) -> str:
         """Turn off the switch."""
-        response = await self._execute_request(
+        response: SwitchResponseSchema = await self._execute_request(
             "get",
             SWITCH_URL,
             params={
@@ -257,16 +267,17 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == ERR_SWITCH_NOT_ALLOWED:
+            if response.get("error") == ERR_SWITCH_NOT_ALLOWED:
                 return "off"
-            if response["error"] == ERR_NOT_AUTHORIZED:
+            if response.get("error") == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
+        _validate_response(response, "state")
         return response["state"]
 
     async def async_turn_on(self, auth_token: str, relay_id: str) -> str:
         """Turn on the switch."""
-        response = await self._execute_request(
+        response: SwitchResponseSchema = await self._execute_request(
             "get",
             SWITCH_URL,
             params={
@@ -277,21 +288,23 @@ class MyLightApiClient:
         )
 
         if response["status"] == "error":
-            if response["error"] == ERR_SWITCH_NOT_ALLOWED:
+            if response.get("error") == ERR_SWITCH_NOT_ALLOWED:
                 return "on"
-            if response["error"] == ERR_NOT_AUTHORIZED:
+            if response.get("error") == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
+        _validate_response(response, "state")
         return response["state"]
 
     async def async_get_relay_state(self, auth_token: str, relay_id: str) -> str | None:
         """Get relay state."""
-        response = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
+        response: StatesResponseSchema = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
 
         if response["status"] == "error":
-            if response["error"] == ERR_NOT_AUTHORIZED:
+            if response.get("error") == ERR_NOT_AUTHORIZED:
                 raise UnauthorizedError()
 
+        _validate_response(response, "deviceStates")
         for device in response["deviceStates"]:
             if device["deviceId"] == relay_id:
                 return device["state"]

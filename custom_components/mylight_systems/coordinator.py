@@ -26,11 +26,12 @@ from .api.exceptions import (
 from .const import (
     CONF_GRID_TYPE,
     CONF_MASTER_RELAY_ID,
+    CONF_SCAN_INTERVAL,
     CONF_VIRTUAL_BATTERY_ID,
     CONF_VIRTUAL_DEVICE_ID,
+    DEFAULT_SCAN_INTERVAL_IN_MINUTES,
     DOMAIN,
     LOGGER,
-    SCAN_INTERVAL_IN_MINUTES,
 )
 
 
@@ -66,11 +67,12 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         self.__auth_token: str | None = None
         self.__token_expiration: datetime | None = None
         self._auth_lock = asyncio.Lock()
+        scan_interval = int(config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_IN_MINUTES))
         super().__init__(
             hass=hass,
             logger=LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(minutes=SCAN_INTERVAL_IN_MINUTES),
+            update_interval=timedelta(minutes=scan_interval),
             config_entry=config_entry,
         )
 

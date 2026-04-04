@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
+from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
@@ -19,11 +20,15 @@ from .const import (
     CONF_MASTER_ID,
     CONF_MASTER_RELAY_ID,
     CONF_MASTER_REPORT_PERIOD,
+    CONF_SCAN_INTERVAL,
     CONF_SUBSCRIPTION_ID,
     CONF_VIRTUAL_BATTERY_ID,
     CONF_VIRTUAL_DEVICE_ID,
+    DEFAULT_SCAN_INTERVAL_IN_MINUTES,
     DOMAIN,
     LOGGER,
+    MAX_SCAN_INTERVAL_IN_MINUTES,
+    MIN_SCAN_INTERVAL_IN_MINUTES,
 )
 
 
@@ -31,6 +36,12 @@ class MyLightSystemsFlowHandler(ConfigFlow, domain=DOMAIN):
     """Config flow for MyLightSystems."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> MyLightSystemsOptionsFlowHandler:
+        """Return the options flow handler."""
+        return MyLightSystemsOptionsFlowHandler()
 
     async def async_step_user(
         self,
@@ -204,4 +215,32 @@ class MyLightSystemsFlowHandler(ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=_errors,
+        )
+
+
+class MyLightSystemsOptionsFlowHandler(OptionsFlow):
+    """Options flow for MyLight Systems."""
+
+    async def async_step_init(self, user_input: dict | None = None) -> ConfigFlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        current_interval = self.config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_IN_MINUTES)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_SCAN_INTERVAL, default=current_interval): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=MIN_SCAN_INTERVAL_IN_MINUTES,
+                            max=MAX_SCAN_INTERVAL_IN_MINUTES,
+                            step=1,
+                            mode=selector.NumberSelectorMode.SLIDER,
+                            unit_of_measurement="min",
+                        )
+                    ),
+                }
+            ),
         )

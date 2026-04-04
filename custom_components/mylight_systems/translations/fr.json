@@ -30,5 +30,15 @@
       "reauth_successful": "Réauthentification réussie",
       "reconfigure_successful": "Mot de passe mis à jour avec succès"
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Ajustez les paramètres de l'intégration.",
+        "data": {
+          "scan_interval": "Intervalle de mise à jour (minutes)"
+        }
+      }
+    }
   }
 }

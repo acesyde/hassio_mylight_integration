@@ -30,5 +30,15 @@
       "reauth_successful": "Reautenticação bem-sucedida",
       "reconfigure_successful": "Senha atualizada com sucesso"
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Ajuste as configurações da integração.",
+        "data": {
+          "scan_interval": "Intervalo de atualização (minutos)"
+        }
+      }
+    }
   }
 }
