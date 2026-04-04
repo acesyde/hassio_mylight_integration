@@ -45,7 +45,7 @@ def _calculate_grid_returned_energy(data: MyLightSystemsCoordinatorData) -> floa
 MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="total_solar_production",
-        name="Total solar production",
+        translation_key="total_solar_production",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -54,7 +54,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_grid_consumption",
-        name="Total grid consumption (with virtual battery)",
+        translation_key="total_grid_consumption",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -63,7 +63,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_grid_without_battery_consumption",
-        name="Total grid consumption (without virtual battery)",
+        translation_key="total_grid_without_battery_consumption",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -72,7 +72,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_autonomy_rate",
-        name="Autonomy rate",
+        translation_key="total_autonomy_rate",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         # No SensorDeviceClass fits a 0-100% ratio; leaving None is intentional.
@@ -82,7 +82,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_self_conso",
-        name="Self-consumption rate",
+        translation_key="total_self_conso",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         # No SensorDeviceClass fits a 0-100% ratio; leaving None is intentional.
@@ -92,7 +92,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_msb_charge",
-        name="Total battery charge",
+        translation_key="total_msb_charge",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -101,7 +101,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_msb_discharge",
-        name="Total battery discharge",
+        translation_key="total_msb_discharge",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -110,7 +110,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="total_green_energy",
-        name="Total green energy (direct solar)",
+        translation_key="total_green_energy",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -119,7 +119,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="battery_state",
-        name="Battery energy stored",
+        translation_key="battery_state",
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.ENERGY_STORAGE,
@@ -128,7 +128,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="grid_returned_energy",
-        name="Total grid returned energy",
+        translation_key="grid_returned_energy",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
@@ -137,7 +137,7 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
     MyLightSensorEntityDescription(
         key="water_heater_energy",
-        name="Water heater energy",
+        translation_key="water_heater_energy",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
