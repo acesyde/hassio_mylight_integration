@@ -178,7 +178,6 @@ class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
     ) -> None:
         """Init."""
         super().__init__(coordinator)
-        self.entity_id = f"{DOMAIN}.{entity_description.key}"
         self._attr_unique_id = f"{entry_id}_{entity_description.key}"
         self.entity_description = entity_description
 
