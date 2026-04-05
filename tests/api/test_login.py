@@ -158,7 +158,7 @@ async def test_login__should_raise_mylight_error_when_unknown_error_code(api_cli
             await api_client.async_login(email=email, password=password)
 
     assert MyLightSystemsError == exc_info.type
-    assert "some.unknown.error" == exc_info.value.msg
+    assert "some.unknown.error" == exc_info.value.msg  # ty: ignore[unresolved-attribute]
 
 
 @pytest.mark.asyncio

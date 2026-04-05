@@ -64,9 +64,9 @@ def make_handler(context: dict | None = None) -> MyLightSystemsFlowHandler:
     handler.hass = MagicMock()
     handler.flow_id = "test_flow"
     handler.handler = DOMAIN
-    handler.context = context or {}
+    handler.context = context or {}  # ty: ignore[invalid-assignment]
     handler.cur_step = None
-    handler._preview = None
+    handler._preview = None  # ty: ignore[unresolved-attribute]
     return handler
 
 
@@ -111,8 +111,8 @@ async def test_user_step__shows_form_on_initial_load():
 async def test_user_step__creates_entry_on_valid_credentials():
     """Valid credentials result in CREATE_ENTRY with all expected fields."""
     handler = make_handler()
-    handler.async_set_unique_id = AsyncMock(return_value=None)
-    handler._abort_if_unique_id_configured = MagicMock()
+    handler.async_set_unique_id = AsyncMock(return_value=None)  # ty: ignore[invalid-assignment]
+    handler._abort_if_unique_id_configured = MagicMock()  # ty: ignore[invalid-assignment]
 
     with (
         patch("custom_components.mylight_systems.config_flow.async_create_clientsession"),
@@ -198,7 +198,7 @@ async def test_user_step__shows_unknown_error_on_unexpected_api_error():
 async def test_reauth_confirm__shows_form_on_initial_load():
     """No user_input → reauth_confirm form is shown."""
     handler = make_handler(context={"entry_id": "existing_entry_id", "source": SOURCE_REAUTH})
-    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()
+    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()  # ty: ignore[unresolved-attribute]
 
     result = await handler.async_step_reauth_confirm(user_input=None)
 
@@ -210,8 +210,8 @@ async def test_reauth_confirm__shows_form_on_initial_load():
 async def test_reauth_confirm__updates_entry_on_valid_new_password():
     """Valid password triggers entry update and flow abort."""
     handler = make_handler(context={"entry_id": "existing_entry_id", "source": SOURCE_REAUTH})
-    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()
-    handler.async_update_reload_and_abort = MagicMock(
+    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()  # ty: ignore[unresolved-attribute]
+    handler.async_update_reload_and_abort = MagicMock(  # ty: ignore[invalid-assignment]
         return_value={"type": FlowResultType.ABORT, "reason": "reauth_successful"}
     )
 
@@ -225,14 +225,14 @@ async def test_reauth_confirm__updates_entry_on_valid_new_password():
         result = await handler.async_step_reauth_confirm(user_input={CONF_PASSWORD: "newpass"})
 
     assert result["type"] == FlowResultType.ABORT
-    handler.async_update_reload_and_abort.assert_called_once()
+    handler.async_update_reload_and_abort.assert_called_once()  # ty: ignore[unresolved-attribute]
 
 
 @pytest.mark.asyncio
 async def test_reauth_confirm__shows_auth_error_on_invalid_credentials():
     """InvalidCredentialsError shows the reauth form with error key 'auth'."""
     handler = make_handler(context={"entry_id": "existing_entry_id", "source": SOURCE_REAUTH})
-    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()
+    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()  # ty: ignore[unresolved-attribute]
 
     with (
         patch("custom_components.mylight_systems.config_flow.async_create_clientsession"),
@@ -251,7 +251,7 @@ async def test_reauth_confirm__shows_auth_error_on_invalid_credentials():
 async def test_reauth_confirm__shows_connection_error_on_communication_failure():
     """CommunicationError shows the reauth form with error key 'connection'."""
     handler = make_handler(context={"entry_id": "existing_entry_id", "source": SOURCE_REAUTH})
-    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()
+    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()  # ty: ignore[unresolved-attribute]
 
     with (
         patch("custom_components.mylight_systems.config_flow.async_create_clientsession"),
@@ -275,7 +275,7 @@ async def test_reauth_confirm__shows_connection_error_on_communication_failure()
 async def test_reconfigure__shows_form_on_initial_load():
     """No user_input → reconfigure form is shown."""
     handler = make_handler(context={"entry_id": "existing_entry_id"})
-    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()
+    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()  # ty: ignore[unresolved-attribute]
 
     result = await handler.async_step_reconfigure(user_input=None)
 
@@ -287,7 +287,7 @@ async def test_reconfigure__shows_form_on_initial_load():
 async def test_reconfigure__aborts_when_entry_not_found():
     """Missing config entry aborts the flow with reason 'not_found'."""
     handler = make_handler(context={"entry_id": "missing_id"})
-    handler.hass.config_entries.async_get_entry.return_value = None
+    handler.hass.config_entries.async_get_entry.return_value = None  # ty: ignore[unresolved-attribute]
 
     result = await handler.async_step_reconfigure(user_input=None)
 
@@ -299,8 +299,8 @@ async def test_reconfigure__aborts_when_entry_not_found():
 async def test_reconfigure__updates_password_on_valid_input():
     """Valid new password updates the entry and aborts the flow."""
     handler = make_handler(context={"entry_id": "existing_entry_id"})
-    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()
-    handler.async_update_reload_and_abort = MagicMock(
+    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()  # ty: ignore[unresolved-attribute]
+    handler.async_update_reload_and_abort = MagicMock(  # ty: ignore[invalid-assignment]
         return_value={"type": FlowResultType.ABORT, "reason": "reconfigure_successful"}
     )
 
@@ -314,14 +314,14 @@ async def test_reconfigure__updates_password_on_valid_input():
         result = await handler.async_step_reconfigure(user_input={CONF_PASSWORD: "newpass"})
 
     assert result["type"] == FlowResultType.ABORT
-    handler.async_update_reload_and_abort.assert_called_once()
+    handler.async_update_reload_and_abort.assert_called_once()  # ty: ignore[unresolved-attribute]
 
 
 @pytest.mark.asyncio
 async def test_reconfigure__shows_auth_error_on_invalid_credentials():
     """InvalidCredentialsError shows the reconfigure form with error key 'auth'."""
     handler = make_handler(context={"entry_id": "existing_entry_id"})
-    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()
+    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()  # ty: ignore[unresolved-attribute]
 
     with (
         patch("custom_components.mylight_systems.config_flow.async_create_clientsession"),
@@ -340,7 +340,7 @@ async def test_reconfigure__shows_auth_error_on_invalid_credentials():
 async def test_reconfigure__shows_connection_error_on_communication_failure():
     """CommunicationError shows the reconfigure form with error key 'connection'."""
     handler = make_handler(context={"entry_id": "existing_entry_id"})
-    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()
+    handler.hass.config_entries.async_get_entry.return_value = make_mock_entry()  # ty: ignore[unresolved-attribute]
 
     with (
         patch("custom_components.mylight_systems.config_flow.async_create_clientsession"),
