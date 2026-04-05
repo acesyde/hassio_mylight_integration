@@ -27,7 +27,7 @@ run = "uv run coverage report --skip-covered"
 
 [tasks."project:lint"]
 description = "Run linting"
-run = ["uv run ruff check", "uv run ruff format --check --diff"]
+run = ["uv run ruff check", "uv run ruff format --check --diff", "uv run ty check"]
 
 [tasks."project:lint-fix"]
 description = "Run linting and fix"

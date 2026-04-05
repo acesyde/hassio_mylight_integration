@@ -16,7 +16,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import MyLightConfigEntry
-from .const import DOMAIN
 from .coordinator import (
     MyLightSystemsCoordinatorData,
     MyLightSystemsDataUpdateCoordinator,
@@ -68,7 +67,9 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        value_fn=lambda data: ws_to_wh(data.grid_energy_without_battery.value) if data.grid_energy_without_battery is not None else None,
+        value_fn=lambda data: (
+            ws_to_wh(data.grid_energy_without_battery.value) if data.grid_energy_without_battery is not None else None
+        ),
     ),
     MyLightSensorEntityDescription(
         key="total_autonomy_rate",
@@ -143,9 +144,9 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
         entity_registry_enabled_default=False,
-        value_fn=lambda data: ws_to_wh(data.water_heater_energy.value)
-        if data.water_heater_energy is not None
-        else None,
+        value_fn=lambda data: (
+            ws_to_wh(data.water_heater_energy.value) if data.water_heater_energy is not None else None
+        ),
     ),
 )
 
