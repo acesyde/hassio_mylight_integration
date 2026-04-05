@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from homeassistant.config_entries import SOURCE_REAUTH
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
 from homeassistant.data_entry_flow import FlowResultType
@@ -38,7 +37,7 @@ VALID_USER_INPUT = {
     CONF_URL: "https://myhome.mylight-systems.com",
 }
 
-MOCK_LOGIN = Login(auth_token="tok123")
+MOCK_LOGIN = Login(auth_token="tok123")  # noqa: S106
 MOCK_PROFILE = UserProfile(subscription_id="sub42", grid_type="one_phase")
 MOCK_DEVICES = InstallationDevices(
     master_id="mst1",

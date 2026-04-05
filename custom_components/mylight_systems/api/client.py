@@ -232,7 +232,9 @@ class MyLightApiClient:
 
     async def async_get_battery_state(self, auth_token: str, battery_id: str) -> Measure | None:
         """Get battery state."""
-        response: StatesResponseSchema = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
+        response: StatesResponseSchema = await self._execute_request(
+            "get", STATES_URL, params={"authToken": auth_token}
+        )
 
         if response["status"] == "error":
             if response.get("error") == ERR_NOT_AUTHORIZED:
@@ -298,7 +300,9 @@ class MyLightApiClient:
 
     async def async_get_relay_state(self, auth_token: str, relay_id: str) -> str | None:
         """Get relay state."""
-        response: StatesResponseSchema = await self._execute_request("get", STATES_URL, params={"authToken": auth_token})
+        response: StatesResponseSchema = await self._execute_request(
+            "get", STATES_URL, params={"authToken": auth_token}
+        )
 
         if response["status"] == "error":
             if response.get("error") == ERR_NOT_AUTHORIZED:

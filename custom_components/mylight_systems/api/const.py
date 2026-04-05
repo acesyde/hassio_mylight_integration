@@ -4,7 +4,7 @@ DEFAULT_TIMEOUT_IN_SECONDS: int = 10
 
 ERR_INVALID_CREDENTIALS: str = "invalid.credentials"
 ERR_UNDEFINED_EMAIL: str = "undefined.email"
-ERR_UNDEFINED_PASSWORD: str = "undefined.password"
+ERR_UNDEFINED_PASSWORD: str = "undefined.password"  # noqa: S105
 ERR_NOT_AUTHORIZED: str = "not.authorized"
 ERR_SWITCH_NOT_ALLOWED: str = "switch.not.allowed"
 
