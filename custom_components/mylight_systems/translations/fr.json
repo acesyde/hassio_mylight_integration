@@ -53,5 +53,23 @@
         }
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "total_solar_production": { "name": "Production solaire totale" },
+      "total_grid_consumption": { "name": "Consommation réseau totale (avec batterie virtuelle)" },
+      "total_grid_without_battery_consumption": { "name": "Consommation réseau totale (sans batterie virtuelle)" },
+      "total_autonomy_rate": { "name": "Taux d'autonomie" },
+      "total_self_conso": { "name": "Taux d'autoconsommation" },
+      "total_msb_charge": { "name": "Charge batterie totale" },
+      "total_msb_discharge": { "name": "Décharge batterie totale" },
+      "total_green_energy": { "name": "Énergie verte totale (solaire direct)" },
+      "battery_state": { "name": "Énergie stockée en batterie" },
+      "grid_returned_energy": { "name": "Énergie réinjectée au réseau" },
+      "water_heater_energy": { "name": "Énergie chauffe-eau" }
+    },
+    "switch": {
+      "master_relay": { "name": "Relais principal" }
+    }
   }
 }
