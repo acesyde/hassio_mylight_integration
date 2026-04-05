@@ -12,7 +12,7 @@ from .coordinator import MyLightSystemsDataUpdateCoordinator
 from .entity import IntegrationMyLightSystemsEntity
 
 
-@dataclass(kw_only=True)
+@dataclass(frozen=True, kw_only=True)
 class MyLightSystemsSwitchEntityDescription(SwitchEntityDescription):
     """Describes MyLight Systems switch entity."""
 
@@ -49,6 +49,8 @@ async def async_setup_entry(
 
 class MyLightSystemsSwitch(IntegrationMyLightSystemsEntity, SwitchEntity):
     """Defines a MyLight Systems switch."""
+
+    entity_description: MyLightSystemsSwitchEntityDescription
 
     def __init__(
         self,

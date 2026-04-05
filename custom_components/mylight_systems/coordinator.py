@@ -89,19 +89,22 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             master_relay_id = self.config_entry.data.get(CONF_MASTER_RELAY_ID, None)
 
             await self.authenticate_user(email, password)
+            if self.__auth_token is None:
+                raise UpdateFailed("Authentication token is not set after login")
+            auth_token: str = self.__auth_token
 
             today = date.today().isoformat()
             tomorrow = (date.today() + timedelta(days=1)).isoformat()
 
             coroutines = [
                 self.client.async_get_measures_grouping(
-                    self.__auth_token, grid_type, device_id, from_date=today, to_date=tomorrow
+                    auth_token, grid_type, device_id, from_date=today, to_date=tomorrow
                 ),
-                self.client.async_get_measures_total(self.__auth_token, grid_type, device_id),
-                self.client.async_get_battery_state(self.__auth_token, virtual_battery_id),
+                self.client.async_get_measures_total(auth_token, grid_type, device_id),
+                self.client.async_get_battery_state(auth_token, virtual_battery_id),
             ]
             if master_relay_id is not None:
-                coroutines.append(self.client.async_get_relay_state(self.__auth_token, master_relay_id))
+                coroutines.append(self.client.async_get_relay_state(auth_token, master_relay_id))
 
             results = await asyncio.gather(*coroutines)
             energy_result = results[0]
@@ -173,10 +176,14 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
 
     async def turn_on_master_relay(self):
         """Turn on master relay."""
+        if self.__auth_token is None:
+            raise UpdateFailed("Authentication token is not set")
         await self.client.async_turn_on(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
 
     async def turn_off_master_relay(self):
         """Turn off master relay."""
+        if self.__auth_token is None:
+            raise UpdateFailed("Authentication token is not set")
         await self.client.async_turn_off(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
 
     def master_relay_is_on(self) -> bool:

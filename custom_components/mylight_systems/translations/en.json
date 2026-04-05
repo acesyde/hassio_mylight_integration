@@ -56,16 +56,16 @@
   },
   "entity": {
     "sensor": {
-      "total_solar_production": { "name": "Total solar production" },
-      "total_grid_consumption": { "name": "Total grid consumption (with virtual battery)" },
-      "total_grid_without_battery_consumption": { "name": "Total grid consumption (without virtual battery)" },
+      "total_solar_production": { "name": "Solar production" },
+      "total_grid_consumption": { "name": "Grid consumption (with virtual battery)" },
+      "total_grid_without_battery_consumption": { "name": "Grid consumption (without virtual battery)" },
       "total_autonomy_rate": { "name": "Autonomy rate" },
       "total_self_conso": { "name": "Self-consumption rate" },
-      "total_msb_charge": { "name": "Total battery charge" },
-      "total_msb_discharge": { "name": "Total battery discharge" },
-      "total_green_energy": { "name": "Total green energy (direct solar)" },
+      "total_msb_charge": { "name": "Battery charge" },
+      "total_msb_discharge": { "name": "Battery discharge" },
+      "total_green_energy": { "name": "Green energy (direct solar)" },
       "battery_state": { "name": "Battery energy stored" },
-      "grid_returned_energy": { "name": "Total grid returned energy" },
+      "grid_returned_energy": { "name": "Grid returned energy" },
       "water_heater_energy": { "name": "Water heater energy" }
     },
     "switch": {
