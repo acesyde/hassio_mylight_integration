@@ -1,0 +1,75 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Conectar a su cuenta de MyLight Systems",
+        "data": {
+          "email": "Correo electrónico",
+          "password": "Contraseña"
+        }
+      },
+      "reauth_confirm": {
+        "description": "Sus credenciales han expirado. Por favor, introduzca su nueva contraseña.",
+        "data": {
+          "password": "Contraseña"
+        }
+      },
+      "reconfigure": {
+        "description": "Actualizar su contraseña.",
+        "data": {
+          "password": "Nueva contraseña"
+        }
+      }
+    },
+    "error": {
+      "auth": "El correo electrónico/contraseña es incorrecto.",
+      "connection": "No se puede conectar al servidor.",
+      "unknown": "Se produjo un error desconocido."
+    },
+    "abort": {
+      "reauth_successful": "Reautenticación exitosa",
+      "reconfigure_successful": "Contraseña actualizada correctamente"
+    }
+  },
+  "issues": {
+    "auth_failed": {
+      "title": "Autenticación fallida para {entry_title}",
+      "fix_flow": {
+        "step": {
+          "confirm": {
+            "title": "Reautenticar {entry_title}",
+            "description": "Confirme para abrir el flujo de reautenticación para esta entrada de MyLight Systems."
+          }
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Ajustar la configuración de la integración.",
+        "data": {
+          "scan_interval": "Intervalo de actualización (minutos)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "total_solar_production": { "name": "Producción solar" },
+      "total_grid_consumption": { "name": "Consumo de red (con batería virtual)" },
+      "total_grid_without_battery_consumption": { "name": "Consumo de red (sin batería virtual)" },
+      "total_autonomy_rate": { "name": "Tasa de autonomía" },
+      "total_self_conso": { "name": "Tasa de autoconsumo" },
+      "total_msb_charge": { "name": "Carga de batería" },
+      "total_msb_discharge": { "name": "Descarga de batería" },
+      "total_green_energy": { "name": "Energía verde (solar directa)" },
+      "battery_state": { "name": "Energía almacenada en batería" },
+      "grid_returned_energy": { "name": "Energía devuelta a la red" },
+      "water_heater_energy": { "name": "Energía del calentador de agua" }
+    },
+    "switch": {
+      "master_relay": { "name": "Relé principal" }
+    }
+  }
+}
