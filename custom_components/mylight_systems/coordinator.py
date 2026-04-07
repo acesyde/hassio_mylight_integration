@@ -186,6 +186,11 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             raise UpdateFailed("Authentication token is not set")
         await self.client.async_turn_off(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
 
+    @property
+    def auth_token(self) -> str | None:
+        """Return the current auth token."""
+        return self.__auth_token
+
     def master_relay_is_on(self) -> bool:
         """Return true if master relay is on."""
         if self._data is not None and self._data.master_relay_state is not None:
