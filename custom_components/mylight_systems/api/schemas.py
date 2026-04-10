@@ -103,3 +103,44 @@ class SwitchResponseSchema(TypedDict):
 
     status: str
     state: str
+
+
+class RoomDeviceSchema(TypedDict):
+    """A device entry within a room."""
+
+    device_id: str
+    name: str
+    ecnType: str
+    type_id: str
+
+
+class RoomSchema(TypedDict):
+    """A room entry."""
+
+    id: str
+    name: str
+    type: str
+    devices: list[RoomDeviceSchema]
+
+
+class RoomsResponseSchema(TypedDict):
+    """Rooms API response."""
+
+    status: str
+    rooms: list[RoomSchema]
+
+
+class ScheduleSchema(TypedDict):
+    """A schedule entry."""
+
+    ranges: str
+    type: str
+    category: str
+    enabled: bool
+
+
+class ScheduleResponseSchema(TypedDict):
+    """Schedule API response."""
+
+    status: str
+    schedule: ScheduleSchema

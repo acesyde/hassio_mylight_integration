@@ -24,6 +24,8 @@ from .const import (
     MEASURES_GROUPING_URL,
     MEASURES_TOTAL_URL,
     PROFILE_URL,
+    ROOMS_URL,
+    SCHEDULE_URL,
     STATES_URL,
     SWITCH_URL,
 )
@@ -33,13 +35,15 @@ from .exceptions import (
     MyLightSystemsError,
     UnauthorizedError,
 )
-from .models import InstallationDevices, Login, Measure, UserProfile
+from .models import InstallationDevices, Login, Measure, Room, RoomDevice, Schedule, UserProfile
 from .schemas import (
     DevicesResponseSchema,
     LoginResponseSchema,
     MeasuresGroupingResponseSchema,
     MeasuresTotalResponseSchema,
     ProfileResponseSchema,
+    RoomsResponseSchema,
+    ScheduleResponseSchema,
     StatesResponseSchema,
     SwitchResponseSchema,
 )
@@ -314,3 +318,54 @@ class MyLightApiClient:
                 return device["state"]
 
         return None
+
+    async def async_get_rooms(self, auth_token: str) -> list[Room]:
+        """Get rooms with their devices."""
+        response: RoomsResponseSchema = await self._execute_request(
+            "get",
+            ROOMS_URL,
+            params={"authToken": auth_token},
+        )
+
+        if response["status"] == "error":
+            if response.get("error") == ERR_NOT_AUTHORIZED:
+                raise UnauthorizedError()
+
+        _validate_response(response, "rooms")
+        rooms: list[Room] = []
+
+        for room_data in response["rooms"]:
+            devices = [
+                RoomDevice(
+                    device_id=d["device_id"],
+                    name=d["name"],
+                    ecn_type=d["ecnType"],
+                    type_id=d["type_id"],
+                )
+                for d in room_data["devices"]
+            ]
+            rooms.append(Room(room_data["id"], room_data["name"], room_data["type"], devices))
+
+        return rooms
+
+    async def async_get_schedule(self, auth_token: str, schedule_type: str) -> Schedule:
+        """Get schedule by type."""
+        response: ScheduleResponseSchema = await self._execute_request(
+            "get",
+            SCHEDULE_URL,
+            params={"authToken": auth_token, "scheduleType": schedule_type},
+        )
+
+        if response["status"] == "error":
+            if response.get("error") == ERR_NOT_AUTHORIZED:
+                raise UnauthorizedError()
+
+        _validate_response(response, "schedule")
+        schedule_data = response["schedule"]
+
+        return Schedule(
+            ranges=schedule_data["ranges"],
+            type=schedule_data["type"],
+            category=schedule_data["category"],
+            enabled=schedule_data["enabled"],
+        )

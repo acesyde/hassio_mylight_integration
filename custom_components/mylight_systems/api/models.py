@@ -42,3 +42,33 @@ class Measure:
     type: str
     value: float
     unit: str
+
+
+@dataclass
+class RoomDevice:
+    """A device within a room."""
+
+    device_id: str
+    name: str
+    ecn_type: str
+    type_id: str
+
+
+@dataclass
+class Room:
+    """A room containing devices."""
+
+    id: str
+    name: str
+    type: str
+    devices: list[RoomDevice]
+
+
+@dataclass
+class Schedule:
+    """A schedule (e.g. electric tariff)."""
+
+    ranges: str
+    type: str
+    category: str
+    enabled: bool
