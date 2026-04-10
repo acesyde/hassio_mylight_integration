@@ -1,6 +1,6 @@
 # MyLight Systems
 
-🌐 **English** | [Français](README.fr.md) | [Português](README.pt.md)
+🌐 **English** | [Français](README.fr.md) | [Português](README.pt.md) | [Deutsch](README.de.md) | [Español](README.es.md)
 
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
