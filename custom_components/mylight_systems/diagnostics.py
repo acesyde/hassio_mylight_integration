@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import asyncio
+import base64
+import json
+import logging
 from dataclasses import asdict
 from datetime import date, timedelta
-from typing import Any
+from typing import Any, Callable
 
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
@@ -13,6 +16,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.loader import async_get_integration
 
 from . import MyLightConfigEntry
+from .api.const import (
+    DEVICES_URL,
+    MEASURES_GROUPING_URL,
+    MEASURES_TOTAL_URL,
+    PROFILE_URL,
+    ROOMS_URL,
+    STATES_URL,
+)
 from .const import (
     CONF_GRID_TYPE,
     CONF_MASTER_ID,
@@ -24,6 +35,74 @@ from .const import (
 
 TO_REDACT = {CONF_EMAIL, CONF_PASSWORD, CONF_SUBSCRIPTION_ID, CONF_MASTER_ID, CONF_MASTER_RELAY_ID}
 
+# Fields to fully replace with "***"
+_REDACT_FIELDS = {"email", "firstName", "lastName", "tenant"}
+
+# Fields to truncate to first 4 chars + "***"
+_TRUNCATE_FIELDS = {"id", "deviceId", "sensorId", "serialNumber"}
+
+# Fields to zero out
+_ZERO_FIELDS = {"latitude", "longitude"}
+
+# Fields to remove entirely
+_REMOVE_FIELDS = {"authToken"}
+
+
+def _anonymize_value(key: str, value: Any) -> Any:
+    """Anonymize a single value based on its key."""
+    if key in _REDACT_FIELDS:
+        return "***"
+    if key in _ZERO_FIELDS:
+        return 0.0
+    if key in _TRUNCATE_FIELDS and isinstance(value, str) and len(value) > 4:
+        return value[:4] + "***"
+    return value
+
+
+def _anonymize_response(data: Any) -> Any:
+    """Recursively anonymize sensitive fields in an API response."""
+    if isinstance(data, dict):
+        result = {}
+        for key, value in data.items():
+            if key in _REMOVE_FIELDS:
+                continue
+            result[key] = _anonymize_value(key, _anonymize_response(value))
+        return result
+    if isinstance(data, list):
+        return [_anonymize_response(item) for item in data]
+    return data
+
+
+# Each entry: (endpoint_path, param_builder)
+# The callable receives (auth_token, entry_data, today, tomorrow) and returns params.
+DiagnosticEndpoint = tuple[str, Callable[[str, dict, str, str], dict]]
+
+DIAGNOSTIC_ENDPOINTS: list[DiagnosticEndpoint] = [
+    (PROFILE_URL, lambda tok, data, t, tm: {"authToken": tok}),
+    (DEVICES_URL, lambda tok, data, t, tm: {"authToken": tok}),
+    (
+        MEASURES_TOTAL_URL,
+        lambda tok, data, t, tm: {
+            "authToken": tok,
+            "measureType": data[CONF_GRID_TYPE],
+            "deviceId": data[CONF_VIRTUAL_DEVICE_ID],
+        },
+    ),
+    (
+        MEASURES_GROUPING_URL,
+        lambda tok, data, t, tm: {
+            "authToken": tok,
+            "groupType": "day",
+            "fromDate": t,
+            "toDate": tm,
+            "measureType": data[CONF_GRID_TYPE],
+            "deviceId": data[CONF_VIRTUAL_DEVICE_ID],
+        },
+    ),
+    (STATES_URL, lambda tok, data, t, tm: {"authToken": tok}),
+    (ROOMS_URL, lambda tok, data, t, tm: {"authToken": tok}),
+]
+
 
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant,
@@ -33,35 +112,40 @@ async def async_get_config_entry_diagnostics(
     coordinator = entry.runtime_data
     integration = await async_get_integration(hass, DOMAIN)
 
-    measures_grouping_data: list | None = None
-    measures_total_data: list | None = None
+    raw_api_responses: dict[str, str] = {}
 
     try:
         email = entry.data[CONF_EMAIL]
         password = entry.data[CONF_PASSWORD]
-        grid_type = entry.data[CONF_GRID_TYPE]
-        device_id = entry.data[CONF_VIRTUAL_DEVICE_ID]
 
         await coordinator.authenticate_user(email, password)
         auth_token = coordinator.auth_token
+        if auth_token is None:
+            raise ValueError("Authentication token is not set after login")
 
         today = date.today().isoformat()
         tomorrow = (date.today() + timedelta(days=1)).isoformat()
+        entry_data = dict(entry.data)
 
-        grouping_measures, total_measures = await asyncio.gather(
-            coordinator.client.async_get_measures_grouping(
-                auth_token, grid_type, device_id, from_date=today, to_date=tomorrow
-            ),
-            coordinator.client.async_get_measures_total(auth_token, grid_type, device_id),
-        )
-        measures_grouping_data = [
-            {"type": m.type, "value": m.value, "unit": m.unit} for m in grouping_measures
-        ]
-        measures_total_data = [
-            {"type": m.type, "value": m.value, "unit": m.unit} for m in total_measures
-        ]
+        tasks = {
+            path: coordinator.client.async_raw_request(
+                "get", path, params=param_builder(auth_token, entry_data, today, tomorrow)
+            )
+            for path, param_builder in DIAGNOSTIC_ENDPOINTS
+        }
+        results = await asyncio.gather(*tasks.values(), return_exceptions=True)
+
+        for path, result in zip(tasks.keys(), results):
+            if isinstance(result, Exception):
+                payload = {"error": type(result).__name__, "message": str(result)}
+            else:
+                payload = _anonymize_response(result)
+            raw_api_responses[path] = base64.b64encode(
+                json.dumps(payload, default=str).encode()
+            ).decode()
+
     except Exception:  # noqa: BLE001
-        pass  # diagnostics must always be downloadable; sections remain None
+        logging.getLogger(__name__).debug("Failed to fetch raw API data for diagnostics", exc_info=True)
 
     return {
         "integration_manifest": {
@@ -74,6 +158,5 @@ async def async_get_config_entry_diagnostics(
         }
         if coordinator.data
         else None,
-        "measures_grouping": measures_grouping_data,
-        "measures_total": measures_total_data,
+        "raw_api_responses": raw_api_responses,
     }

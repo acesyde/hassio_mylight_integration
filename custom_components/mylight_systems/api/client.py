@@ -100,6 +100,16 @@ class MyLightApiClient:
             _LOGGER.debug("An error occured : %s", exception, exc_info=True)
             raise CommunicationError() from exception
 
+    async def async_raw_request(
+        self,
+        method: str,
+        path: str,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Any:
+        """Execute a raw API request and return the unprocessed JSON response."""
+        return await self._execute_request(method, path, params, headers)
+
     async def async_login(self, email: str, password: str) -> Login:
         """Log user and return the authentication token."""
         response: LoginResponseSchema = await self._execute_request(
