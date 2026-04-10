@@ -167,7 +167,7 @@ async def test_diagnostics_returns_all_endpoint_keys():
     ):
         result = await async_get_config_entry_diagnostics(hass, entry)
 
-    expected_keys = {path for path, _ in DIAGNOSTIC_ENDPOINTS}
+    expected_keys = {path for path, *_ in DIAGNOSTIC_ENDPOINTS}
     assert set(result["raw_api_responses"].keys()) == expected_keys
 
 
@@ -260,7 +260,7 @@ async def test_diagnostics_captures_endpoint_errors():
         result = await async_get_config_entry_diagnostics(hass, entry)
 
     # All endpoints should still be present
-    expected_keys = {path for path, _ in DIAGNOSTIC_ENDPOINTS}
+    expected_keys = {path for path, *_ in DIAGNOSTIC_ENDPOINTS}
     assert set(result["raw_api_responses"].keys()) == expected_keys
 
     # The failed endpoint should have an error payload
