@@ -1,0 +1,9 @@
+{
+    "status": "ok",
+    "schedule": {
+        "ranges": "mon 22:20 on;tue 6:20 off",
+        "type": "electric_tariff",
+        "category": "custom",
+        "enabled": true
+    }
+}

@@ -1,0 +1,137 @@
+{
+    "status": "ok",
+    "rooms": [
+        {
+            "id": "ab150cDfefghij",
+            "name": "Habitation",
+            "type": "alaska_home",
+            "devices": [
+                {
+                    "device_id": "ZEdtSVQKto8T53RWa_msb",
+                    "typeOverride": "MySmartBattery",
+                    "name": "Battery 1",
+                    "ecnType": "bat",
+                    "type_id": "my_smart_battery",
+                    "has_actuator": false,
+                    "created": "2023-02-17 14:52:51",
+                    "batteryCapacity": 100.0,
+                    "batteryNumberOfBoxes": 1,
+                    "msbType": "MYLIGHT",
+                    "msb_SN_filled": true,
+                    "msb_AC_filled": false,
+                    "msb_provider_registration_ok": false,
+                    "msb_enedis_ok": false,
+                    "msb_ok": true,
+                    "msb_enedis_grid_injection_requested": false,
+                    "msb_strasbourg_electricity_administrative_procedure_requested": false
+                },
+                {
+                    "device_id": "qVGSJ45vkeqvrHy6g",
+                    "name": "Virtual 1",
+                    "ecnType": "vrt",
+                    "type_id": "virtual",
+                    "noneZeroConsumption": true,
+                    "noneZeroProduction": true,
+                    "has_actuator": false,
+                    "created": "2023-02-17 14:52:52"
+                },
+                {
+                    "device_id": "4tGrXr2CViF8chJEd",
+                    "typeOverride": "MST-G3",
+                    "name": "Master",
+                    "serialNumber": "JZJQ57LS2UHKP",
+                    "reportPeriod": 300,
+                    "ecnType": "mst",
+                    "type_id": "asoka_red_plug",
+                    "has_actuator": false,
+                    "created": "2023-02-17 14:55:47"
+                },
+                {
+                    "device_id": "A1B2C3D4E5F6",
+                    "typeOverride": "MST-G3-Meter",
+                    "name": "Compteur",
+                    "masterMac": "4tGrXr2CViF8chJEd",
+                    "masterType": "mst",
+                    "ecnType": "gmd",
+                    "type_id": "composite_device",
+                    "has_actuator": false,
+                    "created": "2023-02-17 14:55:51",
+                    "children": [
+                        {
+                            "mac": "cmp-phase1-001",
+                            "phase": 1
+                        },
+                        {
+                            "mac": "cmp-phase2-001",
+                            "phase": 2
+                        },
+                        {
+                            "mac": "cmp-phase3-001",
+                            "phase": 3
+                        }
+                    ],
+                    "phasesConfiguration": {
+                        "phase1": {
+                            "multipilcationCoefficient": 1,
+                            "phaseVoltagePath": 1
+                        },
+                        "phase2": {
+                            "multipilcationCoefficient": 1,
+                            "phaseVoltagePath": 1
+                        },
+                        "phase3": {
+                            "multipilcationCoefficient": 1,
+                            "phaseVoltagePath": 1
+                        }
+                    }
+                },
+                {
+                    "device_id": "cmp-phase1-001",
+                    "name": "Consommation",
+                    "masterMac": "A1B2C3D4E5F6",
+                    "masterType": "gmd",
+                    "ecnType": "cmp",
+                    "type_id": "asoka_electric_counter",
+                    "phase": "1",
+                    "has_actuator": false,
+                    "created": "2023-02-17 14:55:54"
+                },
+                {
+                    "device_id": "cmp-phase2-001",
+                    "name": "Ignoré",
+                    "masterMac": "A1B2C3D4E5F6",
+                    "masterType": "gmd",
+                    "ecnType": "cmp",
+                    "type_id": "production_counter_ignored",
+                    "phase": "2",
+                    "has_actuator": false,
+                    "created": "2023-02-17 14:55:54"
+                },
+                {
+                    "device_id": "cmp-phase3-001",
+                    "name": "Production",
+                    "masterMac": "A1B2C3D4E5F6",
+                    "masterType": "gmd",
+                    "ecnType": "cmp",
+                    "type_id": "production_counter",
+                    "phase": "3",
+                    "has_actuator": false,
+                    "unitElectricCapacity": 370,
+                    "moduleNumber": 8,
+                    "created": "2023-02-17 14:55:54"
+                },
+                {
+                    "device_id": "sw-relay-001",
+                    "typeOverride": "MST-G3-Relay",
+                    "name": "Relais",
+                    "masterMac": "4tGrXr2CViF8chJEd",
+                    "masterType": "mst",
+                    "ecnType": "sw",
+                    "type_id": "other_device_type",
+                    "has_actuator": true,
+                    "created": "2023-02-17 14:55:55"
+                }
+            ]
+        }
+    ]
+}
