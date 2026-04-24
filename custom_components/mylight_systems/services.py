@@ -68,6 +68,14 @@ def _build_csv(rows: list[tuple[date, list[Measure]]]) -> str:
     return output.getvalue()
 
 
+def _write_csv(output_dir: Path, filename: str, content: str) -> Path:
+    """Write CSV content to a file. Runs in an executor (blocking I/O)."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / filename
+    output_path.write_text(content, encoding="utf-8")
+    return output_path
+
+
 async def async_setup_services(hass: HomeAssistant) -> None:
     """Register the export_measures_csv service action."""
     if hass.services.has_service(DOMAIN, SERVICE_EXPORT_CSV):
@@ -104,9 +112,11 @@ async def async_setup_services(hass: HomeAssistant) -> None:
 
         filename = f"mylight_export_{from_date.isoformat()}_{to_date.isoformat()}.csv"
         output_dir = Path(hass.config.config_dir) / "www" / "mylight_systems"
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / filename
-        output_path.write_text(_build_csv(rows), encoding="utf-8")
+        csv_content = _build_csv(rows)
+
+        output_path = await hass.async_add_executor_job(
+            _write_csv, output_dir, filename, csv_content
+        )
 
         url_path = f"/local/mylight_systems/{filename}"
         LOGGER.info(
