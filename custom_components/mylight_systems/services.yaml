@@ -1,9 +1,9 @@
 export_measures_csv:
   name: Export measures as CSV
   description: >
-    Exports daily energy measures for a date range to a CSV file in
-    /config/www/mylight_systems/ and returns the download URL path in the
-    service response (key: path, e.g. /local/mylight_systems/mylight_export_2025-01-01_2025-01-31.csv).
+    Exports daily energy measures to /config/www/mylight_systems/ and returns
+    the download URL (key: path). from_date must be strictly before to_date;
+    to_date cannot be in the future.
   fields:
     from_date:
       name: From date
