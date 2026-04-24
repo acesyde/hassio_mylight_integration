@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import io
 from datetime import date
+from pathlib import Path
 
 import voluptuous as vol
 
@@ -101,14 +102,21 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             auth_token, grid_type, device_id, from_date, to_date
         )
 
-        csv_content = _build_csv(rows)
+        filename = f"mylight_export_{from_date.isoformat()}_{to_date.isoformat()}.csv"
+        output_dir = Path(hass.config.config_dir) / "www" / "mylight_systems"
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / filename
+        output_path.write_text(_build_csv(rows), encoding="utf-8")
+
+        url_path = f"/local/mylight_systems/{filename}"
         LOGGER.info(
-            "CSV export generated: %d rows for %s to %s",
+            "CSV export written to %s (%d rows, %s to %s)",
+            output_path,
             len(rows),
             from_date.isoformat(),
             to_date.isoformat(),
         )
-        return {"csv": csv_content}
+        return {"path": url_path}
 
     hass.services.async_register(
         DOMAIN,
