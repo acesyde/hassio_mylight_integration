@@ -8,7 +8,6 @@ from datetime import date
 from pathlib import Path
 
 import voluptuous as vol
-
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
@@ -35,9 +34,7 @@ def _parse_date(value: str, field_name: str) -> date:
             raise ValueError("Format mismatch")
         return parsed
     except ValueError as exc:
-        raise ServiceValidationError(
-            f"Invalid date for '{field_name}': '{value}'. Use YYYY-MM-DD format."
-        ) from exc
+        raise ServiceValidationError(f"Invalid date for '{field_name}': '{value}'. Use YYYY-MM-DD format.") from exc
 
 
 def _build_csv(rows: list[tuple[date, list[Measure]]]) -> str:
@@ -114,9 +111,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         output_dir = Path(hass.config.config_dir) / "www" / "mylight_systems"
         csv_content = _build_csv(rows)
 
-        output_path = await hass.async_add_executor_job(
-            _write_csv, output_dir, filename, csv_content
-        )
+        output_path = await hass.async_add_executor_job(_write_csv, output_dir, filename, csv_content)
 
         url_path = f"/local/mylight_systems/{filename}"
         LOGGER.info(

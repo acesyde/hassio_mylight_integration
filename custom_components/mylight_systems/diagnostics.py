@@ -160,18 +160,14 @@ async def async_get_config_entry_diagnostics(
             )
             for path, param_builder, extra_redact in DIAGNOSTIC_ENDPOINTS
         }
-        results = await asyncio.gather(
-            *[coro for coro, _ in tasks.values()], return_exceptions=True
-        )
+        results = await asyncio.gather(*[coro for coro, _ in tasks.values()], return_exceptions=True)
 
         for (path, (_, extra_redact)), result in zip(tasks.items(), results):
             if isinstance(result, Exception):
                 payload = {"error": type(result).__name__, "message": str(result)}
             else:
                 payload = _anonymize_response(result, extra_redact)
-            raw_api_responses[path] = base64.b64encode(
-                json.dumps(payload, default=str).encode()
-            ).decode()
+            raw_api_responses[path] = base64.b64encode(json.dumps(payload, default=str).encode()).decode()
 
     except Exception:  # noqa: BLE001
         logging.getLogger(__name__).debug("Failed to fetch raw API data for diagnostics", exc_info=True)

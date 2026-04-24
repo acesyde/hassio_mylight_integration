@@ -288,10 +288,7 @@ class MyLightApiClient:
         result: list[tuple[date, list[Measure]]] = []
         for i, day in enumerate(date_sequence):
             if i < len(groups):
-                measures = [
-                    Measure(v["type"], v["value"], v["unit"])
-                    for v in groups[i]["values"]
-                ]
+                measures = [Measure(v["type"], v["value"], v["unit"]) for v in groups[i]["values"]]
             else:
                 measures = []
             result.append((day, measures))

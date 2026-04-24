@@ -47,15 +47,11 @@ async def test_range_single_day_maps_date(api_client):
     url = _url(token, "one_phase", "dev1", "2025-01-01", "2025-01-02")
     payload = {
         "status": "ok",
-        "measures": [
-            {"values": [{"type": "produced_energy", "value": 100.0, "unit": "Ws"}]}
-        ],
+        "measures": [{"values": [{"type": "produced_energy", "value": 100.0, "unit": "Ws"}]}],
     }
     with aioresponses() as m:
         m.get(url, payload=payload)
-        result = await api_client.async_get_measures_grouping_range(
-            token, "one_phase", "dev1", from_date, to_date
-        )
+        result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
     assert len(result) == 1
     assert result[0][0] == date(2025, 1, 1)
     assert result[0][1][0].type == "produced_energy"
@@ -79,9 +75,7 @@ async def test_range_multiple_days_maps_dates_in_order(api_client):
     }
     with aioresponses() as m:
         m.get(url, payload=payload)
-        result = await api_client.async_get_measures_grouping_range(
-            token, "one_phase", "dev1", from_date, to_date
-        )
+        result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
     assert len(result) == 3
     assert result[0][0] == date(2025, 1, 1)
     assert result[1][0] == date(2025, 1, 2)
@@ -105,9 +99,7 @@ async def test_range_fewer_api_groups_than_days_pads_with_empty(api_client):
     }
     with aioresponses() as m:
         m.get(url, payload=payload)
-        result = await api_client.async_get_measures_grouping_range(
-            token, "one_phase", "dev1", from_date, to_date
-        )
+        result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
     assert len(result) == 3
     assert result[0][1][0].value == 10.0
     assert result[1][1] == []
@@ -124,9 +116,7 @@ async def test_range_empty_measures_response(api_client):
     payload = {"status": "ok", "measures": []}
     with aioresponses() as m:
         m.get(url, payload=payload)
-        result = await api_client.async_get_measures_grouping_range(
-            token, "one_phase", "dev1", from_date, to_date
-        )
+        result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
     assert len(result) == 2
     assert result[0][1] == []
     assert result[1][1] == []
@@ -142,9 +132,7 @@ async def test_range_raises_unauthorized_error(api_client):
     with aioresponses() as m:
         m.get(url, payload={"status": "error", "error": "not.authorized"})
         with pytest.raises(UnauthorizedError):
-            await api_client.async_get_measures_grouping_range(
-                token, "one_phase", "dev1", from_date, to_date
-            )
+            await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
 
 
 @pytest.mark.asyncio
@@ -154,6 +142,4 @@ async def test_range_raises_value_error_when_to_date_before_from_date(api_client
     from_date = date(2025, 1, 5)
     to_date = date(2025, 1, 1)
     with pytest.raises(ValueError, match="to_date.*must not be before from_date"):
-        await api_client.async_get_measures_grouping_range(
-            token, "one_phase", "dev1", from_date, to_date
-        )
+        await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)

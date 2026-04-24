@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, date, datetime, timedelta
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
@@ -96,7 +96,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             today = date.today().isoformat()
             tomorrow = (date.today() + timedelta(days=1)).isoformat()
 
-            coroutines = [
+            coroutines: list[Any] = [
                 self.client.async_get_measures_grouping(
                     auth_token, grid_type, device_id, from_date=today, to_date=tomorrow
                 ),
