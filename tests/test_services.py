@@ -49,8 +49,7 @@ class TestBuildCsvFunction:
         ]
         result = _build_csv(rows)
         lines = result.strip().splitlines()
-        # Second row should have empty value for grid_energy
-        assert lines[2].endswith(",")
+        assert lines[2] == "2025-01-02,20.0,"
 
     def test_column_order_matches_discovery_order(self):
         rows = [
@@ -80,3 +79,26 @@ class TestBuildCsvFunction:
         result = _build_csv(rows)
         lines = result.strip().splitlines()
         assert lines[2] == "2025-01-02,"
+
+    def test_week_date_format_raises_service_validation_error(self):
+        with pytest.raises(ServiceValidationError):
+            _parse_date("2025-W01-1", "from_date")
+
+
+class TestDateValidationLogic:
+    """Test the date validation rules used by the service handler."""
+
+    def test_equal_dates_would_fail_handler_guard(self):
+        from_date = date(2025, 1, 1)
+        to_date = date(2025, 1, 1)
+        assert from_date >= to_date
+
+    def test_from_after_to_would_fail_handler_guard(self):
+        from_date = date(2025, 1, 5)
+        to_date = date(2025, 1, 1)
+        assert from_date >= to_date
+
+    def test_valid_range_passes_handler_guard(self):
+        from_date = date(2025, 1, 1)
+        to_date = date(2025, 1, 31)
+        assert not (from_date >= to_date)

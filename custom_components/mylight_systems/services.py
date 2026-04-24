@@ -28,7 +28,11 @@ SERVICE_SCHEMA = vol.Schema(
 def _parse_date(value: str, field_name: str) -> date:
     """Parse an ISO date string, raising ServiceValidationError on failure."""
     try:
-        return date.fromisoformat(value)
+        parsed = date.fromisoformat(value)
+        # Strict validation: reject ISO week-date formats and other non-YYYY-MM-DD formats
+        if parsed.isoformat() != value:
+            raise ValueError("Format mismatch")
+        return parsed
     except ValueError as exc:
         raise ServiceValidationError(
             f"Invalid date for '{field_name}': '{value}'. Use YYYY-MM-DD format."
@@ -72,6 +76,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         from_date = _parse_date(call.data["from_date"], "from_date")
         to_date = _parse_date(call.data["to_date"], "to_date")
 
+        # Reject same-day and backward ranges; exports require at least a one-day interval
         if from_date >= to_date:
             raise ServiceValidationError("'from_date' must be strictly before 'to_date'.")
         if to_date > date.today():
