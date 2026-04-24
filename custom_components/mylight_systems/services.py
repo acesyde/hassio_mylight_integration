@@ -120,7 +120,12 @@ async def async_setup_services(hass: HomeAssistant) -> None:
 
 
 async def async_unload_services(hass: HomeAssistant) -> None:
-    """Unregister the service when the last config entry is removed."""
+    """Unregister the service when the last config entry is removed.
+
+    Called while the entry being unloaded is still registered, so
+    `async_entries` returns it. `<= 1` therefore fires exactly when
+    the last entry is being removed.
+    """
     remaining = hass.config_entries.async_entries(DOMAIN)
     if len(remaining) <= 1:
         hass.services.async_remove(DOMAIN, SERVICE_EXPORT_CSV)

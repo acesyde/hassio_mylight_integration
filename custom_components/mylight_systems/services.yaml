@@ -1,0 +1,18 @@
+export_measures_csv:
+  name: Export measures as CSV
+  description: Exports daily energy measures for a date range as a CSV string returned in the service response.
+  fields:
+    from_date:
+      name: From date
+      description: Start date in YYYY-MM-DD format (inclusive).
+      required: true
+      example: "2025-01-01"
+      selector:
+        text:
+    to_date:
+      name: To date
+      description: End date in YYYY-MM-DD format (inclusive, must be today or earlier).
+      required: true
+      example: "2025-01-31"
+      selector:
+        text:
