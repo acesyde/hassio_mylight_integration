@@ -13,3 +13,4 @@ scripts.yaml
 secrets.yaml
 !configuration.yaml
 .ha_run.lock
+www/
