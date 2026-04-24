@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import socket
+from datetime import date, timedelta
 from typing import Any
 
 import aiohttp
@@ -243,6 +244,56 @@ class MyLightApiClient:
                 measures.append(Measure(value["type"], value["value"], value["unit"]))
 
         return measures
+
+    async def async_get_measures_grouping_range(
+        self,
+        auth_token: str,
+        phase: str,
+        device_id: str,
+        from_date: date,
+        to_date: date,
+    ) -> list[tuple[date, list[Measure]]]:
+        """Get device measures for an inclusive date range, one entry per day.
+
+        Makes a single API call. The API endpoint is exclusive on toDate,
+        so to_date + 1 day is passed. Groups are zipped with the generated
+        date sequence; missing groups are represented as empty measure lists.
+        """
+        response: MeasuresGroupingResponseSchema = await self._execute_request(
+            "get",
+            MEASURES_GROUPING_URL,
+            params={
+                "authToken": auth_token,
+                "groupType": "day",
+                "fromDate": from_date.isoformat(),
+                "toDate": (to_date + timedelta(days=1)).isoformat(),
+                "measureType": phase,
+                "deviceId": device_id,
+            },
+        )
+
+        if response["status"] == "error":
+            if response.get("error") == ERR_NOT_AUTHORIZED:
+                raise UnauthorizedError()
+
+        _validate_response(response, "measures")
+
+        num_days = (to_date - from_date).days + 1
+        date_sequence = [from_date + timedelta(days=i) for i in range(num_days)]
+        groups = response["measures"] or []
+
+        result: list[tuple[date, list[Measure]]] = []
+        for i, day in enumerate(date_sequence):
+            if i < len(groups):
+                measures = [
+                    Measure(v["type"], v["value"], v["unit"])
+                    for v in groups[i]["values"]
+                ]
+            else:
+                measures = []
+            result.append((day, measures))
+
+        return result
 
     async def async_get_battery_state(self, auth_token: str, battery_id: str) -> Measure | None:
         """Get battery state."""
