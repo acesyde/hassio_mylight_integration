@@ -10,6 +10,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api.client import DEFAULT_BASE_URL, MyLightApiClient
 from .const import LOGGER, PLATFORMS
 from .coordinator import MyLightSystemsDataUpdateCoordinator
+from .services import async_setup_services, async_unload_services
 
 type MyLightConfigEntry = ConfigEntry[MyLightSystemsDataUpdateCoordinator]
 
@@ -35,11 +36,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: MyLightConfigEntry) -> b
         entry.add_update_listener(lambda hass, entry: hass.config_entries.async_reload(entry.entry_id))
     )
 
+    await async_setup_services(hass)
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: MyLightConfigEntry) -> bool:
     """Handle removal of an entry."""
+    await async_unload_services(hass)
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
