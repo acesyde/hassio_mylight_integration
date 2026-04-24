@@ -25,7 +25,7 @@ jobs:
       - uses: jdx/mise-action@v4
         name: 🤖 Mise action
         with:
-          version: 2026.3.15
+          version: 2026.4.19
 
       - name: 📦 Install requirements
         run: mise project:setup
