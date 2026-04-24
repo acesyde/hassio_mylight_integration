@@ -259,6 +259,9 @@ class MyLightApiClient:
         so to_date + 1 day is passed. Groups are zipped with the generated
         date sequence; missing groups are represented as empty measure lists.
         """
+        if to_date < from_date:
+            raise ValueError(f"to_date ({to_date}) must not be before from_date ({from_date})")
+
         response: MeasuresGroupingResponseSchema = await self._execute_request(
             "get",
             MEASURES_GROUPING_URL,

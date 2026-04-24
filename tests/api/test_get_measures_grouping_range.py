@@ -145,3 +145,15 @@ async def test_range_raises_unauthorized_error(api_client):
             await api_client.async_get_measures_grouping_range(
                 token, "one_phase", "dev1", from_date, to_date
             )
+
+
+@pytest.mark.asyncio
+async def test_range_raises_value_error_when_to_date_before_from_date(api_client):
+    """ValueError raised when to_date is before from_date."""
+    token = "abc"  # noqa: S105
+    from_date = date(2025, 1, 5)
+    to_date = date(2025, 1, 1)
+    with pytest.raises(ValueError, match="to_date.*must not be before from_date"):
+        await api_client.async_get_measures_grouping_range(
+            token, "one_phase", "dev1", from_date, to_date
+        )
