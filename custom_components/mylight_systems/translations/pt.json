@@ -54,6 +54,22 @@
       }
     }
   },
+  "services": {
+    "export_measures_csv": {
+      "name": "Exportar medidas como CSV",
+      "description": "Exporta as medidas de energia diárias para /config/www/mylight_systems/ e retorna a URL de download (chave: path).",
+      "fields": {
+        "from_date": {
+          "name": "Data de início",
+          "description": "Data de início no formato YYYY-MM-DD (inclusiva)."
+        },
+        "to_date": {
+          "name": "Data de fim",
+          "description": "Data de fim no formato YYYY-MM-DD (hoje ou anterior)."
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "total_solar_production": { "name": "Produção solar" },
