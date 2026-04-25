@@ -102,3 +102,13 @@ class TestDateValidationLogic:
         from_date = date(2025, 1, 1)
         to_date = date(2025, 1, 31)
         assert not (from_date >= to_date)
+
+    def test_range_of_31_days_is_allowed(self):
+        from_date = date(2025, 1, 1)
+        to_date = date(2025, 2, 1)
+        assert (to_date - from_date).days <= 31
+
+    def test_range_of_32_days_exceeds_limit(self):
+        from_date = date(2025, 1, 1)
+        to_date = date(2025, 2, 2)
+        assert (to_date - from_date).days > 31

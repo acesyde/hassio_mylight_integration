@@ -14,7 +14,7 @@ export_measures_csv:
         text:
     to_date:
       name: To date
-      description: End date in YYYY-MM-DD format (inclusive, must be today or earlier).
+      description: End date in YYYY-MM-DD format (must be today or earlier; range cannot exceed 31 days).
       required: true
       example: "2025-01-31"
       selector:

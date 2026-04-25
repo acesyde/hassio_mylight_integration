@@ -65,7 +65,7 @@
         },
         "to_date": {
           "name": "Bis Datum",
-          "description": "Enddatum im Format YYYY-MM-DD (heute oder früher)."
+          "description": "Enddatum im Format YYYY-MM-DD (heute oder früher; max. 31 Tage Zeitraum)."
         }
       }
     }

@@ -87,6 +87,8 @@ async def async_setup_services(hass: HomeAssistant) -> None:
             raise ServiceValidationError("'from_date' must be strictly before 'to_date'.")
         if to_date > date.today():
             raise ServiceValidationError("'to_date' cannot be in the future.")
+        if (to_date - from_date).days > 31:
+            raise ServiceValidationError("Date range cannot exceed 31 days.")
 
         entries = hass.config_entries.async_entries(DOMAIN)
         if not entries:
