@@ -73,9 +73,7 @@ class TestAnonymizeResponse:
             "deviceStates": [
                 {
                     "deviceId": "bat-001-abcdef",
-                    "sensorStates": [
-                        {"sensorId": "bat-001-soc-xyz", "measure": {"type": "soc", "value": 75}}
-                    ],
+                    "sensorStates": [{"sensorId": "bat-001-soc-xyz", "measure": {"type": "soc", "value": 75}}],
                 }
             ],
         }
@@ -176,9 +174,7 @@ async def test_diagnostics_base64_decodes_to_valid_json():
     """Test that each raw_api_responses value is valid base64 JSON."""
     mock_coordinator = _make_mock_coordinator()
     mock_coordinator.client = MagicMock()
-    mock_coordinator.client.async_raw_request = AsyncMock(
-        return_value={"status": "ok", "data": [1, 2, 3]}
-    )
+    mock_coordinator.client.async_raw_request = AsyncMock(return_value={"status": "ok", "data": [1, 2, 3]})
 
     entry = _make_mock_entry(ENTRY_DATA)
     entry.runtime_data = mock_coordinator

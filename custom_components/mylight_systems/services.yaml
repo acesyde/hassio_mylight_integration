@@ -1,0 +1,21 @@
+export_measures_csv:
+  name: Export measures as CSV
+  description: >
+    Exports daily energy measures to /config/www/mylight_systems/ and returns
+    the download URL (key: path). from_date must be strictly before to_date;
+    to_date cannot be in the future.
+  fields:
+    from_date:
+      name: From date
+      description: Start date in YYYY-MM-DD format (inclusive).
+      required: true
+      example: "2025-01-01"
+      selector:
+        text:
+    to_date:
+      name: To date
+      description: End date in YYYY-MM-DD format (must be today or earlier; range cannot exceed 31 days).
+      required: true
+      example: "2025-01-31"
+      selector:
+        text:
