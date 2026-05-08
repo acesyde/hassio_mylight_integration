@@ -111,6 +111,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             virtual_battery_id = self.config_entry.data[CONF_VIRTUAL_BATTERY_ID]
             master_relay_id = self.master_relay_id()
             water_heater_relay_id = self.water_heater_relay_id()
+            water_heater_gmd_id = self.water_heater_gmd_id()
 
             await self.authenticate_user(email, password)
             if self.__auth_token is None:
@@ -129,12 +130,20 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             ]
             master_relay_idx: int | None = None
             water_heater_relay_idx: int | None = None
+            water_heater_gmd_idx: int | None = None
             if master_relay_id is not None:
                 master_relay_idx = len(coroutines)
                 coroutines.append(self.client.async_get_relay_state(auth_token, master_relay_id))
             if water_heater_relay_id is not None:
                 water_heater_relay_idx = len(coroutines)
                 coroutines.append(self.client.async_get_relay_state(auth_token, water_heater_relay_id))
+            if water_heater_gmd_id is not None:
+                water_heater_gmd_idx = len(coroutines)
+                coroutines.append(
+                    self.client.async_get_measures_grouping(
+                        auth_token, grid_type, water_heater_gmd_id, from_date=today, to_date=tomorrow
+                    )
+                )
 
             results = await asyncio.gather(*coroutines)
             energy_result = results[0]
@@ -142,6 +151,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             battery_state = results[2]
             master_relay_state = results[master_relay_idx] if master_relay_idx is not None else None
             water_heater_relay_state = results[water_heater_relay_idx] if water_heater_relay_idx is not None else None
+            water_heater_measures = results[water_heater_gmd_idx] if water_heater_gmd_idx is not None else []
 
             data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(energy_result, "produced_energy"),
@@ -155,7 +165,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
                 water_heater_relay_state=water_heater_relay_state,
-                water_heater_energy=self.find_measure_by_type(energy_result, "water_heater_energy"),
+                water_heater_energy=self.find_measure_by_type(water_heater_measures, "energy"),
             )
 
             self._data = data

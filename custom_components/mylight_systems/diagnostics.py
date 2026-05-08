@@ -113,14 +113,17 @@ def _anonymize_response(data: Any, extra_redact: set[str] | None = None) -> Any:
     return data
 
 
-# Each entry: (endpoint_path, param_builder, extra_redact_fields)
+# Each entry: (label, endpoint_path, param_builder, extra_redact_fields)
+# `label` is the key used in raw_api_responses; it allows multiple entries hitting
+# the same path with different params (e.g. per-gmd grouping calls).
 # The callable receives (auth_token, entry_data, today, tomorrow) and returns params.
-DiagnosticEndpoint = tuple[str, Callable[[str, dict, str, str], dict], set[str]]
+DiagnosticEndpoint = tuple[str, str, Callable[[str, dict, str, str], dict], set[str]]
 
 DIAGNOSTIC_ENDPOINTS: list[DiagnosticEndpoint] = [
-    (PROFILE_URL, lambda tok, data, t, tm: {"authToken": tok}, _PROFILE_REDACT_FIELDS),
-    (DEVICES_URL, lambda tok, data, t, tm: {"authToken": tok}, _DEVICES_REDACT_FIELDS),
+    ("profile", PROFILE_URL, lambda tok, data, t, tm: {"authToken": tok}, _PROFILE_REDACT_FIELDS),
+    ("devices", DEVICES_URL, lambda tok, data, t, tm: {"authToken": tok}, _DEVICES_REDACT_FIELDS),
     (
+        "measures_total",
         MEASURES_TOTAL_URL,
         lambda tok, data, t, tm: {
             "authToken": tok,
@@ -130,6 +133,7 @@ DIAGNOSTIC_ENDPOINTS: list[DiagnosticEndpoint] = [
         _MEASURES_REDACT_FIELDS,
     ),
     (
+        "measures_grouping",
         MEASURES_GROUPING_URL,
         lambda tok, data, t, tm: {
             "authToken": tok,
@@ -141,9 +145,42 @@ DIAGNOSTIC_ENDPOINTS: list[DiagnosticEndpoint] = [
         },
         _MEASURES_REDACT_FIELDS,
     ),
-    (STATES_URL, lambda tok, data, t, tm: {"authToken": tok}, _STATES_REDACT_FIELDS),
-    (ROOMS_URL, lambda tok, data, t, tm: {"authToken": tok}, _ROOMS_REDACT_FIELDS),
+    ("states", STATES_URL, lambda tok, data, t, tm: {"authToken": tok}, _STATES_REDACT_FIELDS),
+    ("rooms", ROOMS_URL, lambda tok, data, t, tm: {"authToken": tok}, _ROOMS_REDACT_FIELDS),
 ]
+
+
+def _per_gmd_endpoints(entry_data: dict) -> list[DiagnosticEndpoint]:
+    """Build per-gmd grouping endpoints for each gmd device declared in the entry.
+
+    Produces self-documenting labels like
+    `measures_grouping__gmd_1_water_heater_submeter` so a downloaded diagnostic
+    file is easy to navigate when several gmds are present.
+    """
+    endpoints: list[DiagnosticEndpoint] = []
+    for idx, gmd in enumerate(entry_data.get(CONF_GMD_DEVICES, []) or []):
+        gmd_id = gmd.get("id")
+        if not gmd_id:
+            continue
+        role = gmd.get("device_type_id") or "generic"
+        topology = "composite" if gmd.get("is_composite") else "submeter"
+        label = f"measures_grouping__gmd_{idx}_{role}_{topology}"
+        endpoints.append(
+            (
+                label,
+                MEASURES_GROUPING_URL,
+                lambda tok, data, t, tm, _id=gmd_id: {
+                    "authToken": tok,
+                    "groupType": "day",
+                    "fromDate": t,
+                    "toDate": tm,
+                    "measureType": data[CONF_GRID_TYPE],
+                    "deviceId": _id,
+                },
+                _MEASURES_REDACT_FIELDS,
+            )
+        )
+    return endpoints
 
 
 async def async_get_config_entry_diagnostics(
@@ -169,23 +206,25 @@ async def async_get_config_entry_diagnostics(
         tomorrow = (date.today() + timedelta(days=1)).isoformat()
         entry_data = dict(entry.data)
 
+        endpoints = list(DIAGNOSTIC_ENDPOINTS) + _per_gmd_endpoints(entry_data)
+
         tasks = {
-            path: (
+            label: (
                 coordinator.client.async_raw_request(
                     "get", path, params=param_builder(auth_token, entry_data, today, tomorrow)
                 ),
                 extra_redact,
             )
-            for path, param_builder, extra_redact in DIAGNOSTIC_ENDPOINTS
+            for label, path, param_builder, extra_redact in endpoints
         }
         results = await asyncio.gather(*[coro for coro, _ in tasks.values()], return_exceptions=True)
 
-        for (path, (_, extra_redact)), result in zip(tasks.items(), results):
+        for (label, (_, extra_redact)), result in zip(tasks.items(), results):
             if isinstance(result, Exception):
                 payload = {"error": type(result).__name__, "message": str(result)}
             else:
                 payload = _anonymize_response(result, extra_redact)
-            raw_api_responses[path] = base64.b64encode(json.dumps(payload, default=str).encode()).decode()
+            raw_api_responses[label] = base64.b64encode(json.dumps(payload, default=str).encode()).decode()
 
     except Exception:  # noqa: BLE001
         logging.getLogger(__name__).debug("Failed to fetch raw API data for diagnostics", exc_info=True)
