@@ -1,5 +1,6 @@
 [tools]
 actionlint = "1.7.12"
+"pipx:graphifyy" = "0.7.10"
 pre-commit = "4.6"
 python = "3.14.4"
 uv = "0.11.7"
