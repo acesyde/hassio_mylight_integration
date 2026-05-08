@@ -14,13 +14,20 @@ from custom_components.mylight_systems.api.exceptions import (
     InvalidCredentialsError,
     MyLightSystemsError,
 )
-from custom_components.mylight_systems.api.models import InstallationDevices, Login, UserProfile
+from custom_components.mylight_systems.api.models import (
+    GmdDevice,
+    InstallationDevices,
+    Login,
+    RelayDevice,
+    UserProfile,
+)
 from custom_components.mylight_systems.config_flow import MyLightSystemsFlowHandler
 from custom_components.mylight_systems.const import (
+    CONF_GMD_DEVICES,
     CONF_GRID_TYPE,
     CONF_MASTER_ID,
-    CONF_MASTER_RELAY_ID,
     CONF_MASTER_REPORT_PERIOD,
+    CONF_RELAY_DEVICES,
     CONF_SUBSCRIPTION_ID,
     CONF_VIRTUAL_BATTERY_ID,
     CONF_VIRTUAL_DEVICE_ID,
@@ -44,7 +51,12 @@ MOCK_DEVICES = InstallationDevices(
     master_report_period=60,
     virtual_device_id="virt1",
     virtual_battery_id="bat1",
-    master_relay_id=None,
+    relay_devices=[
+        RelayDevice(id="sw1", name="Relais", device_type_id="other_device_type", type_override="MST-G3-Relay"),
+    ],
+    gmd_devices=[
+        GmdDevice(id="gmd1", name="Compteur", device_type_id=None, type_override=None, is_composite=True),
+    ],
 )
 
 EXISTING_ENTRY_DATA = {
@@ -132,7 +144,12 @@ async def test_user_step__creates_entry_on_valid_credentials():
     assert data[CONF_VIRTUAL_BATTERY_ID] == MOCK_DEVICES.virtual_battery_id
     assert data[CONF_MASTER_ID] == MOCK_DEVICES.master_id
     assert data[CONF_MASTER_REPORT_PERIOD] == MOCK_DEVICES.master_report_period
-    assert data[CONF_MASTER_RELAY_ID] == MOCK_DEVICES.master_relay_id
+    assert data[CONF_RELAY_DEVICES] == [
+        {"id": "sw1", "name": "Relais", "device_type_id": "other_device_type", "type_override": "MST-G3-Relay"},
+    ]
+    assert data[CONF_GMD_DEVICES] == [
+        {"id": "gmd1", "name": "Compteur", "device_type_id": None, "type_override": None, "is_composite": True},
+    ]
 
 
 @pytest.mark.asyncio

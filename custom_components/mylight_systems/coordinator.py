@@ -25,8 +25,9 @@ from .api.exceptions import (
     UnauthorizedError,
 )
 from .const import (
+    CONF_GMD_DEVICES,
     CONF_GRID_TYPE,
-    CONF_MASTER_RELAY_ID,
+    CONF_RELAY_DEVICES,
     CONF_SCAN_INTERVAL,
     CONF_VIRTUAL_BATTERY_ID,
     CONF_VIRTUAL_DEVICE_ID,
@@ -78,6 +79,27 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             config_entry=config_entry,
         )
 
+    def master_relay_id(self) -> str | None:
+        """Return the id of the relay considered as the master (i.e. not water_heater)."""
+        relays = self.config_entry.data.get(CONF_RELAY_DEVICES, [])
+        relay = next((r for r in relays if r.get("device_type_id") != "water_heater"), None)
+        return relay["id"] if relay else None
+
+    def water_heater_relay_id(self) -> str | None:
+        """Return the id of the relay classified as water_heater, if any."""
+        relays = self.config_entry.data.get(CONF_RELAY_DEVICES, [])
+        relay = next((r for r in relays if r.get("device_type_id") == "water_heater"), None)
+        return relay["id"] if relay else None
+
+    def water_heater_gmd_id(self) -> str | None:
+        """Return the id of the gmd sub-meter classified as water_heater, if any."""
+        gmds = self.config_entry.data.get(CONF_GMD_DEVICES, [])
+        gmd = next(
+            (g for g in gmds if g.get("device_type_id") == "water_heater" and not g.get("is_composite")),
+            None,
+        )
+        return gmd["id"] if gmd else None
+
     async def _async_update_data(self) -> MyLightSystemsCoordinatorData:
         """Update data via library."""
         try:
@@ -86,7 +108,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             grid_type = self.config_entry.data[CONF_GRID_TYPE]
             device_id = self.config_entry.data[CONF_VIRTUAL_DEVICE_ID]
             virtual_battery_id = self.config_entry.data[CONF_VIRTUAL_BATTERY_ID]
-            master_relay_id = self.config_entry.data.get(CONF_MASTER_RELAY_ID, None)
+            master_relay_id = self.master_relay_id()
 
             await self.authenticate_user(email, password)
             if self.__auth_token is None:
@@ -178,13 +200,19 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         """Turn on master relay."""
         if self.__auth_token is None:
             raise UpdateFailed("Authentication token is not set")
-        await self.client.async_turn_on(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
+        relay_id = self.master_relay_id()
+        if relay_id is None:
+            raise UpdateFailed("No master relay configured")
+        await self.client.async_turn_on(self.__auth_token, relay_id)
 
     async def turn_off_master_relay(self):
         """Turn off master relay."""
         if self.__auth_token is None:
             raise UpdateFailed("Authentication token is not set")
-        await self.client.async_turn_off(self.__auth_token, self.config_entry.data[CONF_MASTER_RELAY_ID])
+        relay_id = self.master_relay_id()
+        if relay_id is None:
+            raise UpdateFailed("No master relay configured")
+        await self.client.async_turn_off(self.__auth_token, relay_id)
 
     @property
     def auth_token(self) -> str | None:

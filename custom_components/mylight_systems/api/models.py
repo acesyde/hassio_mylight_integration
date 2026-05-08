@@ -48,7 +48,6 @@ class InstallationDevices:
     master_report_period: int = 60
     virtual_device_id: str = ""
     virtual_battery_id: str = ""
-    master_relay_id: str | None = None
     relay_devices: list[RelayDevice] = field(default_factory=list)
     gmd_devices: list[GmdDevice] = field(default_factory=list)
 

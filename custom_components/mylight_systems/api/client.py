@@ -217,15 +217,6 @@ class MyLightApiClient:
                     )
                 )
 
-        # Backward-compat: master_relay_id is the first relay that is not classified
-        # as a water heater. Removed in step 2 once all consumers read from
-        # relay_devices directly.
-        master_relay = next(
-            (r for r in model.relay_devices if r.device_type_id != "water_heater"),
-            None,
-        )
-        model.master_relay_id = master_relay.id if master_relay else None
-
         return model
 
     async def async_get_measures_total(self, auth_token: str, phase: str, device_id: str) -> list[Measure]:

@@ -8,7 +8,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api.client import DEFAULT_BASE_URL, MyLightApiClient
-from .const import LOGGER, PLATFORMS
+from .const import (
+    CONF_GMD_DEVICES,
+    CONF_MASTER_RELAY_ID,
+    CONF_RELAY_DEVICES,
+    LOGGER,
+    PLATFORMS,
+)
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 from .services import async_setup_services, async_unload_services
 
@@ -51,12 +57,18 @@ async def async_migrate_entry(hass: HomeAssistant, entry: MyLightConfigEntry) ->
     """Migrate old entry data to the current version."""
     LOGGER.debug("Migrating from version %s", entry.version)
 
+    if entry.version > 2:
+        return False
+
     if entry.version == 1:
-        LOGGER.debug("Migration to version %s successful", entry.version)
+        new_data = {**entry.data}
+        old_relay_id = new_data.pop(CONF_MASTER_RELAY_ID, None)
+        new_data[CONF_RELAY_DEVICES] = (
+            [{"id": old_relay_id, "name": "", "device_type_id": None, "type_override": None}] if old_relay_id else []
+        )
+        new_data[CONF_GMD_DEVICES] = []
+        hass.config_entries.async_update_entry(entry, data=new_data, version=2)
+        LOGGER.debug("Migration to version 2 successful")
         return True
 
-    LOGGER.error(
-        "Cannot migrate config entry from version %s: unknown version. Please remove and re-add the integration.",
-        entry.version,
-    )
-    return False
+    return True

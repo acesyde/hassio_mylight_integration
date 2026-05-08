@@ -25,15 +25,33 @@ from .api.const import (
     STATES_URL,
 )
 from .const import (
+    CONF_GMD_DEVICES,
     CONF_GRID_TYPE,
     CONF_MASTER_ID,
-    CONF_MASTER_RELAY_ID,
+    CONF_RELAY_DEVICES,
     CONF_SUBSCRIPTION_ID,
     CONF_VIRTUAL_DEVICE_ID,
     DOMAIN,
 )
 
-TO_REDACT = {CONF_EMAIL, CONF_PASSWORD, CONF_SUBSCRIPTION_ID, CONF_MASTER_ID, CONF_MASTER_RELAY_ID}
+TO_REDACT = {CONF_EMAIL, CONF_PASSWORD, CONF_SUBSCRIPTION_ID, CONF_MASTER_ID}
+
+
+def _truncate_id(value: Any) -> Any:
+    """Truncate id-like strings to first 4 chars + '***' for display."""
+    if isinstance(value, str) and len(value) > 4:
+        return value[:4] + "***"
+    return value
+
+
+def _redact_device_lists(data: dict[str, Any]) -> dict[str, Any]:
+    """Truncate `id` inside relay_devices and gmd_devices lists for diagnostics."""
+    for key in (CONF_RELAY_DEVICES, CONF_GMD_DEVICES):
+        items = data.get(key)
+        if isinstance(items, list):
+            data[key] = [{**item, "id": _truncate_id(item.get("id", ""))} for item in items]
+    return data
+
 
 # --- Global anonymization rules (applied to all endpoints) ---
 
@@ -177,7 +195,7 @@ async def async_get_config_entry_diagnostics(
             "domain": integration.domain,
             "version": integration.version,
         },
-        "config_entry_data": async_redact_data(dict(entry.data), TO_REDACT),
+        "config_entry_data": _redact_device_lists(async_redact_data(dict(entry.data), TO_REDACT)),
         "coordinator_data": {
             k: asdict(v) if hasattr(v, "__dataclass_fields__") else v for k, v in coordinator.data._asdict().items()
         }

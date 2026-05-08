@@ -135,9 +135,6 @@ async def test_get_devices__should_return_device_data_when_valid_token(api_clien
     assert response.gmd_devices[0].is_composite is True
     assert response.gmd_devices[0].device_type_id is None
 
-    # Backward-compat: master_relay_id is the only non-water-heater relay
-    assert "Sw1RelayId00000" == response.master_relay_id
-
 
 @pytest.mark.asyncio
 async def test_get_devices__should_classify_water_heater_relay_and_gmd(api_client, with_water_heater_response_fixture):
@@ -157,10 +154,6 @@ async def test_get_devices__should_classify_water_heater_relay_and_gmd(api_clien
     assert "RelayWaterHeater1" == relay.id
     assert "water_heater" == relay.device_type_id
     assert "MST-G3-Relay" == relay.type_override
-
-    # The water-heater relay is NOT exposed as master_relay_id (backward-compat:
-    # master_relay_id stays None when the only relay is classified water_heater)
-    assert response.master_relay_id is None
 
 
 @pytest.mark.asyncio

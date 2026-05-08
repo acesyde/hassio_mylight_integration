@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
+
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_URL
@@ -17,10 +19,11 @@ from .api.exceptions import (
 )
 from .const import (
     CONF_ELECTRIC_POWER_CAPACITY,
+    CONF_GMD_DEVICES,
     CONF_GRID_TYPE,
     CONF_MASTER_ID,
-    CONF_MASTER_RELAY_ID,
     CONF_MASTER_REPORT_PERIOD,
+    CONF_RELAY_DEVICES,
     CONF_SCAN_INTERVAL,
     CONF_SUBSCRIPTION_ID,
     CONF_VIRTUAL_BATTERY_ID,
@@ -36,7 +39,7 @@ from .const import (
 class MyLightSystemsFlowHandler(ConfigFlow, domain=DOMAIN):
     """Config flow for MyLightSystems."""
 
-    VERSION = 1
+    VERSION = 2
 
     @staticmethod
     @callback
@@ -74,7 +77,8 @@ class MyLightSystemsFlowHandler(ConfigFlow, domain=DOMAIN):
                     CONF_VIRTUAL_BATTERY_ID: device_ids.virtual_battery_id,
                     CONF_MASTER_ID: device_ids.master_id,
                     CONF_MASTER_REPORT_PERIOD: device_ids.master_report_period,
-                    CONF_MASTER_RELAY_ID: device_ids.master_relay_id,
+                    CONF_RELAY_DEVICES: [asdict(r) for r in device_ids.relay_devices],
+                    CONF_GMD_DEVICES: [asdict(g) for g in device_ids.gmd_devices],
                 }
 
                 await self.async_set_unique_id(str(user_profile.subscription_id))
@@ -191,10 +195,13 @@ class MyLightSystemsFlowHandler(ConfigFlow, domain=DOMAIN):
                 # Validate the new password and refresh profile-derived data
                 login_response = await api_client.async_login(entry.data[CONF_EMAIL], user_input[CONF_PASSWORD])
                 user_profile = await api_client.async_get_profile(login_response.auth_token)
+                device_ids = await api_client.async_get_devices(login_response.auth_token)
 
                 new_data = entry.data.copy()
                 new_data[CONF_PASSWORD] = user_input[CONF_PASSWORD]
                 new_data[CONF_ELECTRIC_POWER_CAPACITY] = user_profile.electric_power_capacity
+                new_data[CONF_RELAY_DEVICES] = [asdict(r) for r in device_ids.relay_devices]
+                new_data[CONF_GMD_DEVICES] = [asdict(g) for g in device_ids.gmd_devices]
 
                 return self.async_update_reload_and_abort(entry, data=new_data)
 

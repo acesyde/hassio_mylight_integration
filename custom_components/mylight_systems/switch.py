@@ -7,7 +7,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import MyLightConfigEntry
 from .api.exceptions import MyLightSystemsError
-from .const import CONF_MASTER_RELAY_ID, LOGGER
+from .const import LOGGER
 from .coordinator import MyLightSystemsDataUpdateCoordinator
 from .entity import IntegrationMyLightSystemsEntity
 
@@ -38,7 +38,7 @@ async def async_setup_entry(
 
     switches: list[MyLightSystemsSwitchEntityDescription] = []
 
-    if entry.data.get(CONF_MASTER_RELAY_ID, None) is not None:
+    if coordinator.master_relay_id() is not None:
         switches.append(master_relay_switch)
 
     async_add_entities(

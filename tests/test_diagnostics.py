@@ -140,7 +140,18 @@ ENTRY_DATA = {
     "virtual_device_id": "vrt-123456",
     "subscription_id": "sub-123",
     "master_id": "mst-123",
-    "master_relay_id": "sw-123",
+    "relay_devices": [
+        {"id": "sw-123-water", "name": "Relais", "device_type_id": "water_heater", "type_override": "MST-G3-Relay"},
+    ],
+    "gmd_devices": [
+        {
+            "id": "gmd-composite-1",
+            "name": "Compteur",
+            "device_type_id": None,
+            "type_override": None,
+            "is_composite": True,
+        },
+    ],
 }
 
 
