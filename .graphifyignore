@@ -1,0 +1,10 @@
+# .graphifyignore
+node_modules/
+dist/
+hassio_dev/
+*.generated.py
+
+# only index src/, ignore everything else
+*
+!src/
+!src/**
