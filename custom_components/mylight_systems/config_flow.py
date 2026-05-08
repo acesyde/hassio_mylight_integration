@@ -16,6 +16,7 @@ from .api.exceptions import (
     MyLightSystemsError,
 )
 from .const import (
+    CONF_ELECTRIC_POWER_CAPACITY,
     CONF_GRID_TYPE,
     CONF_MASTER_ID,
     CONF_MASTER_RELAY_ID,
@@ -68,6 +69,7 @@ class MyLightSystemsFlowHandler(ConfigFlow, domain=DOMAIN):
                     CONF_URL: user_input[CONF_URL],
                     CONF_SUBSCRIPTION_ID: user_profile.subscription_id,
                     CONF_GRID_TYPE: user_profile.grid_type,
+                    CONF_ELECTRIC_POWER_CAPACITY: user_profile.electric_power_capacity,
                     CONF_VIRTUAL_DEVICE_ID: device_ids.virtual_device_id,
                     CONF_VIRTUAL_BATTERY_ID: device_ids.virtual_battery_id,
                     CONF_MASTER_ID: device_ids.master_id,
@@ -186,12 +188,13 @@ class MyLightSystemsFlowHandler(ConfigFlow, domain=DOMAIN):
                     session=async_create_clientsession(self.hass),
                 )
 
-                # Validate the new password by attempting to login with existing email
-                await api_client.async_login(entry.data[CONF_EMAIL], user_input[CONF_PASSWORD])
+                # Validate the new password and refresh profile-derived data
+                login_response = await api_client.async_login(entry.data[CONF_EMAIL], user_input[CONF_PASSWORD])
+                user_profile = await api_client.async_get_profile(login_response.auth_token)
 
-                # Update only the password in the config entry
                 new_data = entry.data.copy()
                 new_data[CONF_PASSWORD] = user_input[CONF_PASSWORD]
+                new_data[CONF_ELECTRIC_POWER_CAPACITY] = user_profile.electric_power_capacity
 
                 return self.async_update_reload_and_abort(entry, data=new_data)
 

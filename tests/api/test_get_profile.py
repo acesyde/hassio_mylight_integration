@@ -91,3 +91,42 @@ async def test_get_profile__should_return_profile_data_when_valid_token(api_clie
     # Then
     assert "40oXYqq6nM7R9zGK" == response.subscription_id
     assert "one_phase" == response.grid_type
+    assert 9.0 == response.electric_power_capacity
+
+
+@pytest.mark.asyncio
+async def test_get_profile__should_return_none_capacity_when_field_missing(
+    api_client, valid_one_phase_response_fixture
+):
+    """Test that electric_power_capacity is None when the field is absent from the API response."""
+    # Given
+    payload = {k: v for k, v in valid_one_phase_response_fixture.items() if k != "electric_power_capacity"}
+    token = "abcdef"  # noqa: S105
+    url = DEFAULT_BASE_URL + PROFILE_URL + f"?authToken={token}"
+
+    # When
+    with aioresponses() as session_mock:
+        session_mock.get(url, status=200, payload=payload)
+        response = await api_client.async_get_profile(token)
+
+    # Then
+    assert response.electric_power_capacity is None
+
+
+@pytest.mark.asyncio
+async def test_get_profile__should_return_none_capacity_when_field_is_null(
+    api_client, valid_one_phase_response_fixture
+):
+    """Test that electric_power_capacity is None when the field is null in the API response."""
+    # Given
+    payload = {**valid_one_phase_response_fixture, "electric_power_capacity": None}
+    token = "abcdef"  # noqa: S105
+    url = DEFAULT_BASE_URL + PROFILE_URL + f"?authToken={token}"
+
+    # When
+    with aioresponses() as session_mock:
+        session_mock.get(url, status=200, payload=payload)
+        response = await api_client.async_get_profile(token)
+
+    # Then
+    assert response.electric_power_capacity is None

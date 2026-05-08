@@ -82,7 +82,8 @@
       "total_green_energy": { "name": "Total green energy (direct solar)" },
       "battery_state": { "name": "Battery energy stored" },
       "grid_returned_energy": { "name": "Total grid returned energy" },
-      "water_heater_energy": { "name": "Water heater energy" }
+      "water_heater_energy": { "name": "Water heater energy" },
+      "electric_power_capacity": { "name": "Subscribed power" }
     },
     "switch": {
       "master_relay": { "name": "Master relay" }

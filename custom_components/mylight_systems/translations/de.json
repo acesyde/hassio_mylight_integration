@@ -82,7 +82,8 @@
       "total_green_energy": { "name": "Grüne Energie (direkte Solarenergie)" },
       "battery_state": { "name": "Gespeicherte Batterieenergie" },
       "grid_returned_energy": { "name": "Ins Netz eingespeiste Energie" },
-      "water_heater_energy": { "name": "Warmwasserbereiter-Energie" }
+      "water_heater_energy": { "name": "Warmwasserbereiter-Energie" },
+      "electric_power_capacity": { "name": "Vertraglich zugesicherte Leistung" }
     },
     "switch": {
       "master_relay": { "name": "Hauptrelais" }

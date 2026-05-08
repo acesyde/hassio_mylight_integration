@@ -56,4 +56,5 @@ mise.local.toml
 # Project notes
 IMPROVEMENTS.md
 
+debug/
 .claude/

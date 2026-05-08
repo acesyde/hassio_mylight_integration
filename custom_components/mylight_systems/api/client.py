@@ -152,7 +152,15 @@ class MyLightApiClient:
             case _:
                 grid_type = "one_phase"
 
-        return UserProfile(response["id"], grid_type)
+        raw_capacity = response.get("electric_power_capacity")
+        electric_power_capacity: float | None = None
+        if raw_capacity not in (None, ""):
+            try:
+                electric_power_capacity = float(raw_capacity)
+            except (TypeError, ValueError):
+                electric_power_capacity = None
+
+        return UserProfile(response["id"], grid_type, electric_power_capacity)
 
     async def async_get_devices(self, auth_token: str) -> InstallationDevices:
         """Get user devices (virtual and battery)."""

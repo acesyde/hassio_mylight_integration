@@ -62,12 +62,13 @@ class LoginResponseSchema(TypedDict):
     authToken: str
 
 
-class ProfileResponseSchema(TypedDict):
+class ProfileResponseSchema(TypedDict, total=False):
     """Profile API response."""
 
     status: str
     id: str
     gridType: str
+    electric_power_capacity: str | None
 
 
 class DevicesResponseSchema(TypedDict):

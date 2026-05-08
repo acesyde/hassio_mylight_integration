@@ -16,6 +16,7 @@ class UserProfile:
 
     subscription_id: str
     grid_type: str
+    electric_power_capacity: float | None = None
 
 
 @dataclass

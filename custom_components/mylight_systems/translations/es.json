@@ -82,7 +82,8 @@
       "total_green_energy": { "name": "Energía verde (solar directa)" },
       "battery_state": { "name": "Energía almacenada en batería" },
       "grid_returned_energy": { "name": "Energía devuelta a la red" },
-      "water_heater_energy": { "name": "Energía del calentador de agua" }
+      "water_heater_energy": { "name": "Energía del calentador de agua" },
+      "electric_power_capacity": { "name": "Potencia contratada" }
     },
     "switch": {
       "master_relay": { "name": "Relé principal" }

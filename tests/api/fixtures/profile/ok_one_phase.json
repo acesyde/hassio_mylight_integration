@@ -8,5 +8,6 @@
     "latitude": "10.65797726931048",
     "longitude": "-0.1246704361536673",
     "subscription_status": "ok",
-    "gridType": "1 phase"
+    "gridType": "1 phase",
+    "electric_power_capacity": "9"
 }

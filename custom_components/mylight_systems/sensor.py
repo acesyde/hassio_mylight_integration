@@ -11,11 +11,12 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, UnitOfEnergy
+from homeassistant.const import PERCENTAGE, UnitOfApparentPower, UnitOfEnergy
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import MyLightConfigEntry
+from .const import CONF_ELECTRIC_POWER_CAPACITY
 from .coordinator import (
     MyLightSystemsCoordinatorData,
     MyLightSystemsDataUpdateCoordinator,
@@ -156,14 +157,26 @@ async def async_setup_entry(
 ) -> None:
     """Configure sensor platform."""
     coordinator = entry.runtime_data
-    async_add_devices(
+    entities: list[SensorEntity] = [
         MyLightSystemsSensor(
             entry_id=entry.entry_id,
             coordinator=coordinator,
             entity_description=entity_description,
         )
         for entity_description in MYLIGHT_SENSORS
-    )
+    ]
+
+    capacity = entry.data.get(CONF_ELECTRIC_POWER_CAPACITY)
+    if capacity is not None:
+        entities.append(
+            MyLightElectricPowerCapacitySensor(
+                entry_id=entry.entry_id,
+                coordinator=coordinator,
+                value=float(capacity),
+            )
+        )
+
+    async_add_devices(entities)
 
 
 class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
@@ -191,3 +204,29 @@ class MyLightSystemsSensor(IntegrationMyLightSystemsEntity, SensorEntity):
     def available(self) -> bool:
         """Return True if last update was successful."""
         return self.coordinator.last_update_success
+
+
+class MyLightElectricPowerCapacitySensor(IntegrationMyLightSystemsEntity, SensorEntity):
+    """Static sensor exposing the subscribed electrical power (kVA)."""
+
+    _attr_translation_key = "electric_power_capacity"
+    _attr_native_unit_of_measurement = UnitOfApparentPower.KILO_VOLT_AMPERE
+    _attr_device_class = SensorDeviceClass.APPARENT_POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 0
+
+    def __init__(
+        self,
+        entry_id: str,
+        coordinator: MyLightSystemsDataUpdateCoordinator,
+        value: float,
+    ) -> None:
+        """Init."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry_id}_electric_power_capacity"
+        self._attr_native_value = value
+
+    @property
+    def available(self) -> bool:
+        """Always available — value is static, stored in config entry data."""
+        return True

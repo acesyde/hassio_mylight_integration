@@ -1,10 +1,17 @@
 """Unit tests for sensor module."""
 
+from unittest.mock import MagicMock
+
 import pytest
+from homeassistant.components.sensor import SensorDeviceClass
 
 from custom_components.mylight_systems.api.models import Measure
 from custom_components.mylight_systems.coordinator import MyLightSystemsCoordinatorData
-from custom_components.mylight_systems.sensor import MYLIGHT_SENSORS, _calculate_grid_returned_energy
+from custom_components.mylight_systems.sensor import (
+    MYLIGHT_SENSORS,
+    MyLightElectricPowerCapacitySensor,
+    _calculate_grid_returned_energy,
+)
 
 
 @pytest.fixture
@@ -183,3 +190,21 @@ def test_water_heater_energy__should_return_wh_value_when_measure_is_present(non
 
     # Then — 3600 Ws / 3600 = 1.0 Wh
     assert pytest.approx(1.0) == result
+
+
+def _build_capacity_sensor(value: float) -> MyLightElectricPowerCapacitySensor:
+    """Build a MyLightElectricPowerCapacitySensor with a mocked coordinator."""
+    coordinator = MagicMock()
+    coordinator.config_entry.entry_id = "test_entry"
+    return MyLightElectricPowerCapacitySensor(entry_id="test_entry", coordinator=coordinator, value=value)
+
+
+def test_electric_power_capacity_sensor__exposes_native_value():
+    """Test that the static sensor exposes the value passed at construction."""
+    sensor = _build_capacity_sensor(9.0)
+
+    assert sensor.native_value == 9.0
+    assert sensor.native_unit_of_measurement == "kVA"
+    assert sensor.device_class == SensorDeviceClass.APPARENT_POWER
+    assert sensor.available is True
+    assert sensor.unique_id == "test_entry_electric_power_capacity"
