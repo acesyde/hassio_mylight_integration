@@ -36,7 +36,17 @@ from .exceptions import (
     MyLightSystemsError,
     UnauthorizedError,
 )
-from .models import InstallationDevices, Login, Measure, Room, RoomDevice, Schedule, UserProfile
+from .models import (
+    GmdDevice,
+    InstallationDevices,
+    Login,
+    Measure,
+    RelayDevice,
+    Room,
+    RoomDevice,
+    Schedule,
+    UserProfile,
+)
 from .schemas import (
     DevicesResponseSchema,
     LoginResponseSchema,
@@ -181,13 +191,40 @@ class MyLightApiClient:
         for device in devices:
             if device["type"] == "vrt":
                 model.virtual_device_id = device["id"]
-            if device["type"] == "bat":
+            elif device["type"] == "bat":
                 model.virtual_battery_id = device["id"]
-            if device["type"] == "mst":
+            elif device["type"] == "mst":
                 model.master_id = device["id"]
                 model.master_report_period = device["reportPeriod"]
-            if device["type"] == "sw":
-                model.master_relay_id = device["id"]
+            elif device["type"] == "sw":
+                model.relay_devices.append(
+                    RelayDevice(
+                        id=device["id"],
+                        name=device.get("name", ""),
+                        device_type_id=device.get("deviceTypeId"),
+                        type_override=device.get("typeOverride"),
+                    )
+                )
+            elif device["type"] == "gmd":
+                children = device.get("children") or []
+                model.gmd_devices.append(
+                    GmdDevice(
+                        id=device["id"],
+                        name=device.get("name", ""),
+                        device_type_id=device.get("deviceTypeId"),
+                        type_override=device.get("typeOverride"),
+                        is_composite=bool(children),
+                    )
+                )
+
+        # Backward-compat: master_relay_id is the first relay that is not classified
+        # as a water heater. Removed in step 2 once all consumers read from
+        # relay_devices directly.
+        master_relay = next(
+            (r for r in model.relay_devices if r.device_type_id != "water_heater"),
+            None,
+        )
+        model.master_relay_id = master_relay.id if master_relay else None
 
         return model
 

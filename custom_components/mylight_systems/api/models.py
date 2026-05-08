@@ -1,6 +1,6 @@
 """Api Models."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -20,6 +20,27 @@ class UserProfile:
 
 
 @dataclass
+class RelayDevice:
+    """A switchable relay (sw) device."""
+
+    id: str
+    name: str
+    device_type_id: str | None
+    type_override: str | None
+
+
+@dataclass
+class GmdDevice:
+    """A sub-meter (gmd) device."""
+
+    id: str
+    name: str
+    device_type_id: str | None
+    type_override: str | None
+    is_composite: bool
+
+
+@dataclass
 class InstallationDevices:
     """Installation devices representation."""
 
@@ -28,6 +49,8 @@ class InstallationDevices:
     virtual_device_id: str = ""
     virtual_battery_id: str = ""
     master_relay_id: str | None = None
+    relay_devices: list[RelayDevice] = field(default_factory=list)
+    gmd_devices: list[GmdDevice] = field(default_factory=list)
 
     def __setattr__(self, name: str, value: object) -> None:
         """Default master_report_period to 60 when set to None."""

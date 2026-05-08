@@ -2,30 +2,25 @@
     "status": "ok",
     "devices": [
         {
-            "id": "4tGrXr2CViF8chJEd",
+            "id": "MasterId00000001",
             "name": "Master",
             "type": "mst",
-            "serialNumber": "JZJQ57LS2UHKP",
+            "serialNumber": "ANONYMIZED1",
             "reportPeriod": 300,
             "state": "on",
             "module_number": 0,
             "unit_electric_capacity": 0,
-            "time": "2023-02-21 00:00:00Z",
             "deviceTypeId": "asoka_red_plug",
             "typeOverride": "MST-G3",
             "preProcessingEpsilon": 0,
-            "deviceTypeName": "Appareil rouge",
+            "deviceTypeName": "Master",
             "powerColor": "#39b54a",
             "power": 0,
             "programs": {},
-            "room": {
-                "id": "ab150cDfefghij",
-                "name": "Habitation",
-                "color": "#a1cbe1"
-            }
+            "room": {"id": "RoomId000", "name": "Habitation", "color": "#a1cbe1"}
         },
         {
-            "id": "qVGSJ45vkeqvrHy6g",
+            "id": "VirtualId0000001",
             "name": "Virtual 1",
             "type": "vrt",
             "state": "on",
@@ -38,25 +33,15 @@
             "powerColor": "#39b54a",
             "power": 0,
             "programs": {},
-            "room": {
-                "id": "ab150cDfefghij",
-                "name": "Habitation",
-                "color": "#a1cbe1"
-            }
+            "room": {"id": "RoomId000", "name": "Habitation", "color": "#a1cbe1"}
         },
         {
-            "id": "ZEdtSVQKto8T53RWa_msb",
+            "id": "BatteryId0000001_msb",
             "name": "Battery 1",
             "type": "bat",
-            "batteryCapacity": 0,
-            "batteryNumberOfBoxes": 1,
-            "msbType": "MYLIGHT",
-            "msb_SN_filled": true,
-            "msb_AC_filled": false,
-            "msb_provider_registration_ok": false,
-            "msb_enedis_ok": false,
-            "msb_ok": false,
-            "state": "offline",
+            "batteryCapacity": 600,
+            "batteryNumberOfBoxes": 6,
+            "state": "on",
             "module_number": 0,
             "unit_electric_capacity": 0,
             "deviceTypeId": "my_smart_battery",
@@ -66,41 +51,39 @@
             "powerColor": "#39b54a",
             "power": 0,
             "programs": {},
-            "batteryAdjustment": [],
-            "room": {
-                "id": "ab150cDfefghij",
-                "name": "Habitation",
-                "color": "#a1cbe1"
-            }
+            "room": {"id": "RoomId000", "name": "Habitation", "color": "#a1cbe1"}
         },
         {
-            "id": "Sw1RelayId00000",
+            "id": "RelayWaterHeater1",
             "name": "Relais",
             "type": "sw",
             "state": "on",
             "module_number": 0,
             "unit_electric_capacity": 0,
-            "masterMac": "JZJQ57LS2UHKP",
+            "masterMac": "ANONYMIZED1",
             "masterType": "mst",
-            "deviceTypeId": "other_device_type",
+            "deviceTypeId": "water_heater",
             "typeOverride": "MST-G3-Relay",
             "preProcessingEpsilon": 0,
-            "deviceTypeName": "Autre",
+            "deviceTypeName": "Chauffe eau",
             "powerColor": "#39b54a",
             "power": 0,
-            "programs": {},
-            "room": {
-                "id": "ab150cDfefghij",
-                "name": "Habitation",
-                "color": "#a1cbe1"
-            }
+            "programs": {
+                "scheduleEnabled": false,
+                "greenPlayeEnabled": false,
+                "autoOffEnabled": false,
+                "standByEnabled": false
+            },
+            "room": {"id": "RoomId000", "name": "Habitation", "color": "#a1cbe1"}
         },
         {
-            "id": "Gmd1CompositeId",
+            "id": "GmdComposite0001",
             "name": "Compteur",
             "type": "gmd",
             "state": "on",
+            "internet_connection": "broadband",
             "module_number": 0,
+            "provider": "unknown",
             "unit_electric_capacity": 0,
             "deviceTypeId": null,
             "typeOverride": null,
@@ -110,20 +93,37 @@
             "power": 0,
             "programs": {},
             "children": [
-                {"id": "Gmd1Phase1", "phase": 1},
-                {"id": "Gmd1Phase2", "phase": 2},
-                {"id": "Gmd1Phase3", "phase": 3}
+                {"id": "GmdCompPhase1", "phase": 1},
+                {"id": "GmdCompPhase2", "phase": 2},
+                {"id": "GmdCompPhase3", "phase": 3}
             ],
             "phasesConfiguration": {
                 "phase1": {"multipilcationCoefficient": 1, "phaseVoltagePath": null},
                 "phase2": {"multipilcationCoefficient": 1, "phaseVoltagePath": null},
                 "phase3": {"multipilcationCoefficient": 1, "phaseVoltagePath": null}
             },
-            "room": {
-                "id": "ab150cDfefghij",
-                "name": "Habitation",
-                "color": "#a1cbe1"
-            }
+            "room": {"id": "RoomId000", "name": "Habitation", "color": "#a1cbe1"}
+        },
+        {
+            "id": "GmdWaterHeater001",
+            "name": "Compteur 1",
+            "type": "gmd",
+            "state": "on",
+            "internet_connection": "broadband",
+            "module_number": 0,
+            "provider": "unknown",
+            "unit_electric_capacity": 0,
+            "deviceTypeId": "water_heater",
+            "typeOverride": "MC1D01RM",
+            "preProcessingEpsilon": 0,
+            "deviceTypeName": "Chauffe eau",
+            "powerColor": "#39b54a",
+            "power": 0,
+            "programs": {},
+            "phasesConfiguration": {
+                "phase1": {"multipilcationCoefficient": 1, "phaseVoltagePath": null}
+            },
+            "room": {"id": "RoomId000", "name": "Habitation", "color": "#a1cbe1"}
         }
     ]
 }
