@@ -86,7 +86,8 @@
       "electric_power_capacity": { "name": "Subscribed power" }
     },
     "switch": {
-      "master_relay": { "name": "Master relay" }
+      "master_relay": { "name": "Master relay" },
+      "water_heater_relay": { "name": "Water heater" }
     }
   }
 }

@@ -38,6 +38,9 @@
     "switch": {
       "master_relay": {
         "default": "mdi:light-switch"
+      },
+      "water_heater_relay": {
+        "default": "mdi:water-boiler"
       }
     }
   }

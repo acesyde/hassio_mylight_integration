@@ -86,7 +86,8 @@
       "electric_power_capacity": { "name": "Vertraglich zugesicherte Leistung" }
     },
     "switch": {
-      "master_relay": { "name": "Hauptrelais" }
+      "master_relay": { "name": "Hauptrelais" },
+      "water_heater_relay": { "name": "Warmwasserbereiter" }
     }
   }
 }

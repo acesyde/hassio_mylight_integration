@@ -28,6 +28,7 @@ def none_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_relay_state=None,
         water_heater_energy=None,
     )
 
@@ -46,6 +47,7 @@ def produced_energy_only_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_relay_state=None,
         water_heater_energy=None,
     )
 
@@ -64,6 +66,7 @@ def produced_and_green_energy_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_relay_state=None,
         water_heater_energy=None,
     )
 
@@ -82,6 +85,7 @@ def produced_and_msb_charge_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_relay_state=None,
         water_heater_energy=None,
     )
 
@@ -100,6 +104,7 @@ def all_energy_sources_data():
         autonomy_rate=None,
         battery_state=None,
         master_relay_state=None,
+        water_heater_relay_state=None,
         water_heater_energy=None,
     )
 

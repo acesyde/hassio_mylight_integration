@@ -86,7 +86,8 @@
       "electric_power_capacity": { "name": "Potencia contratada" }
     },
     "switch": {
-      "master_relay": { "name": "Relé principal" }
+      "master_relay": { "name": "Relé principal" },
+      "water_heater_relay": { "name": "Calentador de agua" }
     }
   }
 }

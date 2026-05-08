@@ -86,7 +86,8 @@
       "electric_power_capacity": { "name": "Puissance souscrite" }
     },
     "switch": {
-      "master_relay": { "name": "Relais principal" }
+      "master_relay": { "name": "Relais principal" },
+      "water_heater_relay": { "name": "Chauffe-eau" }
     }
   }
 }

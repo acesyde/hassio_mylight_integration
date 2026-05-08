@@ -50,6 +50,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     green_energy: Measure | None
     battery_state: Measure | None
     master_relay_state: str | None
+    water_heater_relay_state: str | None
     water_heater_energy: Measure | None
 
 
@@ -109,6 +110,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             device_id = self.config_entry.data[CONF_VIRTUAL_DEVICE_ID]
             virtual_battery_id = self.config_entry.data[CONF_VIRTUAL_BATTERY_ID]
             master_relay_id = self.master_relay_id()
+            water_heater_relay_id = self.water_heater_relay_id()
 
             await self.authenticate_user(email, password)
             if self.__auth_token is None:
@@ -125,14 +127,21 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 self.client.async_get_measures_total(auth_token, grid_type, device_id),
                 self.client.async_get_battery_state(auth_token, virtual_battery_id),
             ]
+            master_relay_idx: int | None = None
+            water_heater_relay_idx: int | None = None
             if master_relay_id is not None:
+                master_relay_idx = len(coroutines)
                 coroutines.append(self.client.async_get_relay_state(auth_token, master_relay_id))
+            if water_heater_relay_id is not None:
+                water_heater_relay_idx = len(coroutines)
+                coroutines.append(self.client.async_get_relay_state(auth_token, water_heater_relay_id))
 
             results = await asyncio.gather(*coroutines)
             energy_result = results[0]
             total_result = results[1]
             battery_state = results[2]
-            master_relay_state = results[3] if master_relay_id is not None else None
+            master_relay_state = results[master_relay_idx] if master_relay_idx is not None else None
+            water_heater_relay_state = results[water_heater_relay_idx] if water_heater_relay_idx is not None else None
 
             data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(energy_result, "produced_energy"),
@@ -145,6 +154,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 green_energy=self.find_measure_by_type(energy_result, "green_energy"),
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
+                water_heater_relay_state=water_heater_relay_state,
                 water_heater_energy=self.find_measure_by_type(energy_result, "water_heater_energy"),
             )
 
@@ -214,6 +224,24 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             raise UpdateFailed("No master relay configured")
         await self.client.async_turn_off(self.__auth_token, relay_id)
 
+    async def turn_on_water_heater_relay(self):
+        """Turn on water heater relay."""
+        if self.__auth_token is None:
+            raise UpdateFailed("Authentication token is not set")
+        relay_id = self.water_heater_relay_id()
+        if relay_id is None:
+            raise UpdateFailed("No water heater relay configured")
+        await self.client.async_turn_on(self.__auth_token, relay_id)
+
+    async def turn_off_water_heater_relay(self):
+        """Turn off water heater relay."""
+        if self.__auth_token is None:
+            raise UpdateFailed("Authentication token is not set")
+        relay_id = self.water_heater_relay_id()
+        if relay_id is None:
+            raise UpdateFailed("No water heater relay configured")
+        await self.client.async_turn_off(self.__auth_token, relay_id)
+
     @property
     def auth_token(self) -> str | None:
         """Return the current auth token."""
@@ -223,6 +251,12 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         """Return true if master relay is on."""
         if self._data is not None and self._data.master_relay_state is not None:
             return self._data.master_relay_state == "on"
+        return False
+
+    def water_heater_relay_is_on(self) -> bool:
+        """Return true if water heater relay is on."""
+        if self._data is not None and self._data.water_heater_relay_state is not None:
+            return self._data.water_heater_relay_state == "on"
         return False
 
     @staticmethod

@@ -30,6 +30,15 @@ master_relay_switch = MyLightSystemsSwitchEntityDescription(
 )
 
 
+water_heater_relay_switch = MyLightSystemsSwitchEntityDescription(
+    key="water_heater_relay",
+    translation_key="water_heater_relay",
+    is_on_fn=lambda coordinator: coordinator.water_heater_relay_is_on(),
+    turn_on_fn=lambda coordinator: coordinator.turn_on_water_heater_relay,
+    turn_off_fn=lambda coordinator: coordinator.turn_off_water_heater_relay,
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: MyLightConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
@@ -40,6 +49,9 @@ async def async_setup_entry(
 
     if coordinator.master_relay_id() is not None:
         switches.append(master_relay_switch)
+
+    if coordinator.water_heater_relay_id() is not None:
+        switches.append(water_heater_relay_switch)
 
     async_add_entities(
         [MyLightSystemsSwitch(entry.entry_id, coordinator, description) for description in switches],
