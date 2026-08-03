@@ -123,7 +123,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 green_energy=self.find_measure_by_type(energy_result, "green_energy"),
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
-                water_heater_energy=self.find_measure_by_type(energy_result, "water_heater_energy"),
+                water_heater_energy=self.find_measure_by_type(total_result, "water_heater_energy"),
             )
 
             self._data = data
