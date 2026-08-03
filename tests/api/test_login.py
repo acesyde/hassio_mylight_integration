@@ -74,7 +74,7 @@ async def test_login__should_raise_invalid_credentials_exception_when_empty_emai
     # Given
     email = ""
     password = "test"  # noqa: S105
-    url = DEFAULT_BASE_URL + AUTH_URL + f"?password={password}"
+    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
 
     # When / Then
     with aioresponses() as session_mock:
@@ -98,7 +98,7 @@ async def test_login__should_raise_invalid_credentials_exception_when_empty_pass
     # Given
     email = "test@test.com"
     password = ""
-    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test%2540test.com"
+    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
 
     # When / Then
     with aioresponses() as session_mock:
@@ -122,7 +122,7 @@ async def test_login__should_raise_invalid_credentials_exception_when_wrong_cred
     # Given
     email = "test@test.com"
     password = "test"  # noqa: S105
-    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test%2540test.com&password=test"
+    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
 
     # When / Then
     with aioresponses() as session_mock:
@@ -144,7 +144,7 @@ async def test_login__should_raise_mylight_error_when_unknown_error_code(api_cli
     # Given
     email = "test@test.com"
     password = "test"  # noqa: S105
-    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test%2540test.com&password=test"
+    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
 
     # When / Then
     with aioresponses() as session_mock:
@@ -167,7 +167,7 @@ async def test_login__should_return_auth_token_when_valid_credentials(api_client
     # Given
     email = "test@test.com"
     password = "test"  # noqa: S105
-    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test%2540test.com&password=test"
+    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
 
     # When
     with aioresponses() as session_mock:
