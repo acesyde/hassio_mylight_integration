@@ -1,6 +1,6 @@
 # MyLight Systems
 
-🌐 [English](README.md) | [Français](README.fr.md) | **Português** | [Deutsch](README.de.md) | [Español](README.es.md)
+🌐 [English](README.en.md) | [Français](README.md) | **Português** | [Deutsch](README.de.md) | [Español](README.es.md)
 
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
@@ -13,7 +13,7 @@ _Integração para conectar ao [MyLight Systems][mylight_systems]._
 
 > [!Warning]
 >
-> Esta integração suporta atualmente apenas a área de cliente **MyHome**. A área de cliente **MyLight150** ainda não é suportada.
+> Esta integração suporta atualmente apenas a área de cliente **MyHome**. Para suporte ao **MyLight150**, uma extensão dedicada está disponível em [Racailloux/mylight150_ha](https://github.com/Racailloux/mylight150_ha).
 
 **Esta integração irá configurar as seguintes plataformas.**
 

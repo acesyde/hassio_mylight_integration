@@ -1,6 +1,6 @@
 # MyLight Systems
 
-🌐 **English** | [Français](README.fr.md) | [Português](README.pt.md) | [Deutsch](README.de.md) | [Español](README.es.md)
+🌐 [English](README.en.md) | **Français** | [Português](README.pt.md) | [Deutsch](README.de.md) | [Español](README.es.md)
 
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
@@ -9,71 +9,71 @@
 [![hacs][hacsbadge]][hacs]
 ![Project Maintenance][maintenance-shield]
 
-_Integration to integrate with [MyLight Systems][mylight_systems]._
+_Intégration pour se connecter à [MyLight Systems][mylight_systems]._
 
 > [!Warning]
 >
-> This integration currently only supports the **MyHome** customer area. The **MyLight150** customer area is not yet supported.
+> Cette intégration ne supporte actuellement que l'espace client **MyHome**. Pour le support **MyLight150**, une extension dédiée est disponible sur [Racailloux/mylight150_ha](https://github.com/Racailloux/mylight150_ha).
 
-**This integration will set up the following platforms.**
+**Cette intégration configure les plateformes suivantes.**
 
-## Provided Entities
+## Entités fournies
 
-### Sensors
+### Capteurs
 
-| Entity ID                                       | Description                                         | Unit | State Class        |
-| ----------------------------------------------- | --------------------------------------------------- | ---- | ------------------ |
-| `sensor.total_solar_production`                 | Cumulative energy produced by solar panels          | Wh   | `total_increasing` |
-| `sensor.total_grid_consumption`                 | Grid energy drawn (accounting for virtual battery)  | Wh   | `total_increasing` |
-| `sensor.total_grid_without_battery_consumption` | Grid energy drawn (excluding virtual battery)       | Wh   | `total_increasing` |
-| `sensor.total_autonomy_rate`                    | % of consumption covered by solar + battery         | %    | `measurement`      |
-| `sensor.total_self_conso`                       | % of solar production consumed locally              | %    | `measurement`      |
-| `sensor.total_msb_charge`                       | Cumulative energy charged into the Smart Battery    | Wh   | `total_increasing` |
-| `sensor.total_msb_discharge`                    | Cumulative energy discharged from the Smart Battery | Wh   | `total_increasing` |
-| `sensor.total_green_energy`                     | Solar energy consumed directly by your home         | Wh   | `total_increasing` |
-| `sensor.battery_state`                          | Current energy stored in the Smart Battery          | kWh  | `measurement`      |
-| `sensor.grid_returned_energy`                   | Solar energy exported back to the grid              | Wh   | `total_increasing` |
+| ID d'entité                                     | Description                                              | Unité | Classe d'état      |
+| ----------------------------------------------- | -------------------------------------------------------- | ----- | ------------------ |
+| `sensor.total_solar_production`                 | Énergie cumulée produite par les panneaux solaires       | Wh    | `total_increasing` |
+| `sensor.total_grid_consumption`                 | Énergie soutirée du réseau (avec batterie virtuelle)     | Wh    | `total_increasing` |
+| `sensor.total_grid_without_battery_consumption` | Énergie soutirée du réseau (sans batterie virtuelle)     | Wh    | `total_increasing` |
+| `sensor.total_autonomy_rate`                    | % de consommation couverte par le solaire + batterie     | %     | `measurement`      |
+| `sensor.total_self_conso`                       | % de la production solaire consommée localement          | %     | `measurement`      |
+| `sensor.total_msb_charge`                       | Énergie cumulée chargée dans la Smart Battery            | Wh    | `total_increasing` |
+| `sensor.total_msb_discharge`                    | Énergie cumulée déchargée de la Smart Battery            | Wh    | `total_increasing` |
+| `sensor.total_green_energy`                     | Énergie solaire consommée directement par votre domicile | Wh    | `total_increasing` |
+| `sensor.battery_state`                          | Énergie actuellement stockée dans la Smart Battery       | kWh   | `measurement`      |
+| `sensor.grid_returned_energy`                   | Énergie solaire réinjectée sur le réseau                 | Wh    | `total_increasing` |
 
-### Switches
+### Interrupteurs
 
-| Entity ID             | Description                                    | Notes                                        |
-| --------------------- | ---------------------------------------------- | -------------------------------------------- |
-| `switch.master_relay` | Controls the master relay on your installation | Only available when a relay device is paired |
+| ID d'entité           | Description                                        | Remarques                                     |
+| --------------------- | -------------------------------------------------- | --------------------------------------------- |
+| `switch.master_relay` | Contrôle le relais principal de votre installation | Disponible uniquement si un relais est couplé |
 
 ## Installation
 
-## Automatic
+## Automatique
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=acesyde&repository=hassio_mylight_integration&category=integration)
+[![Ouvrez votre instance Home Assistant et ouvrez un dépôt dans le Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=acesyde&repository=hassio_mylight_integration&category=integration)
 
-## Manual
+## Manuel
 
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-   3In the `custom_components` directory (folder) create a new folder called `mylight_systems`.
-3. Download _all_ the files from the `custom_components/mylight_systems/` directory (folder) in this repository.
-4. Place the files you downloaded in the new directory (folder) you created.
-5. Restart Home Assistant
-6. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "MyLight Systems"
+1. Ouvrez le répertoire de votre configuration HA (là où se trouve `configuration.yaml`).
+2. Si vous n'avez pas de répertoire `custom_components`, créez-le.
+3. Dans `custom_components`, créez un nouveau dossier appelé `mylight_systems`.
+4. Téléchargez _tous_ les fichiers du répertoire `custom_components/mylight_systems/` de ce dépôt.
+5. Placez les fichiers téléchargés dans le nouveau dossier créé.
+6. Redémarrez Home Assistant.
+7. Dans l'interface HA, allez dans « Configuration » → « Intégrations », cliquez sur « + » et recherchez « MyLight Systems ».
 
-## Configuration is done in the UI
+## La configuration se fait via l'interface
 
 ## Architecture
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full component diagram and data flow.
+Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour le schéma des composants et le flux de données.
 
-## Troubleshooting
+## Dépannage
 
-### "Relay switch is missing"
+### « Le relais principal est absent »
 
-The `switch.master_relay` entity is only created when a relay device (`sw` type) is paired to your installation. If you do not have a relay, this entity will not appear.
+L'entité `switch.master_relay` n'est créée que si un relais (`sw`) est couplé à votre installation. Sans relais, cette entité n'apparaîtra pas.
 
-### "Sensor values are stuck / not updating"
+### « Les valeurs des capteurs sont figées / ne se mettent pas à jour »
 
-The coordinator polls the API every 15 minutes. If values stop updating:
+Le coordinateur interroge l'API toutes les 15 minutes. Si les valeurs ne se mettent plus à jour :
 
-1. Open **Settings → Devices & Services → MyLight Systems** and check for an error banner.
-2. Enable debug logging and check the Home Assistant logs:
+1. Allez dans **Paramètres → Appareils et services → MyLight Systems** et vérifiez s'il y a une bannière d'erreur.
+2. Activez les logs de débogage et consultez les journaux Home Assistant :
 
 ```yaml
 # configuration.yaml
@@ -83,15 +83,15 @@ logger:
     custom_components.mylight_systems: debug
 ```
 
-3. Look for `CommunicationError` or `UpdateFailed` entries — these indicate a network issue or an API change.
+3. Recherchez les entrées `CommunicationError` ou `UpdateFailed` — elles indiquent un problème réseau ou un changement d'API.
 
-### "Authentication failed" after a password change
+### « Échec d'authentification » après un changement de mot de passe
 
-If you change your MyLight password externally, the integration will show an authentication error. Go to **Settings → Devices & Services → MyLight Systems** and use the **Re-authenticate** option to enter your new credentials.
+Si vous avez modifié votre mot de passe MyLight en dehors de l'intégration, une erreur d'authentification apparaîtra. Allez dans **Paramètres → Appareils et services → MyLight Systems** et utilisez l'option **Ré-authentifier** pour saisir vos nouveaux identifiants.
 
-## Contributions are welcome!
+## Les contributions sont les bienvenues !
 
-If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
+Si vous souhaitez contribuer, veuillez lire les [directives de contribution](CONTRIBUTING.md).
 
 ---
 
