@@ -6,7 +6,6 @@ import os
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
@@ -14,6 +13,8 @@ from custom_components.mylight_systems.api.client import (
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import UnauthorizedError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -59,7 +60,7 @@ def battery_not_found_response_fixture():
 
 @pytest.mark.asyncio
 async def test_get_battery_state__should_raise_unauthorized_exception_when_invalid_token(
-    api_client, unauthorized_response_fixture
+    api_client, aresponses, unauthorized_response_fixture
 ):
     """Test with invalid token should raise UnauthorizedException."""
     # Given
@@ -68,19 +69,16 @@ async def test_get_battery_state__should_raise_unauthorized_exception_when_inval
     url = DEFAULT_BASE_URL + STATES_URL + f"?authToken={token}"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=unauthorized_response_fixture,
-        )
+    mock_get(aresponses, url, unauthorized_response_fixture)
 
-        with pytest.raises(UnauthorizedError):
-            await api_client.async_get_battery_state(token, battery_id)
+    with pytest.raises(UnauthorizedError):
+        await api_client.async_get_battery_state(token, battery_id)
 
 
 @pytest.mark.asyncio
-async def test_get_battery_state__should_return_measure_when_battery_found(api_client, valid_battery_response_fixture):
+async def test_get_battery_state__should_return_measure_when_battery_found(
+    api_client, aresponses, valid_battery_response_fixture
+):
     """Test with valid token should return battery SOC measure."""
     # Given
     token = "abcdef"  # noqa: S105
@@ -88,14 +86,9 @@ async def test_get_battery_state__should_return_measure_when_battery_found(api_c
     url = DEFAULT_BASE_URL + STATES_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=valid_battery_response_fixture,
-        )
+    mock_get(aresponses, url, valid_battery_response_fixture)
 
-        response = await api_client.async_get_battery_state(token, battery_id)
+    response = await api_client.async_get_battery_state(token, battery_id)
 
     # Then
     assert response is not None
@@ -106,7 +99,7 @@ async def test_get_battery_state__should_return_measure_when_battery_found(api_c
 
 @pytest.mark.asyncio
 async def test_get_battery_state__should_return_none_when_battery_not_found(
-    api_client, battery_not_found_response_fixture
+    api_client, aresponses, battery_not_found_response_fixture
 ):
     """Test should return None when battery device is not in response."""
     # Given
@@ -115,14 +108,9 @@ async def test_get_battery_state__should_return_none_when_battery_not_found(
     url = DEFAULT_BASE_URL + STATES_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=battery_not_found_response_fixture,
-        )
+    mock_get(aresponses, url, battery_not_found_response_fixture)
 
-        response = await api_client.async_get_battery_state(token, battery_id)
+    response = await api_client.async_get_battery_state(token, battery_id)
 
     # Then
     assert response is None

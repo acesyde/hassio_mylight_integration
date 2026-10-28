@@ -6,7 +6,6 @@ import os
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
@@ -14,6 +13,8 @@ from custom_components.mylight_systems.api.client import (
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import MyLightSystemsError, UnauthorizedError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -60,7 +61,7 @@ def _build_url(token, measure_type, device_id, from_date, to_date, group_type="d
 
 @pytest.mark.asyncio
 async def test_async_get_measures_grouping__should_raise_unauthorized_exception_when_invalid_token(
-    api_client, unauthorized_response_fixture
+    api_client, aresponses, unauthorized_response_fixture
 ):
     """Test async_get_measures_grouping raises UnauthorizedException with invalid token."""
     # Given
@@ -72,15 +73,10 @@ async def test_async_get_measures_grouping__should_raise_unauthorized_exception_
     url = _build_url(token, measure_type, device_id, from_date, to_date)
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=unauthorized_response_fixture,
-        )
+    mock_get(aresponses, url, unauthorized_response_fixture)
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_get_measures_grouping(token, measure_type, device_id, from_date, to_date)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_get_measures_grouping(token, measure_type, device_id, from_date, to_date)
 
     # Then
     assert UnauthorizedError == exc_info.type
@@ -88,7 +84,7 @@ async def test_async_get_measures_grouping__should_raise_unauthorized_exception_
 
 @pytest.mark.asyncio
 async def test_async_get_measures_grouping__should_return_measures_data_when_valid_request(
-    api_client, valid_response_fixture
+    api_client, aresponses, valid_response_fixture
 ):
     """Test async_get_measures_grouping returns correct measures data with valid request."""
     # Given
@@ -100,14 +96,9 @@ async def test_async_get_measures_grouping__should_return_measures_data_when_val
     url = _build_url(token, measure_type, device_id, from_date, to_date)
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=valid_response_fixture,
-        )
+    mock_get(aresponses, url, valid_response_fixture)
 
-        response = await api_client.async_get_measures_grouping(token, measure_type, device_id, from_date, to_date)
+    response = await api_client.async_get_measures_grouping(token, measure_type, device_id, from_date, to_date)
 
     # Then
     expected_items = [
@@ -127,7 +118,9 @@ async def test_async_get_measures_grouping__should_return_measures_data_when_val
 
 
 @pytest.mark.asyncio
-async def test_async_get_measures_grouping__should_raise_mylight_error_when_measures_key_missing(api_client):
+async def test_async_get_measures_grouping__should_raise_mylight_error_when_measures_key_missing(
+    api_client, aresponses
+):
     """Test with response missing 'measures' key should raise MyLightSystemsError."""
     # Given
     token = "abcdef"  # noqa: S105
@@ -138,15 +131,10 @@ async def test_async_get_measures_grouping__should_raise_mylight_error_when_meas
     url = _build_url(token, measure_type, device_id, from_date, to_date)
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload={"status": "ok"},
-        )
+    mock_get(aresponses, url, {"status": "ok"})
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_get_measures_grouping(token, measure_type, device_id, from_date, to_date)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_get_measures_grouping(token, measure_type, device_id, from_date, to_date)
 
     assert MyLightSystemsError == exc_info.type
 
@@ -154,6 +142,7 @@ async def test_async_get_measures_grouping__should_raise_mylight_error_when_meas
 @pytest.mark.asyncio
 async def test_async_get_measures_grouping__should_return_empty_list_when_no_measures(
     api_client,
+    aresponses,
 ):
     """Test async_get_measures_grouping returns empty list when measures array is empty."""
     # Given
@@ -165,14 +154,9 @@ async def test_async_get_measures_grouping__should_return_empty_list_when_no_mea
     url = _build_url(token, measure_type, device_id, from_date, to_date)
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload={"status": "ok", "measures": []},
-        )
+    mock_get(aresponses, url, {"status": "ok", "measures": []})
 
-        response = await api_client.async_get_measures_grouping(token, measure_type, device_id, from_date, to_date)
+    response = await api_client.async_get_measures_grouping(token, measure_type, device_id, from_date, to_date)
 
     # Then
     assert 0 == len(response)

@@ -1,19 +1,22 @@
 """Unit tests for the raw request API method."""
 
+import asyncio
 import json
 import os
 
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
+from custom_components.mylight_systems.api import client
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
     PROFILE_URL,
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import CommunicationError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -40,31 +43,36 @@ def valid_profile_fixture():
 
 
 @pytest.mark.asyncio
-async def test_async_raw_request__should_return_unmodified_json(api_client, valid_profile_fixture):
+async def test_async_raw_request__should_return_unmodified_json(api_client, aresponses, valid_profile_fixture):
     """Test that async_raw_request returns the raw JSON dict unchanged."""
     # Given
     token = "abcdef"  # noqa: S105
     url = DEFAULT_BASE_URL + PROFILE_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(url, status=200, payload=valid_profile_fixture)
-        result = await api_client.async_raw_request("get", PROFILE_URL, params={"authToken": token})
+    mock_get(aresponses, url, valid_profile_fixture)
+    result = await api_client.async_raw_request("get", PROFILE_URL, params={"authToken": token})
 
     # Then
     assert result == valid_profile_fixture
 
 
+# shortcut: aresponses 3.0.0 calls asyncio.iscoroutinefunction for callable handlers, drop once it is fixed upstream
+@pytest.mark.filterwarnings("ignore:.*asyncio.iscoroutinefunction.*:DeprecationWarning")
 @pytest.mark.asyncio
-async def test_async_raw_request__should_raise_communication_error_on_timeout(api_client):
+async def test_async_raw_request__should_raise_communication_error_on_timeout(api_client, aresponses, monkeypatch):
     """Test that async_raw_request raises CommunicationError on network failure."""
     # Given
     token = "abcdef"  # noqa: S105
-    url = DEFAULT_BASE_URL + PROFILE_URL + f"?authToken={token}"
+    monkeypatch.setattr(client, "DEFAULT_TIMEOUT_IN_SECONDS", 0.05)
+
+    async def slow(_request):
+        await asyncio.sleep(1)
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(url, exception=TimeoutError())
+    aresponses.add(
+        "myhome.mylight-systems.com", f"{PROFILE_URL}?authToken={token}", "get", slow, match_querystring=True
+    )
 
-        with pytest.raises(CommunicationError):
-            await api_client.async_raw_request("get", PROFILE_URL, params={"authToken": token})
+    with pytest.raises(CommunicationError):
+        await api_client.async_raw_request("get", PROFILE_URL, params={"authToken": token})

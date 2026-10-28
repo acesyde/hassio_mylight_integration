@@ -6,7 +6,6 @@ import os
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
@@ -14,6 +13,8 @@ from custom_components.mylight_systems.api.client import (
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import UnauthorizedError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -50,7 +51,7 @@ def valid_one_phase_response_fixture():
 
 @pytest.mark.asyncio
 async def test_get_profile__should_raise_unauthorized_exception_when_invalid_token(
-    api_client, unauthorized_response_fixture
+    api_client, aresponses, unauthorized_response_fixture
 ):
     """Test with invalid token should raise UnauthorizedException."""
     # Given
@@ -58,35 +59,27 @@ async def test_get_profile__should_raise_unauthorized_exception_when_invalid_tok
     url = DEFAULT_BASE_URL + PROFILE_URL + f"?authToken={token}"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=unauthorized_response_fixture,
-        )
+    mock_get(aresponses, url, unauthorized_response_fixture)
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_get_profile(token)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_get_profile(token)
 
     assert UnauthorizedError == exc_info.type
 
 
 @pytest.mark.asyncio
-async def test_get_profile__should_return_profile_data_when_valid_token(api_client, valid_one_phase_response_fixture):
+async def test_get_profile__should_return_profile_data_when_valid_token(
+    api_client, aresponses, valid_one_phase_response_fixture
+):
     """Test with valid token should return profile data."""
     # Given
     token = "abcdef"  # noqa: S105
     url = DEFAULT_BASE_URL + PROFILE_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=valid_one_phase_response_fixture,
-        )
+    mock_get(aresponses, url, valid_one_phase_response_fixture)
 
-        response = await api_client.async_get_profile(token)
+    response = await api_client.async_get_profile(token)
 
     # Then
     assert "40oXYqq6nM7R9zGK" == response.subscription_id
@@ -96,7 +89,7 @@ async def test_get_profile__should_return_profile_data_when_valid_token(api_clie
 
 @pytest.mark.asyncio
 async def test_get_profile__should_return_none_capacity_when_field_missing(
-    api_client, valid_one_phase_response_fixture
+    api_client, aresponses, valid_one_phase_response_fixture
 ):
     """Test that electric_power_capacity is None when the field is absent from the API response."""
     # Given
@@ -105,9 +98,8 @@ async def test_get_profile__should_return_none_capacity_when_field_missing(
     url = DEFAULT_BASE_URL + PROFILE_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(url, status=200, payload=payload)
-        response = await api_client.async_get_profile(token)
+    mock_get(aresponses, url, payload)
+    response = await api_client.async_get_profile(token)
 
     # Then
     assert response.electric_power_capacity is None
@@ -115,7 +107,7 @@ async def test_get_profile__should_return_none_capacity_when_field_missing(
 
 @pytest.mark.asyncio
 async def test_get_profile__should_return_none_capacity_when_field_is_null(
-    api_client, valid_one_phase_response_fixture
+    api_client, aresponses, valid_one_phase_response_fixture
 ):
     """Test that electric_power_capacity is None when the field is null in the API response."""
     # Given
@@ -124,9 +116,8 @@ async def test_get_profile__should_return_none_capacity_when_field_is_null(
     url = DEFAULT_BASE_URL + PROFILE_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(url, status=200, payload=payload)
-        response = await api_client.async_get_profile(token)
+    mock_get(aresponses, url, payload)
+    response = await api_client.async_get_profile(token)
 
     # Then
     assert response.electric_power_capacity is None
