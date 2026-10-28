@@ -6,7 +6,6 @@ import os
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     AUTH_URL,
@@ -14,6 +13,8 @@ from custom_components.mylight_systems.api.client import (
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import InvalidCredentialsError, MyLightSystemsError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -68,116 +69,93 @@ def valid_login_response_fixture():
 
 @pytest.mark.asyncio
 async def test_login__should_raise_invalid_credentials_exception_when_empty_email(
-    api_client, undefined_email_response_fixture
+    api_client, aresponses, undefined_email_response_fixture
 ):
     """Test with empty email should raise InvalidCredentialsException."""
     # Given
     email = ""
     password = "test"  # noqa: S105
-    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
+    url = DEFAULT_BASE_URL + AUTH_URL + f"?password={password}&email="
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=undefined_email_response_fixture,
-        )
+    mock_get(aresponses, url, undefined_email_response_fixture)
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_login(email=email, password=password)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_login(email=email, password=password)
 
     assert InvalidCredentialsError == exc_info.type
 
 
 @pytest.mark.asyncio
 async def test_login__should_raise_invalid_credentials_exception_when_empty_password(
-    api_client, undefined_password_response_fixture
+    api_client, aresponses, undefined_password_response_fixture
 ):
     """Test with empty password should raise InvalidCredentialsException."""
     # Given
     email = "test@test.com"
     password = ""
-    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
+    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test@test.com&password="
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=undefined_password_response_fixture,
-        )
+    mock_get(aresponses, url, undefined_password_response_fixture)
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_login(email=email, password=password)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_login(email=email, password=password)
 
     assert InvalidCredentialsError == exc_info.type
 
 
 @pytest.mark.asyncio
 async def test_login__should_raise_invalid_credentials_exception_when_wrong_credentials(
-    api_client, invalid_credentials_response_fixture
+    api_client, aresponses, invalid_credentials_response_fixture
 ):
     """Test with wrong credentials should raise InvalidCredentialsException."""
     # Given
     email = "test@test.com"
     password = "test"  # noqa: S105
-    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
+    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test@test.com&password=test"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=invalid_credentials_response_fixture,
-        )
+    mock_get(aresponses, url, invalid_credentials_response_fixture)
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_login(email=email, password=password)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_login(email=email, password=password)
 
     assert InvalidCredentialsError == exc_info.type
 
 
 @pytest.mark.asyncio
-async def test_login__should_raise_mylight_error_when_unknown_error_code(api_client):
+async def test_login__should_raise_mylight_error_when_unknown_error_code(api_client, aresponses):
     """Test with unknown API error code should raise MyLightSystemsError."""
     # Given
     email = "test@test.com"
     password = "test"  # noqa: S105
-    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
+    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test@test.com&password=test"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload={"status": "error", "error": "some.unknown.error"},
-        )
+    mock_get(aresponses, url, {"status": "error", "error": "some.unknown.error"})
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_login(email=email, password=password)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_login(email=email, password=password)
 
     assert MyLightSystemsError == exc_info.type
     assert "some.unknown.error" == exc_info.value.msg  # ty: ignore[unresolved-attribute]
 
 
 @pytest.mark.asyncio
-async def test_login__should_return_auth_token_when_valid_credentials(api_client, valid_login_response_fixture):
+async def test_login__should_return_auth_token_when_valid_credentials(
+    api_client, aresponses, valid_login_response_fixture
+):
     """Test with valid credentials should return auth token."""
     # Given
     email = "test@test.com"
     password = "test"  # noqa: S105
-    url = DEFAULT_BASE_URL + AUTH_URL + f"?email={email}&password={password}"
+    url = DEFAULT_BASE_URL + AUTH_URL + "?email=test@test.com&password=test"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=valid_login_response_fixture,
-        )
+    mock_get(aresponses, url, valid_login_response_fixture)
 
-        response = await api_client.async_login(email=email, password=password)
+    response = await api_client.async_login(email=email, password=password)
 
     # Then
     assert "abcdefgh" == response.auth_token

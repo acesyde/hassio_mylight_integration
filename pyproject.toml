@@ -17,7 +17,6 @@ repository = "https://github.com/acesyde/hassio_mylight_integration"
 
 [dependency-groups]
 dev = [
-  "aioresponses>=0.7.9",
   "aresponses >= 3.0.0",
   "pytest-cov >= 7.1.0",
   "pytest-socket >= 0.6",
@@ -33,6 +32,7 @@ omit = ["**/tests/**", "**/__init__.py", "**/__main__.py"]
 [tool.pytest.ini_options]
 addopts = "-rxf -x -v -l --cov=./ --cov-report=xml"
 pythonpath = ["custom_components/mylight_systems"]
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 
 [tool.ruff]

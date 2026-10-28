@@ -6,7 +6,6 @@ import os
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
@@ -14,6 +13,8 @@ from custom_components.mylight_systems.api.client import (
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import MyLightSystemsError, UnauthorizedError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -50,7 +51,7 @@ def valid_response_fixture():
 
 @pytest.mark.asyncio
 async def test_async_get_measures_total__should_raise_unauthorized_exception_when_invalid_token(
-    api_client, unauthorized_response_fixture
+    api_client, aresponses, unauthorized_response_fixture
 ):
     """Test async_get_measures_total raises UnauthorizedException with invalid token."""
     # Given
@@ -60,22 +61,17 @@ async def test_async_get_measures_total__should_raise_unauthorized_exception_whe
     url = DEFAULT_BASE_URL + MEASURES_TOTAL_URL + f"?authToken={token}&measureType={measure_type}&deviceId={device_id}"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=unauthorized_response_fixture,
-        )
+    mock_get(aresponses, url, unauthorized_response_fixture)
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_get_measures_total(token, measure_type, device_id)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_get_measures_total(token, measure_type, device_id)
 
     # Then
     assert UnauthorizedError == exc_info.type
 
 
 @pytest.mark.asyncio
-async def test_async_get_measures_total__should_raise_mylight_error_when_measure_key_missing(api_client):
+async def test_async_get_measures_total__should_raise_mylight_error_when_measure_key_missing(api_client, aresponses):
     """Test with response missing 'measure' key should raise MyLightSystemsError."""
     # Given
     token = "abcdef"  # noqa: S105
@@ -84,22 +80,17 @@ async def test_async_get_measures_total__should_raise_mylight_error_when_measure
     url = DEFAULT_BASE_URL + MEASURES_TOTAL_URL + f"?authToken={token}&measureType={measure_type}&deviceId={device_id}"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload={"status": "ok"},
-        )
+    mock_get(aresponses, url, {"status": "ok"})
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_get_measures_total(token, measure_type, device_id)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_get_measures_total(token, measure_type, device_id)
 
     assert MyLightSystemsError == exc_info.type
 
 
 @pytest.mark.asyncio
 async def test_async_get_measures_total__should_return_measures_data_when_valid_request(
-    api_client, valid_response_fixture
+    api_client, aresponses, valid_response_fixture
 ):
     """Test async_get_measures_total returns correct measures data with valid request."""
     # Given
@@ -109,14 +100,9 @@ async def test_async_get_measures_total__should_return_measures_data_when_valid_
     url = DEFAULT_BASE_URL + MEASURES_TOTAL_URL + f"?authToken={token}&measureType={measure_type}&deviceId={device_id}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=valid_response_fixture,
-        )
+    mock_get(aresponses, url, valid_response_fixture)
 
-        response = await api_client.async_get_measures_total(token, measure_type, device_id)
+    response = await api_client.async_get_measures_total(token, measure_type, device_id)
 
     # Then
     expected_items = [

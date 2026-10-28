@@ -1,9 +1,9 @@
 [tools]
 actionlint = "1.7.12"
-"pipx:graphifyy" = "0.9.32"
-pre-commit = "4.6"
+"pipx:graphifyy" = "0.9.96"
+pre-commit = "4.7"
 python = "3.14.6"
-uv = "0.12.1"
+uv = "0.13.6"
 
 [settings]
 experimental = true

@@ -6,7 +6,6 @@ import os
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
@@ -14,6 +13,8 @@ from custom_components.mylight_systems.api.client import (
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import MyLightSystemsError, UnauthorizedError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -50,7 +51,7 @@ def valid_response_fixture():
 
 @pytest.mark.asyncio
 async def test_get_rooms__should_raise_unauthorized_exception_when_invalid_token(
-    api_client, unauthorized_response_fixture
+    api_client, aresponses, unauthorized_response_fixture
 ):
     """Test with invalid token should raise UnauthorizedException."""
     # Given
@@ -58,56 +59,41 @@ async def test_get_rooms__should_raise_unauthorized_exception_when_invalid_token
     url = DEFAULT_BASE_URL + ROOMS_URL + f"?authToken={token}"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=unauthorized_response_fixture,
-        )
+    mock_get(aresponses, url, unauthorized_response_fixture)
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_get_rooms(token)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_get_rooms(token)
 
     assert UnauthorizedError == exc_info.type
 
 
 @pytest.mark.asyncio
-async def test_get_rooms__should_raise_mylight_error_when_rooms_key_missing(api_client):
+async def test_get_rooms__should_raise_mylight_error_when_rooms_key_missing(api_client, aresponses):
     """Test with response missing 'rooms' key should raise MyLightSystemsError."""
     # Given
     token = "abcdef"  # noqa: S105
     url = DEFAULT_BASE_URL + ROOMS_URL + f"?authToken={token}"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload={"status": "ok"},
-        )
+    mock_get(aresponses, url, {"status": "ok"})
 
-        with pytest.raises(Exception) as exc_info:
-            await api_client.async_get_rooms(token)
+    with pytest.raises(Exception) as exc_info:
+        await api_client.async_get_rooms(token)
 
     assert MyLightSystemsError == exc_info.type
 
 
 @pytest.mark.asyncio
-async def test_get_rooms__should_return_rooms_when_valid_token(api_client, valid_response_fixture):
+async def test_get_rooms__should_return_rooms_when_valid_token(api_client, aresponses, valid_response_fixture):
     """Test with valid token should return rooms with devices."""
     # Given
     token = "abcdef"  # noqa: S105
     url = DEFAULT_BASE_URL + ROOMS_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=valid_response_fixture,
-        )
+    mock_get(aresponses, url, valid_response_fixture)
 
-        response = await api_client.async_get_rooms(token)
+    response = await api_client.async_get_rooms(token)
 
     # Then
     assert len(response) == 1

@@ -5,7 +5,6 @@ from datetime import date
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
@@ -13,6 +12,8 @@ from custom_components.mylight_systems.api.client import (
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import UnauthorizedError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -39,7 +40,7 @@ def _url(token, measure_type, device_id, from_iso, to_iso):
 
 
 @pytest.mark.asyncio
-async def test_range_single_day_maps_date(api_client):
+async def test_range_single_day_maps_date(api_client, aresponses):
     """Single-day range returns one (date, measures) tuple with correct date."""
     token = "abc"  # noqa: S105
     from_date = date(2025, 1, 1)
@@ -49,9 +50,8 @@ async def test_range_single_day_maps_date(api_client):
         "status": "ok",
         "measures": [{"values": [{"type": "produced_energy", "value": 100.0, "unit": "Ws"}]}],
     }
-    with aioresponses() as m:
-        m.get(url, payload=payload)
-        result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
+    mock_get(aresponses, url, payload)
+    result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
     assert len(result) == 1
     assert result[0][0] == date(2025, 1, 1)
     assert result[0][1][0].type == "produced_energy"
@@ -59,7 +59,7 @@ async def test_range_single_day_maps_date(api_client):
 
 
 @pytest.mark.asyncio
-async def test_range_multiple_days_maps_dates_in_order(api_client):
+async def test_range_multiple_days_maps_dates_in_order(api_client, aresponses):
     """Three-day range returns three tuples with dates in order."""
     token = "abc"  # noqa: S105
     from_date = date(2025, 1, 1)
@@ -73,9 +73,8 @@ async def test_range_multiple_days_maps_dates_in_order(api_client):
             {"values": [{"type": "produced_energy", "value": 30.0, "unit": "Ws"}]},
         ],
     }
-    with aioresponses() as m:
-        m.get(url, payload=payload)
-        result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
+    mock_get(aresponses, url, payload)
+    result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
     assert len(result) == 3
     assert result[0][0] == date(2025, 1, 1)
     assert result[1][0] == date(2025, 1, 2)
@@ -85,7 +84,7 @@ async def test_range_multiple_days_maps_dates_in_order(api_client):
 
 
 @pytest.mark.asyncio
-async def test_range_fewer_api_groups_than_days_pads_with_empty(api_client):
+async def test_range_fewer_api_groups_than_days_pads_with_empty(api_client, aresponses):
     """When API returns fewer groups than days, extra dates get empty measure lists."""
     token = "abc"  # noqa: S105
     from_date = date(2025, 1, 1)
@@ -97,9 +96,8 @@ async def test_range_fewer_api_groups_than_days_pads_with_empty(api_client):
             {"values": [{"type": "produced_energy", "value": 10.0, "unit": "Ws"}]},
         ],
     }
-    with aioresponses() as m:
-        m.get(url, payload=payload)
-        result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
+    mock_get(aresponses, url, payload)
+    result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
     assert len(result) == 3
     assert result[0][1][0].value == 10.0
     assert result[1][1] == []
@@ -107,36 +105,34 @@ async def test_range_fewer_api_groups_than_days_pads_with_empty(api_client):
 
 
 @pytest.mark.asyncio
-async def test_range_empty_measures_response(api_client):
+async def test_range_empty_measures_response(api_client, aresponses):
     """Empty measures list in response produces one entry per day with empty measures."""
     token = "abc"  # noqa: S105
     from_date = date(2025, 1, 1)
     to_date = date(2025, 1, 2)
     url = _url(token, "one_phase", "dev1", "2025-01-01", "2025-01-03")
     payload = {"status": "ok", "measures": []}
-    with aioresponses() as m:
-        m.get(url, payload=payload)
-        result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
+    mock_get(aresponses, url, payload)
+    result = await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
     assert len(result) == 2
     assert result[0][1] == []
     assert result[1][1] == []
 
 
 @pytest.mark.asyncio
-async def test_range_raises_unauthorized_error(api_client):
+async def test_range_raises_unauthorized_error(api_client, aresponses):
     """Unauthorized API response raises UnauthorizedError."""
     token = "abc"  # noqa: S105
     from_date = date(2025, 1, 1)
     to_date = date(2025, 1, 1)
     url = _url(token, "one_phase", "dev1", "2025-01-01", "2025-01-02")
-    with aioresponses() as m:
-        m.get(url, payload={"status": "error", "error": "not.authorized"})
-        with pytest.raises(UnauthorizedError):
-            await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
+    mock_get(aresponses, url, {"status": "error", "error": "not.authorized"})
+    with pytest.raises(UnauthorizedError):
+        await api_client.async_get_measures_grouping_range(token, "one_phase", "dev1", from_date, to_date)
 
 
 @pytest.mark.asyncio
-async def test_range_raises_value_error_when_to_date_before_from_date(api_client):
+async def test_range_raises_value_error_when_to_date_before_from_date(api_client, aresponses):
     """ValueError raised when to_date is before from_date."""
     token = "abc"  # noqa: S105
     from_date = date(2025, 1, 5)

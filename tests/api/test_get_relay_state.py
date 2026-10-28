@@ -6,7 +6,6 @@ import os
 import aiohttp
 import pytest
 import pytest_asyncio
-from aioresponses import aioresponses
 
 from custom_components.mylight_systems.api.client import (
     DEFAULT_BASE_URL,
@@ -14,6 +13,8 @@ from custom_components.mylight_systems.api.client import (
     MyLightApiClient,
 )
 from custom_components.mylight_systems.api.exceptions import UnauthorizedError
+
+from . import mock_get
 
 
 @pytest_asyncio.fixture
@@ -50,7 +51,7 @@ def valid_relay_response_fixture():
 
 @pytest.mark.asyncio
 async def test_get_relay_state__should_raise_unauthorized_exception_when_invalid_token(
-    api_client, unauthorized_response_fixture
+    api_client, aresponses, unauthorized_response_fixture
 ):
     """Test with invalid token should raise UnauthorizedException."""
     # Given
@@ -59,19 +60,16 @@ async def test_get_relay_state__should_raise_unauthorized_exception_when_invalid
     url = DEFAULT_BASE_URL + STATES_URL + f"?authToken={token}"
 
     # When / Then
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=unauthorized_response_fixture,
-        )
+    mock_get(aresponses, url, unauthorized_response_fixture)
 
-        with pytest.raises(UnauthorizedError):
-            await api_client.async_get_relay_state(token, relay_id)
+    with pytest.raises(UnauthorizedError):
+        await api_client.async_get_relay_state(token, relay_id)
 
 
 @pytest.mark.asyncio
-async def test_get_relay_state__should_return_state_when_relay_found(api_client, valid_relay_response_fixture):
+async def test_get_relay_state__should_return_state_when_relay_found(
+    api_client, aresponses, valid_relay_response_fixture
+):
     """Test with valid token should return relay state."""
     # Given
     token = "abcdef"  # noqa: S105
@@ -79,21 +77,18 @@ async def test_get_relay_state__should_return_state_when_relay_found(api_client,
     url = DEFAULT_BASE_URL + STATES_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=valid_relay_response_fixture,
-        )
+    mock_get(aresponses, url, valid_relay_response_fixture)
 
-        response = await api_client.async_get_relay_state(token, relay_id)
+    response = await api_client.async_get_relay_state(token, relay_id)
 
     # Then
     assert "on" == response
 
 
 @pytest.mark.asyncio
-async def test_get_relay_state__should_return_none_when_relay_not_found(api_client, valid_relay_response_fixture):
+async def test_get_relay_state__should_return_none_when_relay_not_found(
+    api_client, aresponses, valid_relay_response_fixture
+):
     """Test should return None when relay device is not in response."""
     # Given
     token = "abcdef"  # noqa: S105
@@ -101,14 +96,9 @@ async def test_get_relay_state__should_return_none_when_relay_not_found(api_clie
     url = DEFAULT_BASE_URL + STATES_URL + f"?authToken={token}"
 
     # When
-    with aioresponses() as session_mock:
-        session_mock.get(
-            url,
-            status=200,
-            payload=valid_relay_response_fixture,
-        )
+    mock_get(aresponses, url, valid_relay_response_fixture)
 
-        response = await api_client.async_get_relay_state(token, relay_id)
+    response = await api_client.async_get_relay_state(token, relay_id)
 
     # Then
     assert response is None
