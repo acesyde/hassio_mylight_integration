@@ -157,7 +157,7 @@ class MyLightApiClient:
         if raw_capacity not in (None, ""):
             try:
                 electric_power_capacity = float(raw_capacity)
-            except (TypeError, ValueError):
+            except TypeError, ValueError:
                 electric_power_capacity = None
 
         return UserProfile(response["id"], grid_type, electric_power_capacity)
