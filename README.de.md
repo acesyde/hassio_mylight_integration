@@ -33,6 +33,11 @@ _Integration zur Verbindung mit [MyLight Systems][mylight_systems]._
 | `sensor.total_green_energy`                     | Solarenergie direkt vom Haushalt verbraucht            | Wh      | `total_increasing` |
 | `sensor.battery_state`                          | Aktuell in der Smart Battery gespeicherte Energie      | kWh     | `measurement`      |
 | `sensor.grid_returned_energy`                   | Solarenergie ins Netz eingespeist                      | Wh      | `total_increasing` |
+| `sensor.grid_power`                             | Momentane Netzleistung (positiv: Bezug, negativ: Einspeisung) | W | `measurement` |
+| `sensor.grid_import_power`                      | Aus dem Netz bezogene Leistung | W | `measurement` |
+| `sensor.grid_export_power`                      | Ins Netz eingespeiste Leistung | W | `measurement` |
+
+> Nur bei genau einem erkannten Netzzähler vorhanden.
 
 ### Schalter
 

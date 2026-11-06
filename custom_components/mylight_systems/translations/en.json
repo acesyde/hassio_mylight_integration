@@ -83,6 +83,9 @@
       "battery_state": { "name": "Battery energy stored" },
       "grid_returned_energy": { "name": "Grid returned energy" },
       "water_heater_energy": { "name": "Water heater energy" },
+      "grid_power": { "name": "Grid power" },
+      "grid_import_power": { "name": "Grid import power" },
+      "grid_export_power": { "name": "Grid export power" },
       "electric_power_capacity": { "name": "Subscribed power" }
     },
     "switch": {

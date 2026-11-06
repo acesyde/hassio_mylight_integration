@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, UnitOfApparentPower, UnitOfEnergy
+from homeassistant.const import PERCENTAGE, UnitOfApparentPower, UnitOfEnergy, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -151,6 +151,34 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
 )
 
+# Created only when a single grid meter was discovered.
+GRID_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
+    MyLightSensorEntityDescription(
+        key="grid_power",
+        translation_key="grid_power",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+        value_fn=lambda data: data.grid_power.value if data.grid_power is not None else None,
+    ),
+    MyLightSensorEntityDescription(
+        key="grid_import_power",
+        translation_key="grid_import_power",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+        value_fn=lambda data: max(0, data.grid_power.value) if data.grid_power is not None else None,
+    ),
+    MyLightSensorEntityDescription(
+        key="grid_export_power",
+        translation_key="grid_export_power",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+        value_fn=lambda data: max(0, -data.grid_power.value) if data.grid_power is not None else None,
+    ),
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: MyLightConfigEntry, async_add_devices: AddEntitiesCallback
@@ -165,6 +193,16 @@ async def async_setup_entry(
         )
         for entity_description in MYLIGHT_SENSORS
     ]
+
+    if coordinator.grid_meter_id is not None:
+        entities.extend(
+            MyLightSystemsSensor(
+                entry_id=entry.entry_id,
+                coordinator=coordinator,
+                entity_description=entity_description,
+            )
+            for entity_description in GRID_POWER_SENSORS
+        )
 
     capacity = entry.data.get(CONF_ELECTRIC_POWER_CAPACITY)
     if capacity is not None:

@@ -3,14 +3,17 @@
 from unittest.mock import MagicMock
 
 import pytest
-from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+from homeassistant.const import UnitOfPower
 
 from custom_components.mylight_systems.api.models import Measure
 from custom_components.mylight_systems.coordinator import MyLightSystemsCoordinatorData
 from custom_components.mylight_systems.sensor import (
+    GRID_POWER_SENSORS,
     MYLIGHT_SENSORS,
     MyLightElectricPowerCapacitySensor,
     _calculate_grid_returned_energy,
+    async_setup_entry,
 )
 
 
@@ -29,6 +32,7 @@ def none_data():
         battery_state=None,
         master_relay_state=None,
         water_heater_energy=None,
+        grid_power=None,
     )
 
 
@@ -47,6 +51,7 @@ def produced_energy_only_data():
         battery_state=None,
         master_relay_state=None,
         water_heater_energy=None,
+        grid_power=None,
     )
 
 
@@ -65,6 +70,7 @@ def produced_and_green_energy_data():
         battery_state=None,
         master_relay_state=None,
         water_heater_energy=None,
+        grid_power=None,
     )
 
 
@@ -83,6 +89,7 @@ def produced_and_msb_charge_data():
         battery_state=None,
         master_relay_state=None,
         water_heater_energy=None,
+        grid_power=None,
     )
 
 
@@ -101,6 +108,7 @@ def all_energy_sources_data():
         battery_state=None,
         master_relay_state=None,
         water_heater_energy=None,
+        grid_power=None,
     )
 
 
@@ -208,3 +216,52 @@ def test_electric_power_capacity_sensor__exposes_native_value():
     assert sensor.device_class == SensorDeviceClass.APPARENT_POWER
     assert sensor.available is True
     assert sensor.unique_id == "test_entry_electric_power_capacity"
+
+
+def _grid_value_fn(key, data):
+    """Return the value_fn result of a grid power sensor."""
+    return next(s for s in GRID_POWER_SENSORS if s.key == key).value_fn(data)
+
+
+@pytest.mark.parametrize(
+    ("power", "signed", "imported", "exported"),
+    [(1500, 1500, 1500, 0), (-1500, -1500, 0, 1500), (0, 0, 0, 0)],
+)
+def test_grid_power_sensors__should_split_signed_power(none_data, power, signed, imported, exported):
+    """Signed power maps to import (positive part) and export (negative part); zero stays zero."""
+    data = none_data._replace(grid_power=Measure(type="electric_power", value=power, unit="watt"))
+
+    assert signed == _grid_value_fn("grid_power", data)
+    assert imported == _grid_value_fn("grid_import_power", data)
+    assert exported == _grid_value_fn("grid_export_power", data)
+
+
+@pytest.mark.parametrize("key", ["grid_power", "grid_import_power", "grid_export_power"])
+def test_grid_power_sensors__should_be_unknown_without_measure(none_data, key):
+    """Missing data is None, never 0."""
+    assert _grid_value_fn(key, none_data) is None
+
+
+def test_grid_power_sensors__should_declare_power_measurement():
+    """All three are measured watt power sensors."""
+    for description in GRID_POWER_SENSORS:
+        assert SensorDeviceClass.POWER == description.device_class
+        assert SensorStateClass.MEASUREMENT == description.state_class
+        assert UnitOfPower.WATT == description.native_unit_of_measurement
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("meter_id", "expected"), [("meter-1", 3), (None, 0)])
+async def test_setup_entry__should_create_grid_power_sensors_only_when_meter_found(meter_id, expected):
+    """The three grid power sensors exist only when a single meter was discovered."""
+    entry = MagicMock()
+    entry.entry_id = "test_entry"
+    entry.data = {}
+    entry.runtime_data.grid_meter_id = meter_id
+    add = MagicMock()
+
+    await async_setup_entry(MagicMock(), entry, add)
+
+    keys = {"grid_power", "grid_import_power", "grid_export_power"}
+    created = [e for e in add.call_args.args[0] if e.entity_description.key in keys]
+    assert expected == len(created)

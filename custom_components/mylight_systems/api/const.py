@@ -8,6 +8,9 @@ ERR_UNDEFINED_PASSWORD: str = "undefined.password"  # noqa: S105
 ERR_NOT_AUTHORIZED: str = "not.authorized"
 ERR_SWITCH_NOT_ALLOWED: str = "switch.not.allowed"
 
+GRID_METER_TYPE: str = "cmp"
+GRID_METER_TYPE_ID: str = "asoka_electric_counter"
+
 DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"
 AUTH_URL: str = "/api/auth"
 PROFILE_URL: str = "/api/profile"

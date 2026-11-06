@@ -33,6 +33,11 @@ _Integración para conectar con [MyLight Systems][mylight_systems]._
 | `sensor.total_green_energy`                     | Energía solar consumida directamente por su hogar      | Wh     | `total_increasing` |
 | `sensor.battery_state`                          | Energía almacenada actualmente en la Smart Battery     | kWh    | `measurement`      |
 | `sensor.grid_returned_energy`                   | Energía solar exportada a la red                       | Wh     | `total_increasing` |
+| `sensor.grid_power`                             | Potencia instantánea de red (positiva: importación, negativa: exportación) | W | `measurement` |
+| `sensor.grid_import_power`                      | Potencia importada de la red | W | `measurement` |
+| `sensor.grid_export_power`                      | Potencia exportada a la red | W | `measurement` |
+
+> Solo se crean si se detecta un único contador de red.
 
 ### Interruptores
 
