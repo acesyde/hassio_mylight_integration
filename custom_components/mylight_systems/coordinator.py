@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any, NamedTuple
 
 from homeassistant.config_entries import ConfigEntry
@@ -15,6 +15,7 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
+from homeassistant.util import dt as dt_util
 
 from custom_components.mylight_systems.api.models import Measure
 
@@ -93,8 +94,9 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 raise UpdateFailed("Authentication token is not set after login")
             auth_token: str = self.__auth_token
 
-            today = date.today().isoformat()
-            tomorrow = (date.today() + timedelta(days=1)).isoformat()
+            local_today = dt_util.now().date()
+            today = local_today.isoformat()
+            tomorrow = (local_today + timedelta(days=1)).isoformat()
 
             coroutines: list[Any] = [
                 self.client.async_get_measures_grouping(

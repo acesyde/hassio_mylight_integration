@@ -7,13 +7,14 @@ import base64
 import json
 import logging
 from dataclasses import asdict
-from datetime import date, timedelta
+from datetime import timedelta
 from typing import Any, Callable
 
 from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from homeassistant.loader import async_get_integration
+from homeassistant.util import dt as dt_util
 
 from . import MyLightConfigEntry
 from .api.const import (
@@ -147,8 +148,9 @@ async def async_get_config_entry_diagnostics(
         if auth_token is None:
             raise ValueError("Authentication token is not set after login")
 
-        today = date.today().isoformat()
-        tomorrow = (date.today() + timedelta(days=1)).isoformat()
+        local_today = dt_util.now().date()
+        today = local_today.isoformat()
+        tomorrow = (local_today + timedelta(days=1)).isoformat()
         entry_data = dict(entry.data)
 
         tasks = {
