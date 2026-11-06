@@ -86,7 +86,7 @@ class MyLightApiClient:
 
                 _LOGGER.debug(
                     "Data retrieved from %s, status: %s",
-                    response.url,
+                    path,
                     response.status,
                 )
                 response.raise_for_status()
@@ -98,8 +98,9 @@ class MyLightApiClient:
             aiohttp.ClientError,
             socket.gaierror,
         ) as exception:
-            _LOGGER.debug("An error occured : %s", exception, exc_info=True)
-            raise CommunicationError() from exception
+            # Request URLs and exception messages can contain passwords or auth tokens.
+            _LOGGER.debug("API request failed: %s", type(exception).__name__)
+            raise CommunicationError() from None
 
     async def async_raw_request(
         self,
