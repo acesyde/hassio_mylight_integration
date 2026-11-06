@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 
 class MeasureValueSchema(TypedDict):
@@ -30,6 +30,7 @@ class DeviceSchema(TypedDict):
 
     id: str
     type: str
+    deviceTypeId: NotRequired[str]
 
 
 class SensorMeasureSchema(TypedDict):

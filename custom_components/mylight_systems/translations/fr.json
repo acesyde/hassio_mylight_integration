@@ -83,6 +83,9 @@
       "battery_state": { "name": "Énergie stockée en batterie" },
       "grid_returned_energy": { "name": "Énergie réinjectée au réseau" },
       "water_heater_energy": { "name": "Énergie chauffe-eau" },
+      "grid_power": { "name": "Puissance réseau" },
+      "grid_import_power": { "name": "Puissance soutirée du réseau" },
+      "grid_export_power": { "name": "Puissance injectée sur le réseau" },
       "electric_power_capacity": { "name": "Puissance souscrite" }
     },
     "switch": {

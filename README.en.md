@@ -33,6 +33,11 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 | `sensor.total_green_energy`                     | Solar energy consumed directly by your home         | Wh   | `total_increasing` |
 | `sensor.battery_state`                          | Current energy stored in the Smart Battery          | kWh  | `measurement`      |
 | `sensor.grid_returned_energy`                   | Solar energy exported back to the grid              | Wh   | `total_increasing` |
+| `sensor.grid_power`                             | Instantaneous grid power (positive: import, negative: export) | W | `measurement` |
+| `sensor.grid_import_power`                      | Power drawn from the grid | W | `measurement` |
+| `sensor.grid_export_power`                      | Power exported to the grid | W | `measurement` |
+
+> Only created when a single grid meter is detected.
 
 ### Switches
 

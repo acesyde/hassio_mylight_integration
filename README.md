@@ -33,6 +33,11 @@ _Intégration pour se connecter à [MyLight Systems][mylight_systems]._
 | `sensor.total_green_energy`                     | Énergie solaire consommée directement par votre domicile | Wh    | `total_increasing` |
 | `sensor.battery_state`                          | Énergie actuellement stockée dans la Smart Battery       | kWh   | `measurement`      |
 | `sensor.grid_returned_energy`                   | Énergie solaire réinjectée sur le réseau                 | Wh    | `total_increasing` |
+| `sensor.grid_power`                             | Puissance réseau instantanée (positive : soutirage, négative : injection) | W | `measurement` |
+| `sensor.grid_import_power`                      | Puissance soutirée du réseau | W | `measurement` |
+| `sensor.grid_export_power`                      | Puissance injectée sur le réseau | W | `measurement` |
+
+> Disponibles uniquement si un compteur réseau unique est détecté.
 
 ### Interrupteurs
 

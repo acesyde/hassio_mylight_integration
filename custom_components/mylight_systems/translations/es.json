@@ -83,6 +83,9 @@
       "battery_state": { "name": "Energía almacenada en batería" },
       "grid_returned_energy": { "name": "Energía devuelta a la red" },
       "water_heater_energy": { "name": "Energía del calentador de agua" },
+      "grid_power": { "name": "Potencia de red" },
+      "grid_import_power": { "name": "Potencia importada de la red" },
+      "grid_export_power": { "name": "Potencia exportada a la red" },
       "electric_power_capacity": { "name": "Potencia contratada" }
     },
     "switch": {
