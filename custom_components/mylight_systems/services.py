@@ -11,6 +11,7 @@ import voluptuous as vol
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
+from homeassistant.util import dt as dt_util
 
 from .api.models import Measure
 from .const import CONF_GRID_TYPE, CONF_VIRTUAL_DEVICE_ID, DOMAIN, LOGGER
@@ -85,7 +86,7 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         # Reject same-day and backward ranges; exports require at least a one-day interval
         if from_date >= to_date:
             raise ServiceValidationError("'from_date' must be strictly before 'to_date'.")
-        if to_date > date.today():
+        if to_date > dt_util.now().date():
             raise ServiceValidationError("'to_date' cannot be in the future.")
         if (to_date - from_date).days > 31:
             raise ServiceValidationError("Date range cannot exceed 31 days.")
