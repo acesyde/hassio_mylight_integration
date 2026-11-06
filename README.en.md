@@ -6,7 +6,7 @@
 [![GitHub Activity][commits-shield]][commits]
 [![License][license-shield]](LICENSE)
 
-[![hacs][hacsbadge]][hacs]
+[![marketplace][marketplacebadge]][marketplace]
 ![Project Maintenance][maintenance-shield]
 
 _Integration to integrate with [MyLight Systems][mylight_systems]._
@@ -42,9 +42,17 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 
 ## Installation
 
-## Automatic
+## Home Assistant Marketplace (2026.11+)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=acesyde&repository=hassio_mylight_integration&category=integration)
+1. In Home Assistant, go to **Settings → Marketplace**.
+2. Choose **Add from link**, paste `https://github.com/acesyde/hassio_mylight_integration` and connect your GitHub account if asked.
+3. Install **MyLight Systems**, then restart Home Assistant.
+
+Or click this button:
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Marketplace.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=acesyde&repository=hassio_mylight_integration&category=integration)
+
+> Since 2026.11, HACS is built into Home Assistant as the Marketplace. Existing HACS installs are migrated automatically.
 
 ## Manual
 
@@ -98,8 +106,8 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 [mylight_systems]: https://www.mylight-systems.com/
 [commits-shield]: https://img.shields.io/github/commit-activity/y/acesyde/hassio_mylight_integration.svg?style=for-the-badge
 [commits]: https://github.com/acesyde/hassio_mylight_integration/commits/main
-[hacs]: https://github.com/hacs/integration
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
+[marketplace]: https://www.home-assistant.io/integrations/marketplace/#custom-repositories
+[marketplacebadge]: https://img.shields.io/badge/Marketplace-Custom-orange.svg?style=for-the-badge
 [license-shield]: https://img.shields.io/github/license/acesyde/hassio_mylight_integration.svg?style=for-the-badge
 [maintenance-shield]: https://img.shields.io/badge/maintainer-Pierre%20Emmanuel%20Mercier%20%40acesyde-blue.svg?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/acesyde/hassio_mylight_integration.svg?style=for-the-badge

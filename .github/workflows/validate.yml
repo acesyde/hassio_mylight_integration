@@ -24,8 +24,10 @@ jobs:
       - name: 🔍 Run hassfest validation
         uses: "home-assistant/actions/hassfest@master"
 
+  # The HA Marketplace (2026.11+) still requires hacs.json; hacs/action is the only validator for it.
+  # shortcut: no Marketplace-specific validator exists yet, swap this job when Home Assistant ships one.
   hacs: # https://github.com/hacs/action
-    name: "HACS Validation"
+    name: "Marketplace (hacs.json) Validation"
     runs-on: "ubuntu-latest"
     steps:
       - name: 📥 Checkout the repository
