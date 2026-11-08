@@ -41,7 +41,7 @@ _Intégration pour se connecter à [MyLight Systems][mylight_systems]._
 
 > `grid_power`, `grid_import_power`, `grid_export_power` : Disponibles uniquement si un compteur réseau unique est détecté. MyLight fournit une moyenne sur 5 minutes : gardez l'intervalle de mise à jour par défaut de 5 minutes, sinon des mesures sont sautées.
 >
-> `msb_discharge_power`, `grid_billed_power` : Disponibles uniquement si une batterie virtuelle est détectée. Moyenne sur l'intervalle de mise à jour (gardez l'intervalle par défaut de 5 minutes, celui des mesures MyLight : au-delà, la courbe est lissée), calculée à partir des compteurs `total_msb_discharge` et `total_grid_without_battery_consumption` : à utiliser comme puissance de décharge (batterie) et de soutirage (réseau) dans le tableau de bord Énergie.
+> `msb_discharge_power`, `grid_billed_power` : Disponibles uniquement si une batterie virtuelle est détectée. Moyenne sur l'intervalle de mise à jour (gardez l'intervalle par défaut de 5 minutes, celui des mesures MyLight : au-delà, la courbe est lissée), calculée à partir des compteurs `total_msb_discharge` et `total_grid_without_battery_consumption` : à utiliser comme puissance de décharge (batterie) et de soutirage (réseau) dans le tableau de bord Énergie. Ils n'ont pas de valeur pendant le premier intervalle après un démarrage (il faut deux relevés).
 
 ### Interrupteurs
 

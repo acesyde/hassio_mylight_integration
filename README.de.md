@@ -41,7 +41,7 @@ _Integration zur Verbindung mit [MyLight Systems][mylight_systems]._
 
 > `grid_power`, `grid_import_power`, `grid_export_power`: Nur bei genau einem erkannten Netzzähler vorhanden. MyLight liefert einen 5-Minuten-Mittelwert: Standard-Aktualisierungsintervall von 5 Minuten beibehalten, sonst werden Messwerte übersprungen.
 >
-> `msb_discharge_power`, `grid_billed_power`: Nur verfügbar, wenn eine virtuelle Batterie erkannt wird. Mittelwert über das Aktualisierungsintervall (Standard von 5 Minuten beibehalten, entspricht dem Messschritt von MyLight: längere Intervalle glätten die Kurve) aus den Zählern `total_msb_discharge` und `total_grid_without_battery_consumption`: im Energie-Dashboard als Entlade- (Batterie) und Bezugsleistung (Netz) verwenden.
+> `msb_discharge_power`, `grid_billed_power`: Nur verfügbar, wenn eine virtuelle Batterie erkannt wird. Mittelwert über das Aktualisierungsintervall (Standard von 5 Minuten beibehalten, entspricht dem Messschritt von MyLight: längere Intervalle glätten die Kurve) aus den Zählern `total_msb_discharge` und `total_grid_without_battery_consumption`: im Energie-Dashboard als Entlade- (Batterie) und Bezugsleistung (Netz) verwenden. Im ersten Intervall nach einem Start haben sie keinen Wert (zwei Messwerte nötig).
 
 ### Schalter
 

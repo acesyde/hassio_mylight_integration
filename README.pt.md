@@ -41,7 +41,7 @@ _Integração para conectar ao [MyLight Systems][mylight_systems]._
 
 > `grid_power`, `grid_import_power`, `grid_export_power`: Só criados se um único contador de rede for detetado. A MyLight fornece uma média de 5 minutos: mantenha o intervalo de atualização padrão de 5 minutos, caso contrário perdem-se medições.
 >
-> `msb_discharge_power`, `grid_billed_power`: Disponíveis apenas quando uma bateria virtual é detetada. Média no intervalo de atualização (mantenha os 5 minutos padrão, o passo de medição da MyLight: intervalos maiores suavizam a curva) a partir dos contadores `total_msb_discharge` e `total_grid_without_battery_consumption`: use-os como potência de descarga (bateria) e de importação (rede) no painel de Energia.
+> `msb_discharge_power`, `grid_billed_power`: Disponíveis apenas quando uma bateria virtual é detetada. Média no intervalo de atualização (mantenha os 5 minutos padrão, o passo de medição da MyLight: intervalos maiores suavizam a curva) a partir dos contadores `total_msb_discharge` e `total_grid_without_battery_consumption`: use-os como potência de descarga (bateria) e de importação (rede) no painel de Energia. Não têm valor durante o primeiro intervalo após um arranque (são necessárias duas leituras).
 
 ### Interruptores
 
