@@ -86,6 +86,8 @@
       "grid_power": { "name": "Puissance réseau" },
       "grid_import_power": { "name": "Puissance soutirée du réseau" },
       "grid_export_power": { "name": "Puissance injectée sur le réseau" },
+      "msb_discharge_power": { "name": "Puissance de décharge de la batterie virtuelle" },
+      "grid_billed_power": { "name": "Puissance soutirée facturée" },
       "electric_power_capacity": { "name": "Puissance souscrite" }
     },
     "switch": {

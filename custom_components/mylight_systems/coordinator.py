@@ -52,6 +52,19 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     master_relay_state: str | None
     water_heater_energy: Measure | None
     grid_power: Measure | None
+    msb_discharge_power: float | None = None
+    grid_billed_power: float | None = None
+
+
+def _average_power(previous_ws: float, current_ws: float, elapsed_s: float) -> float | None:
+    """Average power in W between two readings of a daily energy counter in Ws."""
+    if elapsed_s <= 0:
+        return None
+    delta_ws = current_ws - previous_ws
+    # The counters restart at local midnight: count only what was measured since.
+    if delta_ws < 0:
+        delta_ws = current_ws
+    return delta_ws / elapsed_s
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -73,6 +86,8 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         self._auth_lock = asyncio.Lock()
         self.grid_meter_id: str | None = None
         self._grid_meter_discovered = False
+        self.has_virtual_battery = bool(config_entry.data.get(CONF_VIRTUAL_BATTERY_ID))
+        self._previous_counters: tuple[datetime, float, float] | None = None
         scan_interval = int(config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_IN_MINUTES))
         super().__init__(
             hass=hass,
@@ -122,19 +137,27 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             master_relay_state = results[3] if master_relay_id is not None else None
             grid_power = results[-1]
 
+            grid_energy_without_battery = self.find_measure_by_type(energy_result, "grid_sans_msb_energy")
+            msb_discharge = self.find_measure_by_type(energy_result, "msb_discharge")
+            msb_discharge_power, grid_billed_power = self._compute_virtual_battery_powers(
+                msb_discharge, grid_energy_without_battery
+            )
+
             data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(energy_result, "produced_energy"),
                 grid_energy=self.find_measure_by_type(energy_result, "grid_energy"),
-                grid_energy_without_battery=self.find_measure_by_type(energy_result, "grid_sans_msb_energy"),
+                grid_energy_without_battery=grid_energy_without_battery,
                 autonomy_rate=self.find_measure_by_type(total_result, "autonomy_rate"),
                 self_conso=self.find_measure_by_type(total_result, "self_conso"),
                 msb_charge=self.find_measure_by_type(energy_result, "msb_charge"),
-                msb_discharge=self.find_measure_by_type(energy_result, "msb_discharge"),
+                msb_discharge=msb_discharge,
                 green_energy=self.find_measure_by_type(energy_result, "green_energy"),
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
                 water_heater_energy=self.find_measure_by_type(total_result, "water_heater_energy"),
                 grid_power=grid_power,
+                msb_discharge_power=msb_discharge_power,
+                grid_billed_power=grid_billed_power,
             )
 
             self._data = data
@@ -189,6 +212,29 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         except MyLightSystemsError:
             LOGGER.debug("Grid power read failed")
             return None
+
+    def _compute_virtual_battery_powers(
+        self, msb_discharge: Measure | None, grid_billed: Measure | None
+    ) -> tuple[float | None, float | None]:
+        """Derive discharge and billed import powers from the energy counters MyLight bills on.
+
+        shortcut: averaged over the whole refresh interval and blind to a lagging API bucket,
+        switch to per-bucket timestamps if MyLight ever exposes them.
+        """
+        if not self.has_virtual_battery or msb_discharge is None or grid_billed is None:
+            self._previous_counters = None
+            return None, None
+        now = dt_util.utcnow()
+        previous = self._previous_counters
+        self._previous_counters = (now, msb_discharge.value, grid_billed.value)
+        if previous is None:
+            return None, None
+        previous_time, previous_discharge, previous_billed = previous
+        elapsed_s = (now - previous_time).total_seconds()
+        return (
+            _average_power(previous_discharge, msb_discharge.value, elapsed_s),
+            _average_power(previous_billed, grid_billed.value, elapsed_s),
+        )
 
     def _token_needs_refresh(self) -> bool:
         """Return True if the auth token is missing or expires within 60 seconds."""

@@ -179,6 +179,28 @@ GRID_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
 )
 
+# Created only for installations with a virtual battery; averaged over the refresh interval.
+VIRTUAL_BATTERY_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
+    MyLightSensorEntityDescription(
+        key="msb_discharge_power",
+        translation_key="msb_discharge_power",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+        suggested_display_precision=0,
+        value_fn=lambda data: data.msb_discharge_power,
+    ),
+    MyLightSensorEntityDescription(
+        key="grid_billed_power",
+        translation_key="grid_billed_power",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+        suggested_display_precision=0,
+        value_fn=lambda data: data.grid_billed_power,
+    ),
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: MyLightConfigEntry, async_add_devices: AddEntitiesCallback
@@ -202,6 +224,16 @@ async def async_setup_entry(
                 entity_description=entity_description,
             )
             for entity_description in GRID_POWER_SENSORS
+        )
+
+    if coordinator.has_virtual_battery:
+        entities.extend(
+            MyLightSystemsSensor(
+                entry_id=entry.entry_id,
+                coordinator=coordinator,
+                entity_description=entity_description,
+            )
+            for entity_description in VIRTUAL_BATTERY_POWER_SENSORS
         )
 
     capacity = entry.data.get(CONF_ELECTRIC_POWER_CAPACITY)

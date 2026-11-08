@@ -86,6 +86,8 @@
       "grid_power": { "name": "Potência da rede" },
       "grid_import_power": { "name": "Potência importada da rede" },
       "grid_export_power": { "name": "Potência exportada para a rede" },
+      "msb_discharge_power": { "name": "Potência de descarga da bateria virtual" },
+      "grid_billed_power": { "name": "Potência importada faturada" },
       "electric_power_capacity": { "name": "Potência contratada" }
     },
     "switch": {

@@ -265,3 +265,23 @@ async def test_setup_entry__should_create_grid_power_sensors_only_when_meter_fou
     keys = {"grid_power", "grid_import_power", "grid_export_power"}
     created = [e for e in add.call_args.args[0] if e.entity_description.key in keys]
     assert expected == len(created)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("has_virtual_battery", "expected"), [(True, 2), (False, 0)])
+async def test_setup_entry__should_create_virtual_battery_power_sensors_only_with_virtual_battery(
+    has_virtual_battery, expected
+):
+    """The discharge and billed import power sensors exist only for virtual battery installations."""
+    entry = MagicMock()
+    entry.entry_id = "test_entry"
+    entry.data = {}
+    entry.runtime_data.grid_meter_id = None
+    entry.runtime_data.has_virtual_battery = has_virtual_battery
+    add = MagicMock()
+
+    await async_setup_entry(MagicMock(), entry, add)
+
+    keys = {"msb_discharge_power", "grid_billed_power"}
+    created = [e for e in add.call_args.args[0] if e.entity_description.key in keys]
+    assert expected == len(created)

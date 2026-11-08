@@ -132,3 +132,70 @@ async def test_update__should_trigger_reauth_when_grid_power_unauthorized():
         pytest.raises(ConfigEntryAuthFailed),
     ):
         await coordinator._async_update_data()
+
+
+def _counters(discharge_ws, billed_ws):
+    return [
+        Measure("msb_discharge", discharge_ws, "watt_second"),
+        Measure("grid_sans_msb_energy", billed_ws, "watt_second"),
+    ]
+
+
+async def _refresh_at(coordinator, client, minute, discharge_ws, billed_ws):
+    client.async_get_measures_grouping.return_value = _counters(discharge_ws, billed_ws)
+    at = datetime(2025, 1, 2, 18, minute, tzinfo=ZoneInfo("UTC"))
+    with (
+        patch.object(coordinator, "authenticate_user", AsyncMock()),
+        patch("homeassistant.util.dt.utcnow", return_value=at),
+    ):
+        return await coordinator._async_update_data()
+
+
+@pytest.mark.asyncio
+async def test_update__should_derive_virtual_battery_powers_from_counter_deltas():
+    """Power is the counter delta over the elapsed time; unknown until two readings exist."""
+    coordinator, client = _build_coordinator(meter_id=None)
+
+    first = await _refresh_at(coordinator, client, 0, 1000.0, 5000.0)
+    # 5 min later: +119 Wh discharged (1428 W), +0 billed.
+    second = await _refresh_at(coordinator, client, 5, 1000.0 + 1428 * 300, 5000.0)
+
+    assert (first.msb_discharge_power, first.grid_billed_power) == (None, None)
+    assert second.msb_discharge_power == pytest.approx(1428)
+    assert second.grid_billed_power == 0
+
+
+@pytest.mark.asyncio
+async def test_update__should_count_only_post_reset_energy_after_midnight():
+    """A daily counter that went down restarted at midnight: only its new value counts."""
+    coordinator, client = _build_coordinator(meter_id=None)
+
+    await _refresh_at(coordinator, client, 0, 9_000_000.0, 9_000_000.0)
+    data = await _refresh_at(coordinator, client, 5, 0.0, 600 * 300)
+
+    assert data.msb_discharge_power == 0
+    assert data.grid_billed_power == pytest.approx(600)
+
+
+@pytest.mark.asyncio
+async def test_update__should_not_derive_powers_without_virtual_battery():
+    """Installations without a virtual battery never get these powers."""
+    coordinator, client = _build_coordinator(meter_id=None)
+    coordinator.has_virtual_battery = False
+
+    await _refresh_at(coordinator, client, 0, 1000.0, 5000.0)
+    data = await _refresh_at(coordinator, client, 5, 2000.0, 6000.0)
+
+    assert (data.msb_discharge_power, data.grid_billed_power) == (None, None)
+
+
+def test_coordinator__should_detect_virtual_battery_from_config_entry():
+    """Detection follows the battery id stored at setup (empty when MyLight has none)."""
+    with_battery, _ = _build_coordinator()
+    config_entry = MagicMock()
+    config_entry.options = {}
+    config_entry.data = {"virtual_battery_id": ""}
+    without_battery = MyLightSystemsDataUpdateCoordinator(MagicMock(), MagicMock(), config_entry)
+
+    assert with_battery.has_virtual_battery is True
+    assert without_battery.has_virtual_battery is False

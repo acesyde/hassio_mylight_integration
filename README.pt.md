@@ -36,8 +36,12 @@ _Integração para conectar ao [MyLight Systems][mylight_systems]._
 | `sensor.grid_power`                             | Potência instantânea da rede (positiva: importação, negativa: exportação) | W | `measurement` |
 | `sensor.grid_import_power`                      | Potência importada da rede | W | `measurement` |
 | `sensor.grid_export_power`                      | Potência exportada para a rede | W | `measurement` |
+| `sensor.msb_discharge_power`                   | Potência coberta pela bateria virtual | W | `measurement` |
+| `sensor.grid_billed_power`                     | Potência importada faturada (bateria virtual vazia) | W | `measurement` |
 
-> Só criados se um único contador de rede for detetado.
+> `grid_power`, `grid_import_power`, `grid_export_power`: Só criados se um único contador de rede for detetado.
+>
+> `msb_discharge_power`, `grid_billed_power`: Disponíveis apenas quando uma bateria virtual é detetada. Média no intervalo de atualização a partir dos contadores `total_msb_discharge` e `total_grid_without_battery_consumption`: use-os como potência de descarga (bateria) e de importação (rede) no painel de Energia.
 
 ### Interruptores
 

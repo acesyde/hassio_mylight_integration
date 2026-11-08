@@ -36,8 +36,12 @@ _Integration zur Verbindung mit [MyLight Systems][mylight_systems]._
 | `sensor.grid_power`                             | Momentane Netzleistung (positiv: Bezug, negativ: Einspeisung) | W | `measurement` |
 | `sensor.grid_import_power`                      | Aus dem Netz bezogene Leistung | W | `measurement` |
 | `sensor.grid_export_power`                      | Ins Netz eingespeiste Leistung | W | `measurement` |
+| `sensor.msb_discharge_power`                   | Von der virtuellen Batterie gedeckte Leistung | W | `measurement` |
+| `sensor.grid_billed_power`                     | Abgerechnete Netzbezugsleistung (virtuelle Batterie leer) | W | `measurement` |
 
-> Nur bei genau einem erkannten Netzzähler vorhanden.
+> `grid_power`, `grid_import_power`, `grid_export_power`: Nur bei genau einem erkannten Netzzähler vorhanden.
+>
+> `msb_discharge_power`, `grid_billed_power`: Nur verfügbar, wenn eine virtuelle Batterie erkannt wird. Mittelwert über das Aktualisierungsintervall aus den Zählern `total_msb_discharge` und `total_grid_without_battery_consumption`: im Energie-Dashboard als Entlade- (Batterie) und Bezugsleistung (Netz) verwenden.
 
 ### Schalter
 

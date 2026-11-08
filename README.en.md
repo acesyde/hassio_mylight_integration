@@ -36,8 +36,12 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 | `sensor.grid_power`                             | Instantaneous grid power (positive: import, negative: export) | W | `measurement` |
 | `sensor.grid_import_power`                      | Power drawn from the grid | W | `measurement` |
 | `sensor.grid_export_power`                      | Power exported to the grid | W | `measurement` |
+| `sensor.msb_discharge_power`                   | Power covered by the virtual battery | W | `measurement` |
+| `sensor.grid_billed_power`                     | Billed grid import power (virtual battery empty) | W | `measurement` |
 
-> Only created when a single grid meter is detected.
+> `grid_power`, `grid_import_power`, `grid_export_power`: Only created when a single grid meter is detected.
+>
+> `msb_discharge_power`, `grid_billed_power`: Available only when a virtual battery is detected. Averaged over the update interval from the `total_msb_discharge` and `total_grid_without_battery_consumption` counters: use them as battery discharge and grid import power in the Energy dashboard.
 
 ### Switches
 

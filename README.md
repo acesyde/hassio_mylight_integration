@@ -36,8 +36,12 @@ _Intégration pour se connecter à [MyLight Systems][mylight_systems]._
 | `sensor.grid_power`                             | Puissance réseau instantanée (positive : soutirage, négative : injection) | W | `measurement` |
 | `sensor.grid_import_power`                      | Puissance soutirée du réseau | W | `measurement` |
 | `sensor.grid_export_power`                      | Puissance injectée sur le réseau | W | `measurement` |
+| `sensor.msb_discharge_power`                   | Puissance couverte par la batterie virtuelle | W | `measurement` |
+| `sensor.grid_billed_power`                     | Puissance soutirée facturée (batterie virtuelle vide) | W | `measurement` |
 
-> Disponibles uniquement si un compteur réseau unique est détecté.
+> `grid_power`, `grid_import_power`, `grid_export_power` : Disponibles uniquement si un compteur réseau unique est détecté.
+>
+> `msb_discharge_power`, `grid_billed_power` : Disponibles uniquement si une batterie virtuelle est détectée. Moyenne sur l'intervalle de mise à jour, calculée à partir des compteurs `total_msb_discharge` et `total_grid_without_battery_consumption` : à utiliser comme puissance de décharge (batterie) et de soutirage (réseau) dans le tableau de bord Énergie.
 
 ### Interrupteurs
 
