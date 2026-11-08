@@ -41,7 +41,7 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 
 > `grid_power`, `grid_import_power`, `grid_export_power`: Only created when a single grid meter is detected. MyLight reports a 5-minute average: keep the default 5-minute update interval, otherwise readings are skipped.
 >
-> `msb_discharge_power`, `grid_billed_power`: Available only when a virtual battery is detected. Averaged over the update interval (keep the default 5 minutes, which matches MyLight's measurement step: longer intervals smooth the curve) from the `total_msb_discharge` and `total_grid_without_battery_consumption` counters: use them as battery discharge and grid import power in the Energy dashboard.
+> `msb_discharge_power`, `grid_billed_power`: Available only when a virtual battery is detected. Averaged over the update interval (keep the default 5 minutes, which matches MyLight's measurement step: longer intervals smooth the curve) from the `total_msb_discharge` and `total_grid_without_battery_consumption` counters: use them as battery discharge and grid import power in the Energy dashboard. They have no value during the first interval after a startup (two readings are needed).
 
 ### Switches
 
