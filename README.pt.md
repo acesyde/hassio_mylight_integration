@@ -36,8 +36,12 @@ _Integração para conectar ao [MyLight Systems][mylight_systems]._
 | `sensor.grid_power`                             | Potência instantânea da rede (positiva: importação, negativa: exportação) | W | `measurement` |
 | `sensor.grid_import_power`                      | Potência importada da rede | W | `measurement` |
 | `sensor.grid_export_power`                      | Potência exportada para a rede | W | `measurement` |
+| `sensor.msb_discharge_power`                   | Potência coberta pela bateria virtual | W | `measurement` |
+| `sensor.grid_billed_power`                     | Potência importada faturada (bateria virtual vazia) | W | `measurement` |
 
-> Só criados se um único contador de rede for detetado.
+> `grid_power`, `grid_import_power`, `grid_export_power`: Só criados se um único contador de rede for detetado. A MyLight fornece uma média de 5 minutos: mantenha o intervalo de atualização padrão de 5 minutos, caso contrário perdem-se medições.
+>
+> `msb_discharge_power`, `grid_billed_power`: Disponíveis apenas quando uma bateria virtual é detetada. Média no intervalo de atualização (mantenha os 5 minutos padrão, o passo de medição da MyLight: intervalos maiores suavizam a curva) a partir dos contadores `total_msb_discharge` e `total_grid_without_battery_consumption`: use-os como potência de descarga (bateria) e de importação (rede) no painel de Energia.
 
 ### Interruptores
 
@@ -83,7 +87,7 @@ A entidade `switch.master_relay` só é criada quando um relé (`sw`) está empa
 
 ### "Os valores dos sensores estão parados / não atualizam"
 
-O coordenador consulta a API a cada 15 minutos. Se os valores pararem de atualizar:
+O coordenador consulta a API a cada 5 minutos por padrão (ajustável nas opções da integração, mínimo 5 minutos). Se os valores pararem de atualizar:
 
 1. Abra **Configurações → Dispositivos e Serviços → MyLight Systems** e verifique se há um aviso de erro.
 2. Ative o log de depuração e verifique os logs do Home Assistant:

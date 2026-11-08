@@ -36,8 +36,12 @@ _Intégration pour se connecter à [MyLight Systems][mylight_systems]._
 | `sensor.grid_power`                             | Puissance réseau instantanée (positive : soutirage, négative : injection) | W | `measurement` |
 | `sensor.grid_import_power`                      | Puissance soutirée du réseau | W | `measurement` |
 | `sensor.grid_export_power`                      | Puissance injectée sur le réseau | W | `measurement` |
+| `sensor.msb_discharge_power`                   | Puissance couverte par la batterie virtuelle | W | `measurement` |
+| `sensor.grid_billed_power`                     | Puissance soutirée facturée (batterie virtuelle vide) | W | `measurement` |
 
-> Disponibles uniquement si un compteur réseau unique est détecté.
+> `grid_power`, `grid_import_power`, `grid_export_power` : Disponibles uniquement si un compteur réseau unique est détecté. MyLight fournit une moyenne sur 5 minutes : gardez l'intervalle de mise à jour par défaut de 5 minutes, sinon des mesures sont sautées.
+>
+> `msb_discharge_power`, `grid_billed_power` : Disponibles uniquement si une batterie virtuelle est détectée. Moyenne sur l'intervalle de mise à jour (gardez l'intervalle par défaut de 5 minutes, celui des mesures MyLight : au-delà, la courbe est lissée), calculée à partir des compteurs `total_msb_discharge` et `total_grid_without_battery_consumption` : à utiliser comme puissance de décharge (batterie) et de soutirage (réseau) dans le tableau de bord Énergie.
 
 ### Interrupteurs
 
@@ -83,7 +87,7 @@ L'entité `switch.master_relay` n'est créée que si un relais (`sw`) est coupl�
 
 ### « Les valeurs des capteurs sont figées / ne se mettent pas à jour »
 
-Le coordinateur interroge l'API toutes les 15 minutes. Si les valeurs ne se mettent plus à jour :
+Le coordinateur interroge l'API toutes les 5 minutes par défaut (réglable dans les options de l'intégration, 5 minutes minimum). Si les valeurs ne se mettent plus à jour :
 
 1. Allez dans **Paramètres → Appareils et services → MyLight Systems** et vérifiez s'il y a une bannière d'erreur.
 2. Activez les logs de débogage et consultez les journaux Home Assistant :

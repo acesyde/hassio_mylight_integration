@@ -86,6 +86,8 @@
       "grid_power": { "name": "Netzleistung" },
       "grid_import_power": { "name": "Netzbezugsleistung" },
       "grid_export_power": { "name": "Netzeinspeiseleistung" },
+      "msb_discharge_power": { "name": "Entladeleistung der virtuellen Batterie" },
+      "grid_billed_power": { "name": "Abgerechnete Netzbezugsleistung" },
       "electric_power_capacity": { "name": "Vertraglich zugesicherte Leistung" }
     },
     "switch": {
