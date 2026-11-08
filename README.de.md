@@ -39,9 +39,9 @@ _Integration zur Verbindung mit [MyLight Systems][mylight_systems]._
 | `sensor.msb_discharge_power`                   | Von der virtuellen Batterie gedeckte Leistung | W | `measurement` |
 | `sensor.grid_billed_power`                     | Abgerechnete Netzbezugsleistung (virtuelle Batterie leer) | W | `measurement` |
 
-> `grid_power`, `grid_import_power`, `grid_export_power`: Nur bei genau einem erkannten Netzzähler vorhanden.
+> `grid_power`, `grid_import_power`, `grid_export_power`: Nur bei genau einem erkannten Netzzähler vorhanden. MyLight liefert einen 5-Minuten-Mittelwert: Standard-Aktualisierungsintervall von 5 Minuten beibehalten, sonst werden Messwerte übersprungen.
 >
-> `msb_discharge_power`, `grid_billed_power`: Nur verfügbar, wenn eine virtuelle Batterie erkannt wird. Mittelwert über das Aktualisierungsintervall aus den Zählern `total_msb_discharge` und `total_grid_without_battery_consumption`: im Energie-Dashboard als Entlade- (Batterie) und Bezugsleistung (Netz) verwenden.
+> `msb_discharge_power`, `grid_billed_power`: Nur verfügbar, wenn eine virtuelle Batterie erkannt wird. Mittelwert über das Aktualisierungsintervall (Standard von 5 Minuten beibehalten, entspricht dem Messschritt von MyLight: längere Intervalle glätten die Kurve) aus den Zählern `total_msb_discharge` und `total_grid_without_battery_consumption`: im Energie-Dashboard als Entlade- (Batterie) und Bezugsleistung (Netz) verwenden.
 
 ### Schalter
 
@@ -87,7 +87,7 @@ Die Entität `switch.master_relay` wird nur erstellt, wenn ein Relais (`sw`) mit
 
 ### „Sensorwerte sind eingefroren / aktualisieren sich nicht"
 
-Der Koordinator fragt die API alle 15 Minuten ab. Wenn sich die Werte nicht mehr aktualisieren:
+Der Koordinator fragt die API standardmäßig alle 5 Minuten ab (in den Integrationsoptionen einstellbar, mindestens 5 Minuten). Wenn sich die Werte nicht mehr aktualisieren:
 
 1. Öffnen Sie **Einstellungen → Geräte und Dienste → MyLight Systems** und prüfen Sie, ob ein Fehlerbanner angezeigt wird.
 2. Aktivieren Sie das Debug-Logging und prüfen Sie die Home Assistant-Protokolle:

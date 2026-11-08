@@ -39,9 +39,9 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 | `sensor.msb_discharge_power`                   | Power covered by the virtual battery | W | `measurement` |
 | `sensor.grid_billed_power`                     | Billed grid import power (virtual battery empty) | W | `measurement` |
 
-> `grid_power`, `grid_import_power`, `grid_export_power`: Only created when a single grid meter is detected.
+> `grid_power`, `grid_import_power`, `grid_export_power`: Only created when a single grid meter is detected. MyLight reports a 5-minute average: keep the default 5-minute update interval, otherwise readings are skipped.
 >
-> `msb_discharge_power`, `grid_billed_power`: Available only when a virtual battery is detected. Averaged over the update interval from the `total_msb_discharge` and `total_grid_without_battery_consumption` counters: use them as battery discharge and grid import power in the Energy dashboard.
+> `msb_discharge_power`, `grid_billed_power`: Available only when a virtual battery is detected. Averaged over the update interval (keep the default 5 minutes, which matches MyLight's measurement step: longer intervals smooth the curve) from the `total_msb_discharge` and `total_grid_without_battery_consumption` counters: use them as battery discharge and grid import power in the Energy dashboard.
 
 ### Switches
 
@@ -87,7 +87,7 @@ The `switch.master_relay` entity is only created when a relay device (`sw` type)
 
 ### "Sensor values are stuck / not updating"
 
-The coordinator polls the API every 15 minutes. If values stop updating:
+The coordinator polls the API every 5 minutes by default (adjustable in the integration options, 5 minutes minimum). If values stop updating:
 
 1. Open **Settings → Devices & Services → MyLight Systems** and check for an error banner.
 2. Enable debug logging and check the Home Assistant logs:
