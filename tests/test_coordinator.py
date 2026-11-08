@@ -141,12 +141,16 @@ def _counters(discharge_ws, billed_ws):
     ]
 
 
-async def _refresh_at(coordinator, client, minute, discharge_ws, billed_ws):
+def _paris(day, hour, minute):
+    return datetime(2025, 1, day, hour, minute, tzinfo=ZoneInfo("Europe/Paris"))
+
+
+async def _refresh_at(coordinator, client, at, discharge_ws, billed_ws):
     client.async_get_measures_grouping.return_value = _counters(discharge_ws, billed_ws)
-    at = datetime(2025, 1, 2, 18, minute, tzinfo=ZoneInfo("UTC"))
     with (
         patch.object(coordinator, "authenticate_user", AsyncMock()),
         patch("homeassistant.util.dt.utcnow", return_value=at),
+        patch("homeassistant.util.dt.now", return_value=at),
     ):
         return await coordinator._async_update_data()
 
@@ -156,9 +160,9 @@ async def test_update__should_derive_virtual_battery_powers_from_counter_deltas(
     """Power is the counter delta over the elapsed time; unknown until two readings exist."""
     coordinator, client = _build_coordinator(meter_id=None)
 
-    first = await _refresh_at(coordinator, client, 0, 1000.0, 5000.0)
+    first = await _refresh_at(coordinator, client, _paris(2, 18, 0), 1000.0, 5000.0)
     # 5 min later: +119 Wh discharged (1428 W), +0 billed.
-    second = await _refresh_at(coordinator, client, 5, 1000.0 + 1428 * 300, 5000.0)
+    second = await _refresh_at(coordinator, client, _paris(2, 18, 5), 1000.0 + 1428 * 300, 5000.0)
 
     assert (first.msb_discharge_power, first.grid_billed_power) == (None, None)
     assert second.msb_discharge_power == pytest.approx(1428)
@@ -170,11 +174,24 @@ async def test_update__should_count_only_post_reset_energy_after_midnight():
     """A daily counter that went down restarted at midnight: only its new value counts."""
     coordinator, client = _build_coordinator(meter_id=None)
 
-    await _refresh_at(coordinator, client, 0, 9_000_000.0, 9_000_000.0)
-    data = await _refresh_at(coordinator, client, 5, 0.0, 600 * 300)
+    await _refresh_at(coordinator, client, _paris(1, 23, 55), 9_000_000.0, 9_000_000.0)
+    data = await _refresh_at(coordinator, client, _paris(2, 0, 0), 0.0, 600 * 300)
 
     assert data.msb_discharge_power == 0
     assert data.grid_billed_power == pytest.approx(600)
+
+
+@pytest.mark.asyncio
+async def test_update__should_ignore_float_noise_decrease_within_the_same_day():
+    """MyLight sometimes returns the same counter a few 1e-9 Ws lower: that is 0 W, not a midnight reset."""
+    coordinator, client = _build_coordinator(meter_id=None)
+    billed_ws = 28_632_294.0
+
+    await _refresh_at(coordinator, client, _paris(2, 18, 0), 1000.0, billed_ws)
+    data = await _refresh_at(coordinator, client, _paris(2, 18, 5), 1000.0, billed_ws - 4e-9)
+
+    assert data.grid_billed_power == 0
+    assert data.msb_discharge_power == 0
 
 
 @pytest.mark.asyncio
@@ -183,8 +200,8 @@ async def test_update__should_not_derive_powers_without_virtual_battery():
     coordinator, client = _build_coordinator(meter_id=None)
     coordinator.has_virtual_battery = False
 
-    await _refresh_at(coordinator, client, 0, 1000.0, 5000.0)
-    data = await _refresh_at(coordinator, client, 5, 2000.0, 6000.0)
+    await _refresh_at(coordinator, client, _paris(2, 18, 0), 1000.0, 5000.0)
+    data = await _refresh_at(coordinator, client, _paris(2, 18, 5), 2000.0, 6000.0)
 
     assert (data.msb_discharge_power, data.grid_billed_power) == (None, None)
 

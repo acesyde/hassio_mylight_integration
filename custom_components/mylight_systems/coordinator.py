@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any, NamedTuple
 
 from homeassistant.config_entries import ConfigEntry
@@ -56,14 +56,14 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     grid_billed_power: float | None = None
 
 
-def _average_power(previous_ws: float, current_ws: float, elapsed_s: float) -> float | None:
+def _average_power(previous_ws: float, current_ws: float, elapsed_s: float, new_day: bool) -> float | None:
     """Average power in W between two readings of a daily energy counter in Ws."""
     if elapsed_s <= 0:
         return None
     delta_ws = current_ws - previous_ws
-    # The counters restart at local midnight: count only what was measured since.
     if delta_ws < 0:
-        delta_ws = current_ws
+        # The counters restart at local midnight; any other decrease is float noise from the API.
+        delta_ws = current_ws if new_day else 0.0
     return delta_ws / elapsed_s
 
 
@@ -87,7 +87,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         self.grid_meter_id: str | None = None
         self._grid_meter_discovered = False
         self.has_virtual_battery = bool(config_entry.data.get(CONF_VIRTUAL_BATTERY_ID))
-        self._previous_counters: tuple[datetime, float, float] | None = None
+        self._previous_counters: tuple[datetime, date, float, float] | None = None
         scan_interval = int(config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_IN_MINUTES))
         super().__init__(
             hass=hass,
@@ -140,7 +140,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             grid_energy_without_battery = self.find_measure_by_type(energy_result, "grid_sans_msb_energy")
             msb_discharge = self.find_measure_by_type(energy_result, "msb_discharge")
             msb_discharge_power, grid_billed_power = self._compute_virtual_battery_powers(
-                msb_discharge, grid_energy_without_battery
+                local_today, msb_discharge, grid_energy_without_battery
             )
 
             data = MyLightSystemsCoordinatorData(
@@ -214,7 +214,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             return None
 
     def _compute_virtual_battery_powers(
-        self, msb_discharge: Measure | None, grid_billed: Measure | None
+        self, local_today: date, msb_discharge: Measure | None, grid_billed: Measure | None
     ) -> tuple[float | None, float | None]:
         """Derive discharge and billed import powers from the energy counters MyLight bills on.
 
@@ -226,14 +226,15 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             return None, None
         now = dt_util.utcnow()
         previous = self._previous_counters
-        self._previous_counters = (now, msb_discharge.value, grid_billed.value)
+        self._previous_counters = (now, local_today, msb_discharge.value, grid_billed.value)
         if previous is None:
             return None, None
-        previous_time, previous_discharge, previous_billed = previous
+        previous_time, previous_day, previous_discharge, previous_billed = previous
         elapsed_s = (now - previous_time).total_seconds()
+        new_day = local_today != previous_day
         return (
-            _average_power(previous_discharge, msb_discharge.value, elapsed_s),
-            _average_power(previous_billed, grid_billed.value, elapsed_s),
+            _average_power(previous_discharge, msb_discharge.value, elapsed_s, new_day),
+            _average_power(previous_billed, grid_billed.value, elapsed_s, new_day),
         )
 
     def _token_needs_refresh(self) -> bool:
