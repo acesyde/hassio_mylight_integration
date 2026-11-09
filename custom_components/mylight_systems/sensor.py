@@ -179,26 +179,27 @@ GRID_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
 )
 
-# Created only for installations with a virtual battery; averaged over the refresh interval.
-VIRTUAL_BATTERY_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
-    MyLightSensorEntityDescription(
-        key="msb_discharge_power",
-        translation_key="msb_discharge_power",
+
+def _power_sensor(key: str) -> MyLightSensorEntityDescription:
+    """Average power over the refresh interval, derived from the energy counters."""
+    return MyLightSensorEntityDescription(
+        key=key,
+        translation_key=key,
         native_unit_of_measurement=UnitOfPower.WATT,
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.POWER,
         suggested_display_precision=0,
-        value_fn=lambda data: data.msb_discharge_power,
-    ),
-    MyLightSensorEntityDescription(
-        key="grid_billed_power",
-        translation_key="grid_billed_power",
-        native_unit_of_measurement=UnitOfPower.WATT,
-        state_class=SensorStateClass.MEASUREMENT,
-        device_class=SensorDeviceClass.POWER,
-        suggested_display_precision=0,
-        value_fn=lambda data: data.grid_billed_power,
-    ),
+        value_fn=lambda data: (data.powers or {}).get(key),
+    )
+
+
+COUNTER_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = tuple(
+    _power_sensor(key) for key in ("solar_power", "consumption_power", "grid_returned_power", "grid_net_power")
+)
+
+# Created only for installations with a virtual battery.
+VIRTUAL_BATTERY_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = tuple(
+    _power_sensor(key) for key in ("msb_charge_power", "msb_discharge_power", "msb_net_power", "grid_billed_power")
 )
 
 
@@ -213,7 +214,7 @@ async def async_setup_entry(
             coordinator=coordinator,
             entity_description=entity_description,
         )
-        for entity_description in MYLIGHT_SENSORS
+        for entity_description in (*MYLIGHT_SENSORS, *COUNTER_POWER_SENSORS)
     ]
 
     if coordinator.grid_meter_id is not None:

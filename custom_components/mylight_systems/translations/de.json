@@ -88,6 +88,12 @@
       "grid_export_power": { "name": "Netzeinspeiseleistung" },
       "msb_discharge_power": { "name": "Entladeleistung der virtuellen Batterie" },
       "grid_billed_power": { "name": "Abgerechnete Netzbezugsleistung" },
+      "solar_power": { "name": "Solarleistung" },
+      "consumption_power": { "name": "Verbrauchsleistung" },
+      "grid_returned_power": { "name": "Rückspeiseleistung" },
+      "grid_net_power": { "name": "Netto-Netzleistung" },
+      "msb_charge_power": { "name": "Ladeleistung der virtuellen Batterie" },
+      "msb_net_power": { "name": "Nettoleistung der virtuellen Batterie" },
       "electric_power_capacity": { "name": "Vertraglich zugesicherte Leistung" }
     },
     "switch": {

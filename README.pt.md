@@ -36,18 +36,46 @@ _Integração para conectar ao [MyLight Systems][mylight_systems]._
 | `sensor.grid_power`                             | Potência instantânea da rede (positiva: importação, negativa: exportação) | W | `measurement` |
 | `sensor.grid_import_power`                      | Potência importada da rede | W | `measurement` |
 | `sensor.grid_export_power`                      | Potência exportada para a rede | W | `measurement` |
-| `sensor.msb_discharge_power`                   | Potência coberta pela bateria virtual | W | `measurement` |
-| `sensor.grid_billed_power`                     | Potência importada faturada (bateria virtual vazia) | W | `measurement` |
+| `sensor.solar_power`                            | Potência de produção solar | W | `measurement` |
+| `sensor.consumption_power`                      | Potência consumida pela habitação | W | `measurement` |
+| `sensor.grid_returned_power`                    | Potência devolvida à rede | W | `measurement` |
+| `sensor.grid_net_power`                         | Potência líquida da rede (positiva: importação, negativa: exportação) | W | `measurement` |
+| `sensor.msb_charge_power`                       | Potência de carga da bateria virtual | W | `measurement` |
+| `sensor.msb_discharge_power`                    | Potência coberta pela bateria virtual | W | `measurement` |
+| `sensor.msb_net_power`                          | Potência líquida da bateria virtual (positiva: descarga, negativa: carga) | W | `measurement` |
+| `sensor.grid_billed_power`                      | Potência importada faturada (bateria virtual vazia) | W | `measurement` |
 
 > `grid_power`, `grid_import_power`, `grid_export_power`: Só criados se um único contador de rede for detetado. A MyLight fornece uma média de 5 minutos: mantenha o intervalo de atualização padrão de 5 minutos, caso contrário perdem-se medições.
 >
-> `msb_discharge_power`, `grid_billed_power`: Disponíveis apenas quando uma bateria virtual é detetada. Média no intervalo de atualização (mantenha os 5 minutos padrão, o passo de medição da MyLight: intervalos maiores suavizam a curva) a partir dos contadores `total_msb_discharge` e `total_grid_without_battery_consumption`: use-os como potência de descarga (bateria) e de importação (rede) no painel de Energia. Não têm valor durante o primeiro intervalo após um arranque (são necessárias duas leituras).
+> `solar_power`, `consumption_power`, `grid_returned_power`, `grid_net_power`: médias no intervalo de atualização, calculadas a partir dos contadores de energia da MyLight, por isso coincidem ao Wh com os totais em kWh. Mantenha o intervalo padrão de 5 minutos, o passo de medição da MyLight (intervalos maiores suavizam a curva). Sem valor durante o primeiro intervalo após um arranque (são necessárias duas leituras). Com bateria virtual, `grid_net_power` só conta a importação faturada.
+>
+> `msb_charge_power`, `msb_discharge_power`, `msb_net_power`, `grid_billed_power`: mesmo cálculo, disponíveis apenas quando uma bateria virtual é detetada.
 
 ### Interruptores
 
 | ID da entidade        | Descrição                                   | Notas                                             |
 | --------------------- | ------------------------------------------- | ------------------------------------------------- |
 | `switch.master_relay` | Controla o relé principal da sua instalação | Disponível apenas quando um relé está emparelhado |
+
+## Configurar o painel de Energia
+
+Em **Definições → Painéis → Energia**, indique para cada fonte os seus contadores de energia e, para a potência, **um único sensor com sinal** (modo padrão: positivo quando a energia entra na habitação, negativo quando sai). O Home Assistant deixa de precisar de criar os seus próprios sensores de potência líquida, e o gráfico «Fontes de potência» coincide exatamente com os totais em kWh.
+
+Os IDs de entidade reais incluem o nome do seu dispositivo: procure os sensores pelo nome (entre parênteses abaixo, em português).
+
+| Fonte | Energia | Potência (um único sensor) |
+|---|---|---|
+| Rede | Consumo: `total_grid_without_battery_consumption` com bateria virtual, senão `total_grid_consumption`. Retorno: `grid_returned_energy` | `grid_net_power` (Potência líquida da rede) |
+| Solar | `total_solar_production` | `solar_power` (Potência solar) |
+| Bateria (apenas bateria virtual) | Descarga: `total_msb_discharge`. Carga: `total_msb_charge` | `msb_net_power` (Potência líquida da bateria virtual) |
+
+1. **Rede**: edite (ou adicione) a fonte de rede, escolha os contadores acima e, na parte de potência, o modo de um único sensor com `grid_net_power`.
+2. **Solar**: edite (ou adicione) a produção solar com `total_solar_production` e a potência `solar_power`.
+3. **Bateria** (se tiver bateria virtual): adicione um armazenamento com `total_msb_discharge` (energia que sai da bateria) e `total_msb_charge` (energia que entra na bateria), e a potência `msb_net_power` no modo de um único sensor.
+
+> **Porquê não `total_grid_consumption` nem `grid_power` com bateria virtual?** A MyLight conta a energia exportada como carga da bateria virtual e a importação coberta pelo seu crédito como descarga: só a parte faturada é rede. Os contadores acima seguem essa lógica; `grid_power` mede o fluxo físico e contaria a bateria como rede.
+>
+> `consumption_power` não é necessário aqui: o Home Assistant calcula o consumo a partir das fontes. Serve para o mostrar noutros sítios (cartões, automatizações).
 
 ## Instalação
 

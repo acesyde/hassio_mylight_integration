@@ -36,18 +36,46 @@ _Integration zur Verbindung mit [MyLight Systems][mylight_systems]._
 | `sensor.grid_power`                             | Momentane Netzleistung (positiv: Bezug, negativ: Einspeisung) | W | `measurement` |
 | `sensor.grid_import_power`                      | Aus dem Netz bezogene Leistung | W | `measurement` |
 | `sensor.grid_export_power`                      | Ins Netz eingespeiste Leistung | W | `measurement` |
-| `sensor.msb_discharge_power`                   | Von der virtuellen Batterie gedeckte Leistung | W | `measurement` |
-| `sensor.grid_billed_power`                     | Abgerechnete Netzbezugsleistung (virtuelle Batterie leer) | W | `measurement` |
+| `sensor.solar_power`                            | Solare Erzeugungsleistung | W | `measurement` |
+| `sensor.consumption_power`                      | Verbrauchsleistung des Haushalts | W | `measurement` |
+| `sensor.grid_returned_power`                    | Ins Netz zurückgespeiste Leistung | W | `measurement` |
+| `sensor.grid_net_power`                         | Netto-Netzleistung (positiv: Bezug, negativ: Einspeisung) | W | `measurement` |
+| `sensor.msb_charge_power`                       | Ladeleistung der virtuellen Batterie | W | `measurement` |
+| `sensor.msb_discharge_power`                    | Von der virtuellen Batterie gedeckte Leistung | W | `measurement` |
+| `sensor.msb_net_power`                          | Nettoleistung der virtuellen Batterie (positiv: Entladung, negativ: Ladung) | W | `measurement` |
+| `sensor.grid_billed_power`                      | Abgerechnete Netzbezugsleistung (virtuelle Batterie leer) | W | `measurement` |
 
 > `grid_power`, `grid_import_power`, `grid_export_power`: Nur bei genau einem erkannten Netzzähler vorhanden. MyLight liefert einen 5-Minuten-Mittelwert: Standard-Aktualisierungsintervall von 5 Minuten beibehalten, sonst werden Messwerte übersprungen.
 >
-> `msb_discharge_power`, `grid_billed_power`: Nur verfügbar, wenn eine virtuelle Batterie erkannt wird. Mittelwert über das Aktualisierungsintervall (Standard von 5 Minuten beibehalten, entspricht dem Messschritt von MyLight: längere Intervalle glätten die Kurve) aus den Zählern `total_msb_discharge` und `total_grid_without_battery_consumption`: im Energie-Dashboard als Entlade- (Batterie) und Bezugsleistung (Netz) verwenden. Im ersten Intervall nach einem Start haben sie keinen Wert (zwei Messwerte nötig).
+> `solar_power`, `consumption_power`, `grid_returned_power`, `grid_net_power`: Mittelwerte über das Aktualisierungsintervall, berechnet aus den MyLight-Energiezählern, daher auf die Wh genau mit den kWh-Summen übereinstimmend. Standardintervall von 5 Minuten beibehalten, entspricht dem Messschritt von MyLight (längere Intervalle glätten die Kurve). Im ersten Intervall nach einem Start kein Wert (zwei Messwerte nötig). Mit virtueller Batterie zählt `grid_net_power` nur den abgerechneten Bezug.
+>
+> `msb_charge_power`, `msb_discharge_power`, `msb_net_power`, `grid_billed_power`: gleiche Berechnung, nur verfügbar, wenn eine virtuelle Batterie erkannt wird.
 
 ### Schalter
 
 | Entitäts-ID           | Beschreibung                                        | Hinweise                                          |
 | --------------------- | --------------------------------------------------- | ------------------------------------------------- |
 | `switch.master_relay` | Steuert das Hauptrelais Ihrer Installation          | Nur verfügbar, wenn ein Relais gekoppelt ist      |
+
+## Energie-Dashboard konfigurieren
+
+Unter **Einstellungen → Dashboards → Energie** für jede Quelle die Energiezähler eintragen und für die Leistung **einen einzelnen vorzeichenbehafteten Sensor** wählen (Standardmodus: positiv, wenn Energie ins Haus fließt, negativ, wenn sie hinausfließt). Home Assistant muss dann keine eigenen Nettoleistungssensoren anlegen, und das Diagramm „Leistungsquellen“ entspricht genau den kWh-Summen.
+
+Die tatsächlichen Entitäts-IDs enthalten Ihren Gerätenamen: Sensoren nach Namen suchen (unten in Klammern, auf Deutsch).
+
+| Quelle | Energie | Leistung (einzelner Sensor) |
+|---|---|---|
+| Netz | Bezug: `total_grid_without_battery_consumption` mit virtueller Batterie, sonst `total_grid_consumption`. Rückspeisung: `grid_returned_energy` | `grid_net_power` (Netto-Netzleistung) |
+| Solar | `total_solar_production` | `solar_power` (Solarleistung) |
+| Batterie (nur virtuelle Batterie) | Entladung: `total_msb_discharge`. Ladung: `total_msb_charge` | `msb_net_power` (Nettoleistung der virtuellen Batterie) |
+
+1. **Netz**: Netzquelle bearbeiten (oder hinzufügen), obige Zähler wählen, dann im Leistungsteil den Einzelsensor-Modus mit `grid_net_power`.
+2. **Solar**: Solarproduktion mit `total_solar_production` und der Leistung `solar_power` bearbeiten (oder hinzufügen).
+3. **Batterie** (bei virtueller Batterie): Batteriespeicher mit `total_msb_discharge` (Energie aus der Batterie) und `total_msb_charge` (Energie in die Batterie) hinzufügen, dann die Leistung `msb_net_power` im Einzelsensor-Modus.
+
+> **Warum nicht `total_grid_consumption` oder `grid_power` mit virtueller Batterie?** MyLight zählt eingespeiste Energie als Ladung der virtuellen Batterie und durch Ihr Guthaben gedeckten Bezug als Entladung: nur der abgerechnete Teil ist Netz. Die obigen Zähler folgen dieser Logik; `grid_power` misst den physischen Fluss und würde die Batterie als Netz zählen.
+>
+> `consumption_power` wird hier nicht benötigt: Home Assistant berechnet den Verbrauch aus den Quellen. Es dient zur Anzeige an anderer Stelle (Karten, Automatisierungen).
 
 ## Installation
 
