@@ -56,6 +56,10 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     powers: dict[str, float] | None = None
 
 
+# MyLight counters move in 5-minute steps: a shorter window reads 0 W or a spike.
+MIN_POWER_WINDOW = timedelta(minutes=4)
+
+
 def _average_power(previous_ws: float, current_ws: float, elapsed_s: float, new_day: bool) -> float | None:
     """Average power in W between two readings of a daily energy counter in Ws."""
     if elapsed_s <= 0:
@@ -131,6 +135,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         self._grid_meter_discovered = False
         self.has_virtual_battery = bool(config_entry.data.get(CONF_VIRTUAL_BATTERY_ID))
         self._previous_counters: tuple[datetime, date, dict[str, float]] | None = None
+        self._last_powers: dict[str, float] = {}
         scan_interval = int(config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_IN_MINUTES))
         super().__init__(
             hass=hass,
@@ -258,9 +263,12 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         counters = _counters_ws(data)
         now = dt_util.utcnow()
         previous = self._previous_counters
+        if previous is not None and now - previous[0] < MIN_POWER_WINDOW:
+            # Extra refresh (startup, relay toggle, update_entity): keep the reference and the last powers.
+            return self._last_powers
         self._previous_counters = (now, local_today, counters)
         if previous is None:
-            return {}
+            return self._last_powers
         previous_time, previous_day, previous_counters = previous
         elapsed_s = (now - previous_time).total_seconds()
         new_day = local_today != previous_day
@@ -270,7 +278,8 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 rate = _average_power(previous_counters[name], value, elapsed_s, new_day)
                 if rate is not None:
                     rates[name] = rate
-        return _powers_from_rates(rates, self.has_virtual_battery)
+        self._last_powers = _powers_from_rates(rates, self.has_virtual_battery)
+        return self._last_powers
 
     def _token_needs_refresh(self) -> bool:
         """Return True if the auth token is missing or expires within 60 seconds."""

@@ -1,6 +1,6 @@
 """Unit tests for the coordinator."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 from zoneinfo import ZoneInfo
 
@@ -231,6 +231,34 @@ async def test_update__should_ignore_float_noise_decrease_within_the_same_day():
     data = await _refresh_at(coordinator, client, _paris(2, 15, 10), billed=7953.415 - 1e-12)
 
     assert data.powers["grid_billed_power"] == 0
+
+
+@pytest.mark.asyncio
+async def test_update__should_stay_unknown_on_an_immediate_second_refresh():
+    """A refresh right after startup must not read 0 W from an unchanged counter."""
+    coordinator, client = _build_coordinator(meter_id=None)
+    start = _paris(2, 8, 7)
+
+    await _refresh_at(coordinator, client, start, billed=7944.443)
+    data = await _refresh_at(coordinator, client, start + timedelta(milliseconds=50), billed=7944.443)
+
+    assert {} == data.powers
+
+
+@pytest.mark.asyncio
+async def test_update__should_keep_last_powers_on_a_close_refresh_and_average_from_the_reference():
+    """A refresh 2 min after the reference reuses the last powers; the next one averages over the whole span."""
+    coordinator, client = _build_coordinator(meter_id=None)
+
+    await _refresh_at(coordinator, client, _paris(2, 12, 0), billed=1000)
+    first = await _refresh_at(coordinator, client, _paris(2, 12, 5), billed=1050)  # 600 W
+    # A new 5-minute bucket lands 2 min later: averaging over 2 min would read 1500 W.
+    close = await _refresh_at(coordinator, client, _paris(2, 12, 7), billed=1100)
+    later = await _refresh_at(coordinator, client, _paris(2, 12, 12), billed=1120)
+
+    assert first.powers["grid_billed_power"] == pytest.approx(600)
+    assert close.powers == first.powers
+    assert later.powers["grid_billed_power"] == pytest.approx(70 * 60 / 7)  # 70 Wh over 7 min
 
 
 def test_coordinator__should_detect_virtual_battery_from_config_entry():
