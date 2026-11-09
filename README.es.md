@@ -61,13 +61,14 @@ _Integración para conectar con [MyLight Systems][mylight_systems]._
 
 En **Ajustes → Paneles de control → Energía**, indique para cada fuente sus contadores de energía y, para la potencia, **un único sensor con signo** (modo estándar: positivo cuando la energía entra en la vivienda, negativo cuando sale). Home Assistant ya no necesita crear sus propios sensores de potencia neta, y el gráfico «Fuentes de potencia» coincide exactamente con los totales en kWh.
 
-Los ID de entidad reales incluyen el nombre de su dispositivo: busque los sensores por su nombre (entre paréntesis abajo, en español).
+Los ID de entidad reales incluyen el nombre de su dispositivo: busque los sensores por su nombre visible, indicado entre comillas abajo (en español), sin añadir nada.
 
 | Fuente | Energía | Potencia (un único sensor) |
 |---|---|---|
-| Red | Consumo: `total_grid_without_battery_consumption` con batería virtual, si no `total_grid_consumption`. Retorno: `grid_returned_energy` | `grid_net_power` (Potencia neta de la red, o Potencia neta de la red facturada con batería virtual) |
-| Solar | `total_solar_production` | `solar_power` (Potencia solar) |
-| Batería (solo batería virtual) | Descarga: `total_msb_discharge`. Carga: `total_msb_charge` | `msb_net_power` (Potencia neta de la batería virtual) |
+| Red, con batería virtual | Consumo: `total_grid_without_battery_consumption`. Retorno: `grid_returned_energy` | `grid_net_power`: «Potencia neta de la red facturada» |
+| Red, sin batería virtual | Consumo: `total_grid_consumption`. Retorno: `grid_returned_energy` | `grid_net_power`: «Potencia neta de la red» |
+| Solar | `total_solar_production` | `solar_power`: «Potencia solar» |
+| Batería (solo batería virtual) | Descarga: `total_msb_discharge`. Carga: `total_msb_charge` | `msb_net_power`: «Potencia neta de la batería virtual» |
 
 1. **Red**: edite (o añada) la fuente de red, elija los contadores anteriores y, en la parte de potencia, el modo de un único sensor con `grid_net_power`.
 2. **Solar**: edite (o añada) la producción solar con `total_solar_production` y la potencia `solar_power`.

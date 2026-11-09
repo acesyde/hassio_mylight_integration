@@ -61,13 +61,14 @@ _Integração para conectar ao [MyLight Systems][mylight_systems]._
 
 Em **Definições → Painéis → Energia**, indique para cada fonte os seus contadores de energia e, para a potência, **um único sensor com sinal** (modo padrão: positivo quando a energia entra na habitação, negativo quando sai). O Home Assistant deixa de precisar de criar os seus próprios sensores de potência líquida, e o gráfico «Fontes de potência» coincide exatamente com os totais em kWh.
 
-Os IDs de entidade reais incluem o nome do seu dispositivo: procure os sensores pelo nome (entre parênteses abaixo, em português).
+Os IDs de entidade reais incluem o nome do seu dispositivo: procure os sensores pelo nome apresentado, indicado entre aspas abaixo (em português), sem acrescentar nada.
 
 | Fonte | Energia | Potência (um único sensor) |
 |---|---|---|
-| Rede | Consumo: `total_grid_without_battery_consumption` com bateria virtual, senão `total_grid_consumption`. Retorno: `grid_returned_energy` | `grid_net_power` (Potência líquida da rede, ou Potência líquida da rede faturada com bateria virtual) |
-| Solar | `total_solar_production` | `solar_power` (Potência solar) |
-| Bateria (apenas bateria virtual) | Descarga: `total_msb_discharge`. Carga: `total_msb_charge` | `msb_net_power` (Potência líquida da bateria virtual) |
+| Rede, com bateria virtual | Consumo: `total_grid_without_battery_consumption`. Retorno: `grid_returned_energy` | `grid_net_power`: «Potência líquida da rede faturada» |
+| Rede, sem bateria virtual | Consumo: `total_grid_consumption`. Retorno: `grid_returned_energy` | `grid_net_power`: «Potência líquida da rede» |
+| Solar | `total_solar_production` | `solar_power`: «Potência solar» |
+| Bateria (apenas bateria virtual) | Descarga: `total_msb_discharge`. Carga: `total_msb_charge` | `msb_net_power`: «Potência líquida da bateria virtual» |
 
 1. **Rede**: edite (ou adicione) a fonte de rede, escolha os contadores acima e, na parte de potência, o modo de um único sensor com `grid_net_power`.
 2. **Solar**: edite (ou adicione) a produção solar com `total_solar_production` e a potência `solar_power`.
