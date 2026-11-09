@@ -34,22 +34,22 @@ _Integration zur Verbindung mit [MyLight Systems][mylight_systems]._
 | `sensor.battery_state`                          | Aktuell in der Smart Battery gespeicherte Energie      | kWh     | `measurement`      |
 | `sensor.grid_returned_energy`                   | Solarenergie ins Netz eingespeist                      | Wh      | `total_increasing` |
 | `sensor.grid_power`                             | Momentane Netzleistung (positiv: Bezug, negativ: Einspeisung) | W | `measurement` |
-| `sensor.grid_import_power`                      | Aus dem Netz bezogene Leistung | W | `measurement` |
-| `sensor.grid_export_power`                      | Ins Netz eingespeiste Leistung | W | `measurement` |
+| `sensor.grid_import_power`                      | Aus dem Netz bezogene Leistung (momentan) | W | `measurement` |
+| `sensor.grid_export_power`                      | Ins Netz eingespeiste Leistung (momentan) | W | `measurement` |
 | `sensor.solar_power`                            | Solare Erzeugungsleistung | W | `measurement` |
 | `sensor.consumption_power`                      | Verbrauchsleistung des Haushalts | W | `measurement` |
-| `sensor.grid_returned_power`                    | Ins Netz zurückgespeiste Leistung | W | `measurement` |
-| `sensor.grid_net_power`                         | Netto-Netzleistung (positiv: Bezug, negativ: Einspeisung) | W | `measurement` |
+| `sensor.grid_returned_power`                    | Ins Netz zurückgespeiste Leistung (ohne virtuelle Batterie) | W | `measurement` |
+| `sensor.grid_net_power`                         | Netto-Netzleistung (positiv: Bezug, negativ: Einspeisung). Mit virtueller Batterie: „Abgerechnete Netto-Netzleistung“ | W | `measurement` |
 | `sensor.msb_charge_power`                       | Ladeleistung der virtuellen Batterie | W | `measurement` |
 | `sensor.msb_discharge_power`                    | Von der virtuellen Batterie gedeckte Leistung | W | `measurement` |
 | `sensor.msb_net_power`                          | Nettoleistung der virtuellen Batterie (positiv: Entladung, negativ: Ladung) | W | `measurement` |
 | `sensor.grid_billed_power`                      | Abgerechnete Netzbezugsleistung (virtuelle Batterie leer) | W | `measurement` |
 
-> `grid_power`, `grid_import_power`, `grid_export_power`: Nur bei genau einem erkannten Netzzähler vorhanden. MyLight liefert einen 5-Minuten-Mittelwert: Standard-Aktualisierungsintervall von 5 Minuten beibehalten, sonst werden Messwerte übersprungen.
+> `grid_power`, `grid_import_power`, `grid_export_power`: nur bei genau einem erkannten Netzzähler vorhanden. Punktueller Zählerwert bei jeder Aktualisierung: kann vom Mittelwert des Intervalls abweichen. Für das Energie-Dashboard die unten berechneten Leistungen bevorzugen.
 >
-> `solar_power`, `consumption_power`, `grid_returned_power`, `grid_net_power`: Mittelwerte über das Aktualisierungsintervall, berechnet aus den MyLight-Energiezählern, daher auf die Wh genau mit den kWh-Summen übereinstimmend. Standardintervall von 5 Minuten beibehalten, entspricht dem Messschritt von MyLight (längere Intervalle glätten die Kurve). Im ersten Intervall nach einem Start kein Wert (zwei Messwerte nötig). Mit virtueller Batterie zählt `grid_net_power` nur den abgerechneten Bezug.
+> `solar_power`, `consumption_power`, `grid_net_power`, `grid_returned_power`: Mittelwerte über das Aktualisierungsintervall, berechnet aus den MyLight-Energiezählern, daher auf die Wh genau mit den kWh-Summen übereinstimmend. Standardintervall von 5 Minuten beibehalten, entspricht dem Messschritt von MyLight (längere Intervalle glätten die Kurve). Im ersten Intervall nach einem Start kein Wert (zwei Messwerte nötig). Mit virtueller Batterie zählt `grid_net_power` nur den abgerechneten Bezug.
 >
-> `msb_charge_power`, `msb_discharge_power`, `msb_net_power`, `grid_billed_power`: gleiche Berechnung, nur verfügbar, wenn eine virtuelle Batterie erkannt wird.
+> `msb_charge_power`, `msb_discharge_power`, `msb_net_power`, `grid_billed_power`: gleiche Berechnung, nur verfügbar, wenn eine virtuelle Batterie erkannt wird. `grid_returned_power` wird dann nicht angelegt: MyLight zählt jede eingespeiste Wh als Ladung, die Rückspeisung ist immer 0. Aus demselben Grund haben `grid_net_power` (umbenannt in „Abgerechnete Netto-Netzleistung“) und `grid_billed_power` denselben Wert: das erste ist für den Einzelsensor-Modus (vorzeichenbehaftet) des Energie-Dashboards, das zweite für den Zwei-Sensoren-Modus.
 
 ### Schalter
 
@@ -65,7 +65,7 @@ Die tatsächlichen Entitäts-IDs enthalten Ihren Gerätenamen: Sensoren nach Nam
 
 | Quelle | Energie | Leistung (einzelner Sensor) |
 |---|---|---|
-| Netz | Bezug: `total_grid_without_battery_consumption` mit virtueller Batterie, sonst `total_grid_consumption`. Rückspeisung: `grid_returned_energy` | `grid_net_power` (Netto-Netzleistung) |
+| Netz | Bezug: `total_grid_without_battery_consumption` mit virtueller Batterie, sonst `total_grid_consumption`. Rückspeisung: `grid_returned_energy` | `grid_net_power` (Netto-Netzleistung, mit virtueller Batterie: Abgerechnete Netto-Netzleistung) |
 | Solar | `total_solar_production` | `solar_power` (Solarleistung) |
 | Batterie (nur virtuelle Batterie) | Entladung: `total_msb_discharge`. Ladung: `total_msb_charge` | `msb_net_power` (Nettoleistung der virtuellen Batterie) |
 
