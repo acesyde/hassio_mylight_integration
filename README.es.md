@@ -34,22 +34,22 @@ _Integración para conectar con [MyLight Systems][mylight_systems]._
 | `sensor.battery_state`                          | Energía almacenada actualmente en la Smart Battery     | kWh    | `measurement`      |
 | `sensor.grid_returned_energy`                   | Energía solar exportada a la red                       | Wh     | `total_increasing` |
 | `sensor.grid_power`                             | Potencia instantánea de red (positiva: importación, negativa: exportación) | W | `measurement` |
-| `sensor.grid_import_power`                      | Potencia importada de la red | W | `measurement` |
-| `sensor.grid_export_power`                      | Potencia exportada a la red | W | `measurement` |
+| `sensor.grid_import_power`                      | Potencia importada de la red (instantánea) | W | `measurement` |
+| `sensor.grid_export_power`                      | Potencia exportada a la red (instantánea) | W | `measurement` |
 | `sensor.solar_power`                            | Potencia de producción solar | W | `measurement` |
 | `sensor.consumption_power`                      | Potencia consumida por la vivienda | W | `measurement` |
-| `sensor.grid_returned_power`                    | Potencia devuelta a la red | W | `measurement` |
-| `sensor.grid_net_power`                         | Potencia neta de la red (positiva: importación, negativa: exportación) | W | `measurement` |
+| `sensor.grid_returned_power`                    | Potencia devuelta a la red (sin batería virtual) | W | `measurement` |
+| `sensor.grid_net_power`                         | Potencia neta de la red (positiva: importación, negativa: exportación). Con batería virtual: «Potencia neta de la red facturada» | W | `measurement` |
 | `sensor.msb_charge_power`                       | Potencia de carga de la batería virtual | W | `measurement` |
 | `sensor.msb_discharge_power`                    | Potencia cubierta por la batería virtual | W | `measurement` |
 | `sensor.msb_net_power`                          | Potencia neta de la batería virtual (positiva: descarga, negativa: carga) | W | `measurement` |
 | `sensor.grid_billed_power`                      | Potencia importada facturada (batería virtual vacía) | W | `measurement` |
 
-> `grid_power`, `grid_import_power`, `grid_export_power`: Solo se crean si se detecta un único contador de red. MyLight entrega un promedio de 5 minutos: mantenga el intervalo de actualización por defecto de 5 minutos, de lo contrario se omiten mediciones.
+> `grid_power`, `grid_import_power`, `grid_export_power`: solo se crean si se detecta un único contador de red. Lectura puntual del contador en cada actualización: puede diferir del promedio del intervalo. Para el panel de Energía, prefiera las potencias calculadas de abajo.
 >
-> `solar_power`, `consumption_power`, `grid_returned_power`, `grid_net_power`: promedios sobre el intervalo de actualización, calculados a partir de los contadores de energía de MyLight, por lo que coinciden al Wh con los totales en kWh. Mantenga el intervalo por defecto de 5 minutos, el paso de medición de MyLight (intervalos más largos suavizan la curva). Sin valor durante el primer intervalo tras un arranque (se necesitan dos lecturas). Con una batería virtual, `grid_net_power` solo cuenta la importación facturada.
+> `solar_power`, `consumption_power`, `grid_net_power`, `grid_returned_power`: promedios sobre el intervalo de actualización, calculados a partir de los contadores de energía de MyLight, por lo que coinciden al Wh con los totales en kWh. Mantenga el intervalo por defecto de 5 minutos, el paso de medición de MyLight (intervalos más largos suavizan la curva). Sin valor durante el primer intervalo tras un arranque (se necesitan dos lecturas). Con una batería virtual, `grid_net_power` solo cuenta la importación facturada.
 >
-> `msb_charge_power`, `msb_discharge_power`, `msb_net_power`, `grid_billed_power`: mismo cálculo, disponibles solo si se detecta una batería virtual.
+> `msb_charge_power`, `msb_discharge_power`, `msb_net_power`, `grid_billed_power`: mismo cálculo, disponibles solo si se detecta una batería virtual. `grid_returned_power` no se crea entonces: MyLight cuenta cada Wh exportado como carga, el retorno siempre vale 0. Por la misma razón, `grid_net_power` (renombrado «Potencia neta de la red facturada») y `grid_billed_power` tienen el mismo valor: el primero sirve para el modo de un único sensor con signo del panel de Energía, el segundo para el modo de dos sensores.
 
 ### Interruptores
 
@@ -65,7 +65,7 @@ Los ID de entidad reales incluyen el nombre de su dispositivo: busque los sensor
 
 | Fuente | Energía | Potencia (un único sensor) |
 |---|---|---|
-| Red | Consumo: `total_grid_without_battery_consumption` con batería virtual, si no `total_grid_consumption`. Retorno: `grid_returned_energy` | `grid_net_power` (Potencia neta de la red) |
+| Red | Consumo: `total_grid_without_battery_consumption` con batería virtual, si no `total_grid_consumption`. Retorno: `grid_returned_energy` | `grid_net_power` (Potencia neta de la red, o Potencia neta de la red facturada con batería virtual) |
 | Solar | `total_solar_production` | `solar_power` (Potencia solar) |
 | Batería (solo batería virtual) | Descarga: `total_msb_discharge`. Carga: `total_msb_charge` | `msb_net_power` (Potencia neta de la batería virtual) |
 

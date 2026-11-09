@@ -34,22 +34,22 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 | `sensor.battery_state`                          | Current energy stored in the Smart Battery          | kWh  | `measurement`      |
 | `sensor.grid_returned_energy`                   | Solar energy exported back to the grid              | Wh   | `total_increasing` |
 | `sensor.grid_power`                             | Instantaneous grid power (positive: import, negative: export) | W | `measurement` |
-| `sensor.grid_import_power`                      | Power drawn from the grid | W | `measurement` |
-| `sensor.grid_export_power`                      | Power exported to the grid | W | `measurement` |
+| `sensor.grid_import_power`                      | Power drawn from the grid (instantaneous) | W | `measurement` |
+| `sensor.grid_export_power`                      | Power exported to the grid (instantaneous) | W | `measurement` |
 | `sensor.solar_power`                            | Solar production power | W | `measurement` |
 | `sensor.consumption_power`                      | Home consumption power | W | `measurement` |
-| `sensor.grid_returned_power`                    | Power returned to the grid | W | `measurement` |
-| `sensor.grid_net_power`                         | Grid net power (positive: import, negative: export) | W | `measurement` |
+| `sensor.grid_returned_power`                    | Power returned to the grid (without a virtual battery) | W | `measurement` |
+| `sensor.grid_net_power`                         | Grid net power (positive: import, negative: export). With a virtual battery: "Billed grid net power" | W | `measurement` |
 | `sensor.msb_charge_power`                       | Virtual battery charge power | W | `measurement` |
 | `sensor.msb_discharge_power`                    | Power covered by the virtual battery | W | `measurement` |
 | `sensor.msb_net_power`                          | Virtual battery net power (positive: discharge, negative: charge) | W | `measurement` |
 | `sensor.grid_billed_power`                      | Billed grid import power (virtual battery empty) | W | `measurement` |
 
-> `grid_power`, `grid_import_power`, `grid_export_power`: Only created when a single grid meter is detected. MyLight reports a 5-minute average: keep the default 5-minute update interval, otherwise readings are skipped.
+> `grid_power`, `grid_import_power`, `grid_export_power`: only created when a single grid meter is detected. Point reading taken from the meter at each update: it can differ from the interval average. For the Energy dashboard, prefer the computed powers below.
 >
-> `solar_power`, `consumption_power`, `grid_returned_power`, `grid_net_power`: averages over the update interval, computed from the MyLight energy counters, so they match the kWh totals to the Wh. Keep the default 5-minute interval, MyLight's measurement step (longer intervals smooth the curve). No value during the first interval after a startup (two readings are needed). With a virtual battery, `grid_net_power` only counts the billed import.
+> `solar_power`, `consumption_power`, `grid_net_power`, `grid_returned_power`: averages over the update interval, computed from the MyLight energy counters, so they match the kWh totals to the Wh. Keep the default 5-minute interval, MyLight's measurement step (longer intervals smooth the curve). No value during the first interval after a startup (two readings are needed). With a virtual battery, `grid_net_power` only counts the billed import.
 >
-> `msb_charge_power`, `msb_discharge_power`, `msb_net_power`, `grid_billed_power`: same computation, available only when a virtual battery is detected.
+> `msb_charge_power`, `msb_discharge_power`, `msb_net_power`, `grid_billed_power`: same computation, available only when a virtual battery is detected. `grid_returned_power` is then not created: MyLight counts every exported Wh as a charge, so the return is always 0. For the same reason `grid_net_power` (renamed "Billed grid net power") and `grid_billed_power` have the same value: the first is for the Energy dashboard single signed sensor mode, the second for the two-sensor mode.
 
 ### Switches
 
@@ -65,7 +65,7 @@ Actual entity IDs include your device name: search the sensors by name (in paren
 
 | Source | Energy | Power (single sensor) |
 |---|---|---|
-| Grid | Consumption: `total_grid_without_battery_consumption` with a virtual battery, otherwise `total_grid_consumption`. Return: `grid_returned_energy` | `grid_net_power` (Grid net power) |
+| Grid | Consumption: `total_grid_without_battery_consumption` with a virtual battery, otherwise `total_grid_consumption`. Return: `grid_returned_energy` | `grid_net_power` (Grid net power, or Billed grid net power with a virtual battery) |
 | Solar | `total_solar_production` | `solar_power` (Solar power) |
 | Battery (virtual battery only) | Discharge: `total_msb_discharge`. Charge: `total_msb_charge` | `msb_net_power` (Virtual battery net power) |
 

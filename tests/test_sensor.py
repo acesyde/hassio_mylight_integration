@@ -270,11 +270,27 @@ async def test_setup_entry__should_create_grid_power_sensors_only_when_meter_fou
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(("has_virtual_battery", "expected"), [(True, 4), (False, 0)])
-async def test_setup_entry__should_create_virtual_battery_power_sensors_only_with_virtual_battery(
-    has_virtual_battery, expected
+@pytest.mark.parametrize(
+    ("has_virtual_battery", "present", "absent", "grid_net_name"),
+    [
+        (
+            True,
+            {"msb_charge_power", "msb_discharge_power", "msb_net_power", "grid_billed_power", "grid_net_power"},
+            {"grid_returned_power"},
+            "grid_billed_net_power",
+        ),
+        (
+            False,
+            {"grid_returned_power", "grid_net_power"},
+            {"msb_charge_power", "msb_discharge_power", "msb_net_power", "grid_billed_power"},
+            "grid_net_power",
+        ),
+    ],
+)
+async def test_setup_entry__should_create_power_sensors_matching_the_virtual_battery(
+    has_virtual_battery, present, absent, grid_net_name
 ):
-    """Counter powers always exist; the four virtual battery ones only for virtual battery installations."""
+    """Battery powers only with a virtual battery; the always-zero return only without; grid net named accordingly."""
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.data = {}
@@ -284,11 +300,10 @@ async def test_setup_entry__should_create_virtual_battery_power_sensors_only_wit
 
     await async_setup_entry(MagicMock(), entry, add)
 
-    battery_keys = {"msb_charge_power", "msb_discharge_power", "msb_net_power", "grid_billed_power"}
-    common_keys = {"solar_power", "consumption_power", "grid_returned_power", "grid_net_power"}
-    created = {e.entity_description.key for e in add.call_args.args[0]}
-    assert expected == len(created & battery_keys)
-    assert common_keys <= created
+    descriptions = {e.entity_description.key: e.entity_description for e in add.call_args.args[0]}
+    assert present | {"solar_power", "consumption_power"} <= descriptions.keys()
+    assert not absent & descriptions.keys()
+    assert grid_net_name == descriptions["grid_net_power"].translation_key
 
 
 @pytest.mark.parametrize("key", ["solar_power", "msb_net_power"])

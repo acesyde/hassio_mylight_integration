@@ -168,7 +168,10 @@ FIVE_MIN_LATER = {"produced": 1100, "green": 650, "grid": 2010, "billed": 2010, 
 
 @pytest.mark.asyncio
 async def test_update__should_derive_every_power_from_counter_deltas_with_virtual_battery():
-    """Each power is its counter delta over the elapsed time; unknown until two readings exist."""
+    """Each power is its counter delta over the elapsed time; unknown until two readings exist.
+
+    The grid return is not exposed: with a virtual battery every export is counted as a charge.
+    """
     coordinator, client = _build_coordinator(meter_id=None)
 
     first = await _refresh_at(coordinator, client, _paris(2, 12, 0), **MORNING)
@@ -179,7 +182,6 @@ async def test_update__should_derive_every_power_from_counter_deltas_with_virtua
         {
             "solar_power": 1200,  # +100 Wh
             "consumption_power": 720,  # green +50 Wh, grid +10 Wh
-            "grid_returned_power": 0,  # produced - green - charge stays 0
             "grid_net_power": 6120,  # billed +510 Wh, nothing returned
             "msb_charge_power": 600,
             "msb_discharge_power": 0,

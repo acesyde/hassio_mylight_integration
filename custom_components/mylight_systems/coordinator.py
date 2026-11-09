@@ -91,7 +91,7 @@ def _powers_from_rates(rates: dict[str, float], has_virtual_battery: bool) -> di
         powers["solar_power"] = rates["produced"]
     if "green" in rates and "grid" in rates:
         powers["consumption_power"] = rates["green"] + rates["grid"]
-    if "returned" in rates:
+    if "returned" in rates and not has_virtual_battery:
         powers["grid_returned_power"] = rates["returned"]
     # With a virtual battery only the billed import is grid; the rest is the battery discharging.
     imported = rates.get("billed") if has_virtual_battery else rates.get("grid")
