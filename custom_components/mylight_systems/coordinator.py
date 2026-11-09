@@ -52,8 +52,8 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     master_relay_state: str | None
     water_heater_energy: Measure | None
     grid_power: Measure | None
-    msb_discharge_power: float | None = None
-    grid_billed_power: float | None = None
+    # Average powers in W derived from the energy counters, keyed by sensor key.
+    powers: dict[str, float] | None = None
 
 
 def _average_power(previous_ws: float, current_ws: float, elapsed_s: float, new_day: bool) -> float | None:
@@ -65,6 +65,49 @@ def _average_power(previous_ws: float, current_ws: float, elapsed_s: float, new_
         # The counters restart at local midnight; any other decrease is float noise from the API.
         delta_ws = current_ws if new_day else 0.0
     return delta_ws / elapsed_s
+
+
+def _counters_ws(data: MyLightSystemsCoordinatorData) -> dict[str, float]:
+    """Return the available daily energy counters in Ws, including the derived grid return."""
+    measures = {
+        "produced": data.produced_energy,
+        "green": data.green_energy,
+        "grid": data.grid_energy,
+        "billed": data.grid_energy_without_battery,
+        "charge": data.msb_charge,
+        "discharge": data.msb_discharge,
+    }
+    counters = {name: m.value for name, m in measures.items() if m is not None}
+    if "produced" in counters and "green" in counters:
+        # Same formula as the grid_returned_energy sensor.
+        counters["returned"] = max(0.0, counters["produced"] - counters["green"] - counters.get("charge", 0.0))
+    return counters
+
+
+def _powers_from_rates(rates: dict[str, float], has_virtual_battery: bool) -> dict[str, float]:
+    """Map counter rates (W) to sensor powers; signed ones are positive into the home."""
+    powers: dict[str, float] = {}
+    if "produced" in rates:
+        powers["solar_power"] = rates["produced"]
+    if "green" in rates and "grid" in rates:
+        powers["consumption_power"] = rates["green"] + rates["grid"]
+    if "returned" in rates:
+        powers["grid_returned_power"] = rates["returned"]
+    # With a virtual battery only the billed import is grid; the rest is the battery discharging.
+    imported = rates.get("billed") if has_virtual_battery else rates.get("grid")
+    if imported is not None and "returned" in rates:
+        powers["grid_net_power"] = imported - rates["returned"]
+    if has_virtual_battery:
+        for name, key in (
+            ("charge", "msb_charge_power"),
+            ("discharge", "msb_discharge_power"),
+            ("billed", "grid_billed_power"),
+        ):
+            if name in rates:
+                powers[key] = rates[name]
+        if "charge" in rates and "discharge" in rates:
+            powers["msb_net_power"] = rates["discharge"] - rates["charge"]
+    return powers
 
 
 # https://developers.home-assistant.io/docs/integration_fetching_data#coordinated-single-api-poll-for-data-for-all-entities
@@ -87,7 +130,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         self.grid_meter_id: str | None = None
         self._grid_meter_discovered = False
         self.has_virtual_battery = bool(config_entry.data.get(CONF_VIRTUAL_BATTERY_ID))
-        self._previous_counters: tuple[datetime, date, float, float] | None = None
+        self._previous_counters: tuple[datetime, date, dict[str, float]] | None = None
         scan_interval = int(config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_IN_MINUTES))
         super().__init__(
             hass=hass,
@@ -137,28 +180,21 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             master_relay_state = results[3] if master_relay_id is not None else None
             grid_power = results[-1]
 
-            grid_energy_without_battery = self.find_measure_by_type(energy_result, "grid_sans_msb_energy")
-            msb_discharge = self.find_measure_by_type(energy_result, "msb_discharge")
-            msb_discharge_power, grid_billed_power = self._compute_virtual_battery_powers(
-                local_today, msb_discharge, grid_energy_without_battery
-            )
-
             data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(energy_result, "produced_energy"),
                 grid_energy=self.find_measure_by_type(energy_result, "grid_energy"),
-                grid_energy_without_battery=grid_energy_without_battery,
+                grid_energy_without_battery=self.find_measure_by_type(energy_result, "grid_sans_msb_energy"),
                 autonomy_rate=self.find_measure_by_type(total_result, "autonomy_rate"),
                 self_conso=self.find_measure_by_type(total_result, "self_conso"),
                 msb_charge=self.find_measure_by_type(energy_result, "msb_charge"),
-                msb_discharge=msb_discharge,
+                msb_discharge=self.find_measure_by_type(energy_result, "msb_discharge"),
                 green_energy=self.find_measure_by_type(energy_result, "green_energy"),
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
                 water_heater_energy=self.find_measure_by_type(total_result, "water_heater_energy"),
                 grid_power=grid_power,
-                msb_discharge_power=msb_discharge_power,
-                grid_billed_power=grid_billed_power,
             )
+            data = data._replace(powers=self._compute_powers(local_today, data))
 
             self._data = data
 
@@ -213,29 +249,28 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             LOGGER.debug("Grid power read failed")
             return None
 
-    def _compute_virtual_battery_powers(
-        self, local_today: date, msb_discharge: Measure | None, grid_billed: Measure | None
-    ) -> tuple[float | None, float | None]:
-        """Derive discharge and billed import powers from the energy counters MyLight bills on.
+    def _compute_powers(self, local_today: date, data: MyLightSystemsCoordinatorData) -> dict[str, float]:
+        """Derive average powers from the daily energy counters MyLight bills on.
 
         shortcut: averaged over the whole refresh interval and blind to a lagging API bucket,
         switch to per-bucket timestamps if MyLight ever exposes them.
         """
-        if not self.has_virtual_battery or msb_discharge is None or grid_billed is None:
-            self._previous_counters = None
-            return None, None
+        counters = _counters_ws(data)
         now = dt_util.utcnow()
         previous = self._previous_counters
-        self._previous_counters = (now, local_today, msb_discharge.value, grid_billed.value)
+        self._previous_counters = (now, local_today, counters)
         if previous is None:
-            return None, None
-        previous_time, previous_day, previous_discharge, previous_billed = previous
+            return {}
+        previous_time, previous_day, previous_counters = previous
         elapsed_s = (now - previous_time).total_seconds()
         new_day = local_today != previous_day
-        return (
-            _average_power(previous_discharge, msb_discharge.value, elapsed_s, new_day),
-            _average_power(previous_billed, grid_billed.value, elapsed_s, new_day),
-        )
+        rates: dict[str, float] = {}
+        for name, value in counters.items():
+            if name in previous_counters:
+                rate = _average_power(previous_counters[name], value, elapsed_s, new_day)
+                if rate is not None:
+                    rates[name] = rate
+        return _powers_from_rates(rates, self.has_virtual_battery)
 
     def _token_needs_refresh(self) -> bool:
         """Return True if the auth token is missing or expires within 60 seconds."""

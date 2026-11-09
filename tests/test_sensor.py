@@ -9,8 +9,10 @@ from homeassistant.const import UnitOfPower
 from custom_components.mylight_systems.api.models import Measure
 from custom_components.mylight_systems.coordinator import MyLightSystemsCoordinatorData
 from custom_components.mylight_systems.sensor import (
+    COUNTER_POWER_SENSORS,
     GRID_POWER_SENSORS,
     MYLIGHT_SENSORS,
+    VIRTUAL_BATTERY_POWER_SENSORS,
     MyLightElectricPowerCapacitySensor,
     _calculate_grid_returned_energy,
     async_setup_entry,
@@ -268,11 +270,11 @@ async def test_setup_entry__should_create_grid_power_sensors_only_when_meter_fou
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(("has_virtual_battery", "expected"), [(True, 2), (False, 0)])
+@pytest.mark.parametrize(("has_virtual_battery", "expected"), [(True, 4), (False, 0)])
 async def test_setup_entry__should_create_virtual_battery_power_sensors_only_with_virtual_battery(
     has_virtual_battery, expected
 ):
-    """The discharge and billed import power sensors exist only for virtual battery installations."""
+    """Counter powers always exist; the four virtual battery ones only for virtual battery installations."""
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.data = {}
@@ -282,6 +284,18 @@ async def test_setup_entry__should_create_virtual_battery_power_sensors_only_wit
 
     await async_setup_entry(MagicMock(), entry, add)
 
-    keys = {"msb_discharge_power", "grid_billed_power"}
-    created = [e for e in add.call_args.args[0] if e.entity_description.key in keys]
-    assert expected == len(created)
+    battery_keys = {"msb_charge_power", "msb_discharge_power", "msb_net_power", "grid_billed_power"}
+    common_keys = {"solar_power", "consumption_power", "grid_returned_power", "grid_net_power"}
+    created = {e.entity_description.key for e in add.call_args.args[0]}
+    assert expected == len(created & battery_keys)
+    assert common_keys <= created
+
+
+@pytest.mark.parametrize("key", ["solar_power", "msb_net_power"])
+def test_counter_power_sensors__should_read_powers_and_be_unknown_without_them(none_data, key):
+    """Values come from the coordinator powers; missing means unknown, never 0."""
+    description = next(d for d in (*COUNTER_POWER_SENSORS, *VIRTUAL_BATTERY_POWER_SENSORS) if d.key == key)
+
+    assert description.value_fn(none_data) is None
+    assert -250.0 == description.value_fn(none_data._replace(powers={key: -250.0}))
+    assert UnitOfPower.WATT == description.native_unit_of_measurement

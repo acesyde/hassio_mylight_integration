@@ -88,6 +88,12 @@
       "grid_export_power": { "name": "Grid export power" },
       "msb_discharge_power": { "name": "Virtual battery discharge power" },
       "grid_billed_power": { "name": "Billed grid import power" },
+      "solar_power": { "name": "Solar power" },
+      "consumption_power": { "name": "Consumption power" },
+      "grid_returned_power": { "name": "Grid returned power" },
+      "grid_net_power": { "name": "Grid net power" },
+      "msb_charge_power": { "name": "Virtual battery charge power" },
+      "msb_net_power": { "name": "Virtual battery net power" },
       "electric_power_capacity": { "name": "Subscribed power" }
     },
     "switch": {
