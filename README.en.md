@@ -61,13 +61,14 @@ _Integration to integrate with [MyLight Systems][mylight_systems]._
 
 In **Settings → Dashboards → Energy**, set each source's energy counters, then, for power, **a single signed sensor** (standard mode: positive when energy flows into the home, negative when it flows out). Home Assistant then does not need to create its own net power sensors, and the "Power sources" graph matches the kWh totals exactly.
 
-Actual entity IDs include your device name: search the sensors by name (in parentheses below, in English).
+Actual entity IDs include your device name: search the sensors by their display name, given in quotes below (in English), without adding anything.
 
 | Source | Energy | Power (single sensor) |
 |---|---|---|
-| Grid | Consumption: `total_grid_without_battery_consumption` with a virtual battery, otherwise `total_grid_consumption`. Return: `grid_returned_energy` | `grid_net_power` (Grid net power, or Billed grid net power with a virtual battery) |
-| Solar | `total_solar_production` | `solar_power` (Solar power) |
-| Battery (virtual battery only) | Discharge: `total_msb_discharge`. Charge: `total_msb_charge` | `msb_net_power` (Virtual battery net power) |
+| Grid, with a virtual battery | Consumption: `total_grid_without_battery_consumption`. Return: `grid_returned_energy` | `grid_net_power`: "Billed grid net power" |
+| Grid, without a virtual battery | Consumption: `total_grid_consumption`. Return: `grid_returned_energy` | `grid_net_power`: "Grid net power" |
+| Solar | `total_solar_production` | `solar_power`: "Solar power" |
+| Battery (virtual battery only) | Discharge: `total_msb_discharge`. Charge: `total_msb_charge` | `msb_net_power`: "Virtual battery net power" |
 
 1. **Grid**: edit (or add) the grid source, pick the counters above, then in the power part the single-sensor mode with `grid_net_power`.
 2. **Solar**: edit (or add) the solar production with `total_solar_production` and the power `solar_power`.

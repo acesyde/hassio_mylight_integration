@@ -61,13 +61,14 @@ _Integration zur Verbindung mit [MyLight Systems][mylight_systems]._
 
 Unter **Einstellungen → Dashboards → Energie** für jede Quelle die Energiezähler eintragen und für die Leistung **einen einzelnen vorzeichenbehafteten Sensor** wählen (Standardmodus: positiv, wenn Energie ins Haus fließt, negativ, wenn sie hinausfließt). Home Assistant muss dann keine eigenen Nettoleistungssensoren anlegen, und das Diagramm „Leistungsquellen“ entspricht genau den kWh-Summen.
 
-Die tatsächlichen Entitäts-IDs enthalten Ihren Gerätenamen: Sensoren nach Namen suchen (unten in Klammern, auf Deutsch).
+Die tatsächlichen Entitäts-IDs enthalten Ihren Gerätenamen: Sensoren nach ihrem Anzeigenamen suchen, unten in Anführungszeichen (auf Deutsch), ohne etwas hinzuzufügen.
 
 | Quelle | Energie | Leistung (einzelner Sensor) |
 |---|---|---|
-| Netz | Bezug: `total_grid_without_battery_consumption` mit virtueller Batterie, sonst `total_grid_consumption`. Rückspeisung: `grid_returned_energy` | `grid_net_power` (Netto-Netzleistung, mit virtueller Batterie: Abgerechnete Netto-Netzleistung) |
-| Solar | `total_solar_production` | `solar_power` (Solarleistung) |
-| Batterie (nur virtuelle Batterie) | Entladung: `total_msb_discharge`. Ladung: `total_msb_charge` | `msb_net_power` (Nettoleistung der virtuellen Batterie) |
+| Netz, mit virtueller Batterie | Bezug: `total_grid_without_battery_consumption`. Rückspeisung: `grid_returned_energy` | `grid_net_power`: „Abgerechnete Netto-Netzleistung“ |
+| Netz, ohne virtuelle Batterie | Bezug: `total_grid_consumption`. Rückspeisung: `grid_returned_energy` | `grid_net_power`: „Netto-Netzleistung“ |
+| Solar | `total_solar_production` | `solar_power`: „Solarleistung“ |
+| Batterie (nur virtuelle Batterie) | Entladung: `total_msb_discharge`. Ladung: `total_msb_charge` | `msb_net_power`: „Nettoleistung der virtuellen Batterie“ |
 
 1. **Netz**: Netzquelle bearbeiten (oder hinzufügen), obige Zähler wählen, dann im Leistungsteil den Einzelsensor-Modus mit `grid_net_power`.
 2. **Solar**: Solarproduktion mit `total_solar_production` und der Leistung `solar_power` bearbeiten (oder hinzufügen).

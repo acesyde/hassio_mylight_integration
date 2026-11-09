@@ -61,13 +61,14 @@ _Intégration pour se connecter à [MyLight Systems][mylight_systems]._
 
 Dans **Paramètres → Tableaux de bord → Énergie**, renseignez pour chaque source ses compteurs d'énergie, puis, pour la puissance, **un seul capteur signé** (mode standard : positif quand l'énergie entre dans le logement, négatif quand elle en sort). Home Assistant n'a alors pas besoin de créer ses propres capteurs de puissance nette, et le graphique « Sources de puissance » correspond exactement aux totaux en kWh.
 
-Les ID d'entité réels contiennent le nom de votre appareil : cherchez les capteurs par leur nom (entre parenthèses ci-dessous, en français).
+Les ID d'entité réels contiennent le nom de votre appareil : cherchez les capteurs par leur nom affiché, indiqué entre guillemets ci-dessous (en français), sans rien ajouter.
 
 | Source | Énergie | Puissance (un seul capteur) |
 |---|---|---|
-| Réseau | Consommation : `total_grid_without_battery_consumption` avec batterie virtuelle, sinon `total_grid_consumption`. Retour : `grid_returned_energy` | `grid_net_power` (Puissance nette réseau, ou Puissance nette réseau facturée avec batterie virtuelle) |
-| Solaire | `total_solar_production` | `solar_power` (Puissance solaire) |
-| Batterie (batterie virtuelle uniquement) | Décharge : `total_msb_discharge`. Charge : `total_msb_charge` | `msb_net_power` (Puissance nette de la batterie virtuelle) |
+| Réseau, avec batterie virtuelle | Consommation : `total_grid_without_battery_consumption`. Retour : `grid_returned_energy` | `grid_net_power` : « Puissance nette réseau facturée » |
+| Réseau, sans batterie virtuelle | Consommation : `total_grid_consumption`. Retour : `grid_returned_energy` | `grid_net_power` : « Puissance nette réseau » |
+| Solaire | `total_solar_production` | `solar_power` : « Puissance solaire » |
+| Batterie (batterie virtuelle uniquement) | Décharge : `total_msb_discharge`. Charge : `total_msb_charge` | `msb_net_power` : « Puissance nette de la batterie virtuelle » |
 
 1. **Réseau** : modifiez (ou ajoutez) la source réseau, choisissez les compteurs ci-dessus, puis dans la partie puissance le mode à un seul capteur avec `grid_net_power`.
 2. **Solaire** : modifiez (ou ajoutez) la production solaire avec `total_solar_production` et la puissance `solar_power`.
