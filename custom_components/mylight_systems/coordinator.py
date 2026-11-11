@@ -180,13 +180,14 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 coroutines.append(self.client.async_get_relay_state(auth_token, master_relay_id))
             coroutines.append(self._async_get_meter_power(auth_token, self.grid_meter_id))
             coroutines.append(self._async_get_meter_power(auth_token, self.water_heater_meter_id))
+            coroutines.append(self._async_get_meter_energy(auth_token, grid_type, self.water_heater_meter_id))
 
             results = await asyncio.gather(*coroutines)
             energy_result = results[0]
             total_result = results[1]
             battery_state = results[2]
             master_relay_state = results[3] if master_relay_id is not None else None
-            grid_power, water_heater_power = results[-2], results[-1]
+            grid_power, water_heater_power, water_heater_energy = results[-3], results[-2], results[-1]
 
             data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(energy_result, "produced_energy"),
@@ -199,7 +200,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 green_energy=self.find_measure_by_type(energy_result, "green_energy"),
                 battery_state=battery_state,
                 master_relay_state=master_relay_state,
-                water_heater_energy=self.find_measure_by_type(total_result, "water_heater_energy"),
+                water_heater_energy=water_heater_energy,
                 grid_power=grid_power,
                 water_heater_power=water_heater_power,
             )
@@ -258,6 +259,19 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         except MyLightSystemsError:
             LOGGER.debug("Meter power read failed")
             return None
+
+    async def _async_get_meter_energy(self, auth_token: str, grid_type: str, meter_id: str | None) -> Measure | None:
+        """Read an optional meter's cumulative energy; only an auth failure may fail the update."""
+        if meter_id is None:
+            return None
+        try:
+            measures = await self.client.async_get_measures_total(auth_token, grid_type, meter_id)
+        except UnauthorizedError:
+            raise
+        except MyLightSystemsError:
+            LOGGER.debug("Meter energy read failed")
+            return None
+        return self.find_measure_by_type(measures, "energy")
 
     def _compute_powers(self, local_today: date, data: MyLightSystemsCoordinatorData) -> dict[str, float]:
         """Derive average powers from the daily energy counters MyLight bills on.

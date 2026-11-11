@@ -288,3 +288,31 @@ async def test_update__should_expose_water_heater_power_from_its_own_meter():
     assert data.grid_power is None
     assert "heater-1" == coordinator.water_heater_meter_id
     client.async_get_grid_power.assert_awaited_once_with("token", "heater-1")
+
+
+@pytest.mark.asyncio
+async def test_update__should_expose_water_heater_energy_from_its_own_meter():
+    """The cumulative energy is read from the water heater meter, not from the virtual device totals."""
+    coordinator, client = _build_coordinator(meter_id=None, heater_id="heater-1")
+    client.async_get_measures_total = AsyncMock(
+        side_effect=lambda _token, _grid, device_id: (
+            [Measure("energy", 7200.0, "Ws")] if device_id == "heater-1" else []
+        )
+    )
+
+    with patch.object(coordinator, "authenticate_user", AsyncMock()):
+        data = await coordinator._async_update_data()
+
+    assert Measure("energy", 7200.0, "Ws") == data.water_heater_energy
+
+
+@pytest.mark.asyncio
+async def test_update__should_keep_other_data_when_water_heater_energy_read_fails():
+    """A failing optional energy read must not fail the update."""
+    coordinator, client = _build_coordinator(meter_id=None, heater_id="heater-1")
+    client.async_get_measures_total = AsyncMock(side_effect=[[], CommunicationError()])
+
+    with patch.object(coordinator, "authenticate_user", AsyncMock()):
+        data = await coordinator._async_update_data()
+
+    assert data.water_heater_energy is None
