@@ -13,6 +13,7 @@ from custom_components.mylight_systems.sensor import (
     GRID_POWER_SENSORS,
     MYLIGHT_SENSORS,
     VIRTUAL_BATTERY_POWER_SENSORS,
+    WATER_HEATER_POWER_SENSORS,
     MyLightElectricPowerCapacitySensor,
     _calculate_grid_returned_energy,
     async_setup_entry,
@@ -314,3 +315,28 @@ def test_counter_power_sensors__should_read_powers_and_be_unknown_without_them(n
     assert description.value_fn(none_data) is None
     assert -250.0 == description.value_fn(none_data._replace(powers={key: -250.0}))
     assert UnitOfPower.WATT == description.native_unit_of_measurement
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("meter_id", "expected"), [("heater-1", 1), (None, 0)])
+async def test_setup_entry__should_create_water_heater_power_sensor_only_when_meter_found(meter_id, expected):
+    """The water heater power sensor exists only when a single meter was discovered."""
+    entry = MagicMock()
+    entry.entry_id = "test_entry"
+    entry.data = {}
+    entry.runtime_data.water_heater_meter_id = meter_id
+    add = MagicMock()
+
+    await async_setup_entry(MagicMock(), entry, add)
+
+    created = [e for e in add.call_args.args[0] if e.entity_description.key == "water_heater_power"]
+    assert expected == len(created)
+
+
+def test_water_heater_power_sensor__should_read_measure(none_data):
+    """The sensor reports the measured watts, or unknown without a measure."""
+    description = WATER_HEATER_POWER_SENSORS[0]
+
+    assert description.value_fn(none_data) is None
+    data = none_data._replace(water_heater_power=Measure(type="electric_power", value=2964.4, unit="watt"))
+    assert 2964.4 == description.value_fn(data)

@@ -29,6 +29,7 @@ class InstallationDevices:
     virtual_battery_id: str = ""
     master_relay_id: str | None = None
     grid_meter_id: str | None = None
+    water_heater_meter_id: str | None = None
 
     def __setattr__(self, name: str, value: object) -> None:
         """Default master_report_period to 60 when set to None."""

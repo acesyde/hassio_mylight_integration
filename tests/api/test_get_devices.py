@@ -144,3 +144,27 @@ async def test_get_devices__should_not_return_grid_meter_id_when_ambiguous(api_c
     response = await api_client.async_get_devices(token)
 
     assert response.grid_meter_id is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("extra", "expected"),
+    [
+        ([], "heater-1"),
+        ([{"id": "heater-2", "type": "gmd", "deviceTypeId": "water_heater"}], None),
+    ],
+)
+async def test_get_devices__should_return_water_heater_meter_id_only_when_single(
+    api_client, aresponses, extra, expected
+):
+    """The gmd/water_heater meter is exposed; the sw relay sharing that deviceTypeId is ignored."""
+    token = "abcdef"  # noqa: S105
+    relay = {"id": "relay", "type": "sw", "deviceTypeId": "water_heater"}
+    heater = {"id": "heater-1", "type": "gmd", "deviceTypeId": "water_heater"}
+    mock_get(
+        aresponses, DEFAULT_BASE_URL + DEVICES_URL + f"?authToken={token}", _devices_payload(relay, heater, *extra)
+    )
+
+    response = await api_client.async_get_devices(token)
+
+    assert expected == response.water_heater_meter_id

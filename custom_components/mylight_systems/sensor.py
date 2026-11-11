@@ -151,6 +151,18 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     ),
 )
 
+# Created only when a single water heater meter was discovered.
+WATER_HEATER_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
+    MyLightSensorEntityDescription(
+        key="water_heater_power",
+        translation_key="water_heater_power",
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+        value_fn=lambda data: data.water_heater_power.value if data.water_heater_power is not None else None,
+    ),
+)
+
 # Created only when a single grid meter was discovered.
 GRID_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
@@ -231,6 +243,16 @@ async def async_setup_entry(
                 entity_description=entity_description,
             )
             for entity_description in GRID_POWER_SENSORS
+        )
+
+    if coordinator.water_heater_meter_id is not None:
+        entities.extend(
+            MyLightSystemsSensor(
+                entry_id=entry.entry_id,
+                coordinator=coordinator,
+                entity_description=entity_description,
+            )
+            for entity_description in WATER_HEATER_POWER_SENSORS
         )
 
     entities.extend(

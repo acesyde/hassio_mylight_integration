@@ -54,6 +54,7 @@ class MyLightSystemsCoordinatorData(NamedTuple):
     grid_power: Measure | None
     # Average powers in W derived from the energy counters, keyed by sensor key.
     powers: dict[str, float] | None = None
+    water_heater_power: Measure | None = None
 
 
 # MyLight counters move in 5-minute steps: a shorter window reads 0 W or a spike.
@@ -132,6 +133,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
         self.__token_expiration: datetime | None = None
         self._auth_lock = asyncio.Lock()
         self.grid_meter_id: str | None = None
+        self.water_heater_meter_id: str | None = None
         self._grid_meter_discovered = False
         self.has_virtual_battery = bool(config_entry.data.get(CONF_VIRTUAL_BATTERY_ID))
         self._previous_counters: tuple[datetime, date, dict[str, float]] | None = None
@@ -176,14 +178,15 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             ]
             if master_relay_id is not None:
                 coroutines.append(self.client.async_get_relay_state(auth_token, master_relay_id))
-            coroutines.append(self._async_get_grid_power(auth_token))
+            coroutines.append(self._async_get_meter_power(auth_token, self.grid_meter_id))
+            coroutines.append(self._async_get_meter_power(auth_token, self.water_heater_meter_id))
 
             results = await asyncio.gather(*coroutines)
             energy_result = results[0]
             total_result = results[1]
             battery_state = results[2]
             master_relay_state = results[3] if master_relay_id is not None else None
-            grid_power = results[-1]
+            grid_power, water_heater_power = results[-2], results[-1]
 
             data = MyLightSystemsCoordinatorData(
                 produced_energy=self.find_measure_by_type(energy_result, "produced_energy"),
@@ -198,6 +201,7 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 master_relay_state=master_relay_state,
                 water_heater_energy=self.find_measure_by_type(total_result, "water_heater_energy"),
                 grid_power=grid_power,
+                water_heater_power=water_heater_power,
             )
             data = data._replace(powers=self._compute_powers(local_today, data))
 
@@ -240,18 +244,19 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             LOGGER.debug("Grid meter discovery failed, will retry on next refresh")
             return
         self.grid_meter_id = devices.grid_meter_id
+        self.water_heater_meter_id = devices.water_heater_meter_id
         self._grid_meter_discovered = True
 
-    async def _async_get_grid_power(self, auth_token: str) -> Measure | None:
-        """Read the optional grid power; only an auth failure may fail the update."""
-        if self.grid_meter_id is None:
+    async def _async_get_meter_power(self, auth_token: str, meter_id: str | None) -> Measure | None:
+        """Read an optional meter power; only an auth failure may fail the update."""
+        if meter_id is None:
             return None
         try:
-            return await self.client.async_get_grid_power(auth_token, self.grid_meter_id)
+            return await self.client.async_get_grid_power(auth_token, meter_id)
         except UnauthorizedError:
             raise
         except MyLightSystemsError:
-            LOGGER.debug("Grid power read failed")
+            LOGGER.debug("Meter power read failed")
             return None
 
     def _compute_powers(self, local_today: date, data: MyLightSystemsCoordinatorData) -> dict[str, float]:
