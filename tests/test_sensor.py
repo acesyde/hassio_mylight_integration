@@ -11,9 +11,8 @@ from custom_components.mylight_systems.coordinator import MyLightSystemsCoordina
 from custom_components.mylight_systems.sensor import (
     COUNTER_POWER_SENSORS,
     GRID_POWER_SENSORS,
-    MYLIGHT_SENSORS,
     VIRTUAL_BATTERY_POWER_SENSORS,
-    WATER_HEATER_POWER_SENSORS,
+    WATER_HEATER_SENSORS,
     MyLightElectricPowerCapacitySensor,
     _calculate_grid_returned_energy,
     async_setup_entry,
@@ -183,7 +182,7 @@ def test_calculate_grid_returned_energy__should_return_calculated_energy_when_al
 
 def _water_heater_value_fn(data):
     """Return the value_fn for the water_heater_energy sensor."""
-    return next(s for s in MYLIGHT_SENSORS if s.key == "water_heater_energy").value_fn(data)
+    return next(s for s in WATER_HEATER_SENSORS if s.key == "water_heater_energy").value_fn(data)
 
 
 def test_water_heater_energy__should_return_none_when_measure_is_absent(none_data):
@@ -194,7 +193,7 @@ def test_water_heater_energy__should_return_none_when_measure_is_absent(none_dat
 def test_water_heater_energy__should_return_wh_value_when_measure_is_present(none_data):
     """Test that value_fn converts Ws to Wh correctly."""
     # Given
-    data = none_data._replace(water_heater_energy=Measure(type="water_heater_energy", value=3600, unit="Ws"))
+    data = none_data._replace(water_heater_energy=Measure(type="energy", value=3600, unit="Ws"))
 
     # When
     result = _water_heater_value_fn(data)
@@ -318,9 +317,9 @@ def test_counter_power_sensors__should_read_powers_and_be_unknown_without_them(n
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(("meter_id", "expected"), [("heater-1", 1), (None, 0)])
-async def test_setup_entry__should_create_water_heater_power_sensor_only_when_meter_found(meter_id, expected):
-    """The water heater power sensor exists only when a single meter was discovered."""
+@pytest.mark.parametrize(("meter_id", "expected"), [("heater-1", 2), (None, 0)])
+async def test_setup_entry__should_create_water_heater_sensors_only_when_meter_found(meter_id, expected):
+    """The water heater energy and power sensors exist only when a single meter was discovered."""
     entry = MagicMock()
     entry.entry_id = "test_entry"
     entry.data = {}
@@ -329,13 +328,14 @@ async def test_setup_entry__should_create_water_heater_power_sensor_only_when_me
 
     await async_setup_entry(MagicMock(), entry, add)
 
-    created = [e for e in add.call_args.args[0] if e.entity_description.key == "water_heater_power"]
+    keys = {"water_heater_energy", "water_heater_power"}
+    created = [e for e in add.call_args.args[0] if e.entity_description.key in keys]
     assert expected == len(created)
 
 
 def test_water_heater_power_sensor__should_read_measure(none_data):
     """The sensor reports the measured watts, or unknown without a measure."""
-    description = WATER_HEATER_POWER_SENSORS[0]
+    description = next(s for s in WATER_HEATER_SENSORS if s.key == "water_heater_power")
 
     assert description.value_fn(none_data) is None
     data = none_data._replace(water_heater_power=Measure(type="electric_power", value=2964.4, unit="watt"))

@@ -137,6 +137,10 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         suggested_display_precision=2,
         value_fn=_calculate_grid_returned_energy,
     ),
+)
+
+# Created only when a single water heater meter was discovered.
+WATER_HEATER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="water_heater_energy",
         translation_key="water_heater_energy",
@@ -144,15 +148,10 @@ MYLIGHT_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         suggested_display_precision=2,
-        entity_registry_enabled_default=False,
         value_fn=lambda data: (
             ws_to_wh(data.water_heater_energy.value) if data.water_heater_energy is not None else None
         ),
     ),
-)
-
-# Created only when a single water heater meter was discovered.
-WATER_HEATER_POWER_SENSORS: tuple[MyLightSensorEntityDescription, ...] = (
     MyLightSensorEntityDescription(
         key="water_heater_power",
         translation_key="water_heater_power",
@@ -252,7 +251,7 @@ async def async_setup_entry(
                 coordinator=coordinator,
                 entity_description=entity_description,
             )
-            for entity_description in WATER_HEATER_POWER_SENSORS
+            for entity_description in WATER_HEATER_SENSORS
         )
 
     entities.extend(
