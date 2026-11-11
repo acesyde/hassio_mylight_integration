@@ -83,6 +83,7 @@
       "battery_state": { "name": "Battery energy stored" },
       "grid_returned_energy": { "name": "Total grid returned energy" },
       "water_heater_energy": { "name": "Water heater energy" },
+      "water_heater_power": { "name": "Water heater power (instantaneous)" },
       "grid_power": { "name": "Grid power (instantaneous)" },
       "grid_import_power": { "name": "Grid import power (instantaneous)" },
       "grid_export_power": { "name": "Grid export power (instantaneous)" },

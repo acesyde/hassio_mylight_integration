@@ -32,6 +32,8 @@ from .const import (
     SCHEDULE_URL,
     STATES_URL,
     SWITCH_URL,
+    WATER_HEATER_METER_TYPE,
+    WATER_HEATER_METER_TYPE_ID,
 )
 from .exceptions import (
     CommunicationError,
@@ -182,10 +184,13 @@ class MyLightApiClient:
         model = InstallationDevices()
         devices = response["devices"]
         grid_meter_ids: list[str] = []
+        water_heater_meter_ids: list[str] = []
 
         for device in devices:
             if device["type"] == GRID_METER_TYPE and device.get("deviceTypeId") == GRID_METER_TYPE_ID:
                 grid_meter_ids.append(device["id"])
+            if device["type"] == WATER_HEATER_METER_TYPE and device.get("deviceTypeId") == WATER_HEATER_METER_TYPE_ID:
+                water_heater_meter_ids.append(device["id"])
             if device["type"] == "vrt":
                 model.virtual_device_id = device["id"]
             if device["type"] == "bat":
@@ -199,6 +204,8 @@ class MyLightApiClient:
         # Zero or several meters: expose nothing rather than guess or sum.
         if len(grid_meter_ids) == 1:
             model.grid_meter_id = grid_meter_ids[0]
+        if len(water_heater_meter_ids) == 1:
+            model.water_heater_meter_id = water_heater_meter_ids[0]
 
         return model
 

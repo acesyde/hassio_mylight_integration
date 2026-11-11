@@ -34,6 +34,9 @@
       "water_heater_energy": {
         "default": "mdi:water-boiler"
       },
+      "water_heater_power": {
+        "default": "mdi:water-boiler"
+      },
       "grid_power": {
         "default": "mdi:transmission-tower"
       },

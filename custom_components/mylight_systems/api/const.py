@@ -11,6 +11,10 @@ ERR_SWITCH_NOT_ALLOWED: str = "switch.not.allowed"
 GRID_METER_TYPE: str = "cmp"
 GRID_METER_TYPE_ID: str = "asoka_electric_counter"
 
+# The relay ("sw") shares the water_heater deviceTypeId but reports no power; only the "gmd" meter does.
+WATER_HEATER_METER_TYPE: str = "gmd"
+WATER_HEATER_METER_TYPE_ID: str = "water_heater"
+
 DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"
 AUTH_URL: str = "/api/auth"
 PROFILE_URL: str = "/api/profile"

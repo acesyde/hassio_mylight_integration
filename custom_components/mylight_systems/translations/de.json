@@ -83,6 +83,7 @@
       "battery_state": { "name": "Gespeicherte Batterieenergie" },
       "grid_returned_energy": { "name": "Ins Netz eingespeiste Energie" },
       "water_heater_energy": { "name": "Warmwasserbereiter-Energie" },
+      "water_heater_power": { "name": "Warmwasserbereiter-Leistung (momentan)" },
       "grid_power": { "name": "Netzleistung (momentan)" },
       "grid_import_power": { "name": "Netzbezugsleistung (momentan)" },
       "grid_export_power": { "name": "Netzeinspeiseleistung (momentan)" },

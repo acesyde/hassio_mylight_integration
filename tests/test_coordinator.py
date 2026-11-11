@@ -46,7 +46,7 @@ async def test_update_uses_home_assistant_local_date():
     assert kwargs["to_date"] == "2025-01-03"
 
 
-def _build_coordinator(meter_id="meter-1", power=None, power_error=None):
+def _build_coordinator(meter_id="meter-1", power=None, power_error=None, heater_id=None):
     config_entry = MagicMock()
     config_entry.options = {}
     config_entry.data = {
@@ -60,7 +60,9 @@ def _build_coordinator(meter_id="meter-1", power=None, power_error=None):
     client.async_get_measures_grouping = AsyncMock(return_value=[])
     client.async_get_measures_total = AsyncMock(return_value=[])
     client.async_get_battery_state = AsyncMock(return_value=None)
-    client.async_get_devices = AsyncMock(return_value=InstallationDevices(grid_meter_id=meter_id))
+    client.async_get_devices = AsyncMock(
+        return_value=InstallationDevices(grid_meter_id=meter_id, water_heater_meter_id=heater_id)
+    )
     client.async_get_grid_power = AsyncMock(return_value=power, side_effect=power_error)
     coordinator = MyLightSystemsDataUpdateCoordinator(MagicMock(), client, config_entry)
     coordinator._MyLightSystemsDataUpdateCoordinator__auth_token = "token"  # noqa: S105
@@ -271,3 +273,18 @@ def test_coordinator__should_detect_virtual_battery_from_config_entry():
 
     assert with_battery.has_virtual_battery is True
     assert without_battery.has_virtual_battery is False
+
+
+@pytest.mark.asyncio
+async def test_update__should_expose_water_heater_power_from_its_own_meter():
+    """The water heater meter is read independently of the grid meter."""
+    power = Measure("electric_power", 2964.4, "watt")
+    coordinator, client = _build_coordinator(meter_id=None, power=power, heater_id="heater-1")
+
+    with patch.object(coordinator, "authenticate_user", AsyncMock()):
+        data = await coordinator._async_update_data()
+
+    assert power == data.water_heater_power
+    assert data.grid_power is None
+    assert "heater-1" == coordinator.water_heater_meter_id
+    client.async_get_grid_power.assert_awaited_once_with("token", "heater-1")
