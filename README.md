@@ -49,7 +49,7 @@ _Intégration pour se connecter à [MyLight Systems][mylight_systems]._
 
 > `grid_power`, `grid_import_power`, `grid_export_power` : disponibles uniquement si un compteur réseau unique est détecté. Valeur ponctuelle lue sur le compteur à chaque mise à jour : elle peut s'écarter de la moyenne de l'intervalle. Pour la vue Énergie, préférez les puissances calculées ci-dessous.
 >
-> `water_heater_energy`, `water_heater_power` : disponibles uniquement si un compteur chauffe-eau unique est détecté (appareil `gmd` de type « Chauffe eau », identifiant en `_RS_01`). L'énergie vient de `/api/measures/total` du compteur, la puissance (valeur ponctuelle) de `/api/states`.
+> `water_heater_energy`, `water_heater_power` : disponibles uniquement si un compteur chauffe-eau unique est détecté (appareil de type « Chauffe eau » : compteur `gmd` seul, identifiant en `_RS_01`, ou sous-compteur `cmp` rattaché à un compteur composite). L'énergie vient de `/api/measures/total` du compteur, la puissance (valeur ponctuelle) de `/api/states`.
 >
 > `solar_power`, `consumption_power`, `grid_net_power`, `grid_returned_power` : moyennes sur l'intervalle de mise à jour, calculées à partir des compteurs d'énergie MyLight, donc cohérentes au Wh près avec les totaux en kWh. Gardez l'intervalle par défaut de 5 minutes, celui des mesures MyLight (au-delà, la courbe est lissée). Pas de valeur pendant le premier intervalle après un démarrage (il faut deux relevés). Avec une batterie virtuelle, `grid_net_power` ne compte que le soutirage facturé.
 >

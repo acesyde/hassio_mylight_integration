@@ -261,14 +261,14 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             return None
 
     async def _async_get_meter_energy(self, auth_token: str, grid_type: str, meter_id: str | None) -> Measure | None:
-        """Read an optional meter's cumulative energy; only an auth failure may fail the update."""
+        """Read an optional meter's cumulative energy; a failure never fails the update."""
         if meter_id is None:
             return None
         try:
             measures = await self.client.async_get_measures_total(auth_token, grid_type, meter_id)
-        except UnauthorizedError:
-            raise
         except MyLightSystemsError:
+            # A sub-meter MyLight refuses to total may answer not.authorized; an expired session still
+            # fails the update through the other calls made with the same token.
             LOGGER.debug("Meter energy read failed")
             return None
         return self.find_measure_by_type(measures, "energy")

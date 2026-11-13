@@ -113,7 +113,7 @@ METER = {"id": "meter-1", "type": "cmp", "deviceTypeId": "asoka_electric_counter
 async def test_get_devices__should_return_grid_meter_id_when_single_meter(api_client, aresponses):
     """A single cmp/asoka_electric_counter device is the grid meter."""
     token = "abcdef"  # noqa: S105
-    other = {"id": "heater", "type": "cmp", "deviceTypeId": "water_heater"}
+    other = {"id": "heater", "type": "cmp", "deviceTypeId": "production_counter"}
     mock_get(aresponses, DEFAULT_BASE_URL + DEVICES_URL + f"?authToken={token}", _devices_payload(other, METER))
 
     response = await api_client.async_get_devices(token)
@@ -148,19 +148,22 @@ async def test_get_devices__should_not_return_grid_meter_id_when_ambiguous(api_c
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    ("extra", "expected"),
+    ("heater_type", "extra", "expected"),
     [
-        ([], "heater-1"),
-        ([{"id": "heater-2", "type": "gmd", "deviceTypeId": "water_heater"}], None),
+        ("gmd", [], "heater-1"),
+        ("cmp", [], "heater-1"),
+        ("gmd", [{"id": "heater-2", "type": "cmp", "deviceTypeId": "water_heater"}], "heater-1"),
+        ("cmp", [{"id": "heater-2", "type": "cmp", "deviceTypeId": "water_heater"}], None),
+        ("gmd", [{"id": "heater-2", "type": "gmd", "deviceTypeId": "water_heater"}], None),
     ],
 )
 async def test_get_devices__should_return_water_heater_meter_id_only_when_single(
-    api_client, aresponses, extra, expected
+    api_client, aresponses, heater_type, extra, expected
 ):
-    """The gmd/water_heater meter is exposed; the sw relay sharing that deviceTypeId is ignored."""
+    """The gmd or cmp water_heater meter is exposed; the sw relay sharing that deviceTypeId is ignored."""
     token = "abcdef"  # noqa: S105
     relay = {"id": "relay", "type": "sw", "deviceTypeId": "water_heater"}
-    heater = {"id": "heater-1", "type": "gmd", "deviceTypeId": "water_heater"}
+    heater = {"id": "heater-1", "type": heater_type, "deviceTypeId": "water_heater"}
     mock_get(
         aresponses, DEFAULT_BASE_URL + DEVICES_URL + f"?authToken={token}", _devices_payload(relay, heater, *extra)
     )
