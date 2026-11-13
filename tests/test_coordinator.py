@@ -136,6 +136,20 @@ async def test_update__should_trigger_reauth_when_grid_power_unauthorized():
         await coordinator._async_update_data()
 
 
+@pytest.mark.asyncio
+async def test_update__should_trigger_reauth_when_session_expired_despite_water_heater_meter():
+    """A refused heater total is swallowed, but the virtual device total still surfaces an expired session."""
+    coordinator, client = _build_coordinator(meter_id=None, heater_id="heater-1")
+    client.async_get_measures_total = AsyncMock(side_effect=UnauthorizedError())
+
+    with (
+        patch.object(coordinator, "authenticate_user", AsyncMock()),
+        patch("custom_components.mylight_systems.coordinator.ir"),
+        pytest.raises(ConfigEntryAuthFailed),
+    ):
+        await coordinator._async_update_data()
+
+
 def _counters(**wh):
     """Daily counters as MyLight returns them (Ws), from Wh keyword values."""
     types = {
@@ -307,10 +321,17 @@ async def test_update__should_expose_water_heater_energy_from_its_own_meter():
 
 
 @pytest.mark.asyncio
-async def test_update__should_keep_other_data_when_water_heater_energy_read_fails():
-    """A failing optional energy read must not fail the update."""
+@pytest.mark.parametrize("error", [CommunicationError(), UnauthorizedError()])
+async def test_update__should_keep_other_data_when_water_heater_energy_read_fails(error):
+    """A failing optional energy read, even refused as not authorized, must not fail the update."""
     coordinator, client = _build_coordinator(meter_id=None, heater_id="heater-1")
-    client.async_get_measures_total = AsyncMock(side_effect=[[], CommunicationError()])
+
+    async def _total(_token, _grid, device_id):
+        if device_id == "heater-1":
+            raise error
+        return []
+
+    client.async_get_measures_total = AsyncMock(side_effect=_total)
 
     with patch.object(coordinator, "authenticate_user", AsyncMock()):
         data = await coordinator._async_update_data()

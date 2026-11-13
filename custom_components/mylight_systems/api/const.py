@@ -11,8 +11,9 @@ ERR_SWITCH_NOT_ALLOWED: str = "switch.not.allowed"
 GRID_METER_TYPE: str = "cmp"
 GRID_METER_TYPE_ID: str = "asoka_electric_counter"
 
-# The relay ("sw") shares the water_heater deviceTypeId but reports no power; only the "gmd" meter does.
-WATER_HEATER_METER_TYPE: str = "gmd"
+# The relay ("sw") shares the water_heater deviceTypeId but reports no power; only the meter does.
+# Standalone meter is "gmd"; a channel of a composite "gmd" meter is a child "cmp". Order is preference.
+WATER_HEATER_METER_TYPES: tuple[str, ...] = ("gmd", "cmp")
 WATER_HEATER_METER_TYPE_ID: str = "water_heater"
 
 DEFAULT_BASE_URL: str = "https://myhome.mylight-systems.com"

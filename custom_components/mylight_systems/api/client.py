@@ -32,8 +32,8 @@ from .const import (
     SCHEDULE_URL,
     STATES_URL,
     SWITCH_URL,
-    WATER_HEATER_METER_TYPE,
     WATER_HEATER_METER_TYPE_ID,
+    WATER_HEATER_METER_TYPES,
 )
 from .exceptions import (
     CommunicationError,
@@ -184,13 +184,13 @@ class MyLightApiClient:
         model = InstallationDevices()
         devices = response["devices"]
         grid_meter_ids: list[str] = []
-        water_heater_meter_ids: list[str] = []
+        water_heater_meter_ids: dict[str, list[str]] = {t: [] for t in WATER_HEATER_METER_TYPES}
 
         for device in devices:
             if device["type"] == GRID_METER_TYPE and device.get("deviceTypeId") == GRID_METER_TYPE_ID:
                 grid_meter_ids.append(device["id"])
-            if device["type"] == WATER_HEATER_METER_TYPE and device.get("deviceTypeId") == WATER_HEATER_METER_TYPE_ID:
-                water_heater_meter_ids.append(device["id"])
+            if device["type"] in WATER_HEATER_METER_TYPES and device.get("deviceTypeId") == WATER_HEATER_METER_TYPE_ID:
+                water_heater_meter_ids[device["type"]].append(device["id"])
             if device["type"] == "vrt":
                 model.virtual_device_id = device["id"]
             if device["type"] == "bat":
@@ -204,8 +204,10 @@ class MyLightApiClient:
         # Zero or several meters: expose nothing rather than guess or sum.
         if len(grid_meter_ids) == 1:
             model.grid_meter_id = grid_meter_ids[0]
-        if len(water_heater_meter_ids) == 1:
-            model.water_heater_meter_id = water_heater_meter_ids[0]
+        # Prefer the standalone gmd meter; a cmp sub-meter is only used when no gmd exists.
+        heater_ids = next((ids for ids in water_heater_meter_ids.values() if ids), [])
+        if len(heater_ids) == 1:
+            model.water_heater_meter_id = heater_ids[0]
 
         return model
 

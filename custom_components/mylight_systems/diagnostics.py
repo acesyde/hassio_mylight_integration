@@ -129,6 +129,9 @@ DIAGNOSTIC_ENDPOINTS: list[DiagnosticEndpoint] = [
 ]
 
 
+WATER_HEATER_TOTAL_KEY = f"{MEASURES_TOTAL_URL} (water_heater)"
+
+
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant,
     entry: MyLightConfigEntry,
@@ -162,6 +165,20 @@ async def async_get_config_entry_diagnostics(
             )
             for path, param_builder, extra_redact in DIAGNOSTIC_ENDPOINTS
         }
+        if coordinator.water_heater_meter_id is not None:
+            # Shows why water_heater_energy is missing when the meter's totals lack it or error out.
+            tasks[WATER_HEATER_TOTAL_KEY] = (
+                coordinator.client.async_raw_request(
+                    "get",
+                    MEASURES_TOTAL_URL,
+                    params={
+                        "authToken": auth_token,
+                        "measureType": entry_data[CONF_GRID_TYPE],
+                        "deviceId": coordinator.water_heater_meter_id,
+                    },
+                ),
+                _MEASURES_REDACT_FIELDS,
+            )
         results = await asyncio.gather(*[coro for coro, _ in tasks.values()], return_exceptions=True)
 
         for (path, (_, extra_redact)), result in zip(tasks.items(), results):
