@@ -130,6 +130,7 @@ DIAGNOSTIC_ENDPOINTS: list[DiagnosticEndpoint] = [
 
 
 WATER_HEATER_TOTAL_KEY = f"{MEASURES_TOTAL_URL} (water_heater)"
+WATER_HEATER_GROUPING_KEY = f"{MEASURES_GROUPING_URL} (water_heater)"
 
 
 async def async_get_config_entry_diagnostics(
@@ -166,17 +167,22 @@ async def async_get_config_entry_diagnostics(
             for path, param_builder, extra_redact in DIAGNOSTIC_ENDPOINTS
         }
         if coordinator.water_heater_meter_id is not None:
-            # Shows why water_heater_energy is missing when the meter's totals lack it or error out.
-            tasks[WATER_HEATER_TOTAL_KEY] = (
+            # The sensor reads the grouping; the totals stay for comparison with what the MyLight app shows.
+            heater_params = {
+                "authToken": auth_token,
+                "measureType": entry_data[CONF_GRID_TYPE],
+                "deviceId": coordinator.water_heater_meter_id,
+            }
+            tasks[WATER_HEATER_GROUPING_KEY] = (
                 coordinator.client.async_raw_request(
                     "get",
-                    MEASURES_TOTAL_URL,
-                    params={
-                        "authToken": auth_token,
-                        "measureType": entry_data[CONF_GRID_TYPE],
-                        "deviceId": coordinator.water_heater_meter_id,
-                    },
+                    MEASURES_GROUPING_URL,
+                    params={**heater_params, "groupType": "day", "fromDate": today, "toDate": tomorrow},
                 ),
+                _MEASURES_REDACT_FIELDS,
+            )
+            tasks[WATER_HEATER_TOTAL_KEY] = (
+                coordinator.client.async_raw_request("get", MEASURES_TOTAL_URL, params=heater_params),
                 _MEASURES_REDACT_FIELDS,
             )
         results = await asyncio.gather(*[coro for coro, _ in tasks.values()], return_exceptions=True)

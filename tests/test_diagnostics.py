@@ -12,6 +12,7 @@ from custom_components.mylight_systems.api.const import DEVICES_URL, PROFILE_URL
 from custom_components.mylight_systems.api.exceptions import CommunicationError
 from custom_components.mylight_systems.diagnostics import (
     DIAGNOSTIC_ENDPOINTS,
+    WATER_HEATER_GROUPING_KEY,
     WATER_HEATER_TOTAL_KEY,
     _anonymize_response,
     async_get_config_entry_diagnostics,
@@ -173,7 +174,7 @@ async def test_diagnostics_returns_all_endpoint_keys():
 
 @pytest.mark.asyncio
 async def test_diagnostics_includes_water_heater_totals_when_meter_found():
-    """The water heater meter's totals are captured under their own key, with its deviceId."""
+    """The water heater meter's grouping and totals are captured under their own keys, with its deviceId."""
     mock_coordinator = _make_mock_coordinator()
     mock_coordinator.water_heater_meter_id = "heater-123456"
     mock_coordinator.client = MagicMock()
@@ -189,7 +190,7 @@ async def test_diagnostics_includes_water_heater_totals_when_meter_found():
     ):
         result = await async_get_config_entry_diagnostics(MagicMock(), entry)
 
-    assert WATER_HEATER_TOTAL_KEY in result["raw_api_responses"]
+    assert {WATER_HEATER_GROUPING_KEY, WATER_HEATER_TOTAL_KEY} <= result["raw_api_responses"].keys()
     device_ids = [c.kwargs["params"].get("deviceId") for c in mock_coordinator.client.async_raw_request.call_args_list]
     assert "heater-123456" in device_ids
 
