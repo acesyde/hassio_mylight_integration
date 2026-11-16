@@ -138,7 +138,7 @@ async def test_update__should_trigger_reauth_when_grid_power_unauthorized():
 
 @pytest.mark.asyncio
 async def test_update__should_trigger_reauth_when_session_expired_despite_water_heater_meter():
-    """A refused heater total is swallowed, but the virtual device total still surfaces an expired session."""
+    """A refused heater read is swallowed, but the virtual device total still surfaces an expired session."""
     coordinator, client = _build_coordinator(meter_id=None, heater_id="heater-1")
     client.async_get_measures_total = AsyncMock(side_effect=UnauthorizedError())
 
@@ -306,10 +306,10 @@ async def test_update__should_expose_water_heater_power_from_its_own_meter():
 
 @pytest.mark.asyncio
 async def test_update__should_expose_water_heater_energy_from_its_own_meter():
-    """The cumulative energy is read from the water heater meter, not from the virtual device totals."""
+    """The energy of the day is read from the water heater meter's grouping, not from its broken totals."""
     coordinator, client = _build_coordinator(meter_id=None, heater_id="heater-1")
-    client.async_get_measures_total = AsyncMock(
-        side_effect=lambda _token, _grid, device_id: (
+    client.async_get_measures_grouping = AsyncMock(
+        side_effect=lambda _token, _grid, device_id, **_dates: (
             [Measure("energy", 7200.0, "Ws")] if device_id == "heater-1" else []
         )
     )
@@ -326,12 +326,12 @@ async def test_update__should_keep_other_data_when_water_heater_energy_read_fail
     """A failing optional energy read, even refused as not authorized, must not fail the update."""
     coordinator, client = _build_coordinator(meter_id=None, heater_id="heater-1")
 
-    async def _total(_token, _grid, device_id):
+    async def _grouping(_token, _grid, device_id, **_dates):
         if device_id == "heater-1":
             raise error
         return []
 
-    client.async_get_measures_total = AsyncMock(side_effect=_total)
+    client.async_get_measures_grouping = AsyncMock(side_effect=_grouping)
 
     with patch.object(coordinator, "authenticate_user", AsyncMock()):
         data = await coordinator._async_update_data()
