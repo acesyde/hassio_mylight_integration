@@ -180,7 +180,9 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
                 coroutines.append(self.client.async_get_relay_state(auth_token, master_relay_id))
             coroutines.append(self._async_get_meter_power(auth_token, self.grid_meter_id))
             coroutines.append(self._async_get_meter_power(auth_token, self.water_heater_meter_id))
-            coroutines.append(self._async_get_meter_energy(auth_token, grid_type, self.water_heater_meter_id))
+            coroutines.append(
+                self._async_get_meter_energy(auth_token, grid_type, self.water_heater_meter_id, today, tomorrow)
+            )
 
             results = await asyncio.gather(*coroutines)
             energy_result = results[0]
@@ -260,12 +262,17 @@ class MyLightSystemsDataUpdateCoordinator(DataUpdateCoordinator[MyLightSystemsCo
             LOGGER.debug("Meter power read failed")
             return None
 
-    async def _async_get_meter_energy(self, auth_token: str, grid_type: str, meter_id: str | None) -> Measure | None:
-        """Read an optional meter's cumulative energy; a failure never fails the update."""
+    async def _async_get_meter_energy(
+        self, auth_token: str, grid_type: str, meter_id: str | None, today: str, tomorrow: str
+    ) -> Measure | None:
+        """Read an optional meter's energy of the day; a failure never fails the update."""
         if meter_id is None:
             return None
         try:
-            measures = await self.client.async_get_measures_total(auth_token, grid_type, meter_id)
+            # /api/measures/total lags then catches up in steps (issue #184), like the virtual device totals did.
+            measures = await self.client.async_get_measures_grouping(
+                auth_token, grid_type, meter_id, from_date=today, to_date=tomorrow
+            )
         except MyLightSystemsError:
             # A sub-meter MyLight refuses to total may answer not.authorized; an expired session still
             # fails the update through the other calls made with the same token.
